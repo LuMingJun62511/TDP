@@ -10,7 +10,7 @@ import utils
 from decision import get_decisions
 from red import play as red_play
 from blue import play as blue_play
-from red import test as test_play
+from red.test import play as test_play
 
 
 
@@ -248,13 +248,16 @@ class Runner:
         red_players_info = []
         blue_players_info = []
         for red_player in self.red_players:
-            red_players_info.append(red_player.info_reversed)
+            #red_players_info.append(red_player.info_reversed)
+            red_players_info.append(red_player.info)
         for blue_player in self.blue_players:
-            blue_players_info.append(blue_player.info_reversed)
+            #blue_players_info.append(blue_player.info_reversed)
+            blue_players_info.append(blue_player.info)
         ball_info = self.ball.info
         #ball_info = self.ball.info_reversed
-        scoreboard_info = self.scoreboard.info_reversed
-        return blue_players_info, red_players_info, ball_info, scoreboard_info
+        scoreboard_info = self.scoreboard.info
+        #scoreboard_info = self.scoreboard.info_reversed
+        return red_players_info, blue_players_info, ball_info, scoreboard_info
 
     def _show_and_increase_cycle_number(self):
         if self.config.graphical_output:

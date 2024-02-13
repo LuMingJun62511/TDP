@@ -22,15 +22,7 @@ class Player:
         self.radius = radius
         self.img = img or default_img
         self.ban_cycles = ban_cycles
-        if role == 'goalkeeper':
-            self.role = goalkeeper.GoalKeeper(color,number)
-        elif role == 'defender':
-            self.role = defender.Defender(self.color,self.number)
-        elif role == 'forward':
-            self.role = forward.Forward(self.color,self.number)
-        else:
-            print("wrong role!")
-
+        self.role = role
     def draw(self, screen):
         pygame_x, pygame_y = utils.convert_coordinate_cartesian_to_pygame(self.x , self.y)
         screen.blit(self.img, (int(pygame_x)-self.radius, int(pygame_y)-self.radius))

@@ -19,8 +19,8 @@ def get_decisions(runner, red_responses, blue_responses,test_responses):
             blue_response['direction'] = (blue_response['direction'] + 180) % 360
         if 'destination' in blue_response:
             blue_response['destination'] = {
-                'x': -blue_response['destination']['x'],
-                'y': -blue_response['destination']['y'],
+                'x': blue_response['destination']['x'],
+                'y': blue_response['destination']['y'],
             }
         blue_decisions.append(_decision_factory(runner, blue_response))
     return _unique_decisions(red_decisions), _unique_decisions(blue_decisions),_unique_decisions(test_decisions)
