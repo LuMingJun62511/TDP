@@ -21,6 +21,8 @@ HORIZONTAL_MARGIN = make_even_number(int((PLAYER_RADIUS + BALL_RADIUS) * 2.5)) #
 SCREEN_WIDTH = make_even_number(FOOTBALL_PITCH_WIDTH + HORIZONTAL_MARGIN) # 1000
 SCREEN_HEIGHT = make_even_number(FOOTBALL_PITCH_HEIGHT + VERTICAL_MARGIN * 2) # 742
 
+GOALKEEPER_WIDTRH = make_even_number(main_size * 16) #160
+GOALKEEPER_DEPTH = make_even_number(main_size * 21) #210
 
 # FOOTBALL PITCH
 GOAL_WIDTH = make_even_number(FOOTBALL_PITCH_HEIGHT * 30 // 100) # 196

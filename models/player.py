@@ -4,10 +4,10 @@ import pygame as pg
 
 import utils
 from .point import Point
-
+from roles import goalkeeper,defender,forward
 
 class Player:
-    def __init__(self, x, y, name, number, color, radius=utils.PLAYER_RADIUS, img=None, ban_cycles=0):
+    def __init__(self, x, y, name, number, color, radius=utils.PLAYER_RADIUS, img=None, ban_cycles=0,role=None):
         img_link = utils.RED_PLAYER_IMG_LINK
         if color == 'blue':
             img_link = utils.BLUE_PLAYER_IMG_LINK
@@ -22,6 +22,14 @@ class Player:
         self.radius = radius
         self.img = img or default_img
         self.ban_cycles = ban_cycles
+        if role == 'goalkeeper':
+            self.role = goalkeeper.GoalKeeper(color,number)
+        elif role == 'defender':
+            self.role = defender.Defender(self.color,self.number)
+        elif role == 'forward':
+            self.role = forward.Forward(self.color,self.number)
+        else:
+            print("wrong role!")
 
     def draw(self, screen):
         pygame_x, pygame_y = utils.convert_coordinate_cartesian_to_pygame(self.x , self.y)
@@ -62,6 +70,20 @@ class Player:
             return True
         else:
             return False
+        
+
+    def role(self):
+        if self.role == 'goalkeeper':
+            role = goalkeeper.GoalKeeper(self,self.color,self.number)
+        elif self.role == 'defender':
+            role = defender.Defender(self,self.color,self.number)
+        elif self.role == 'forward':
+            role = forward.Forward(self,self.color,self.number)
+        #需要异常处理
+        else:
+            print("不匹配的身份定义")
+        
+        return role
 
     @property
     def info(self):

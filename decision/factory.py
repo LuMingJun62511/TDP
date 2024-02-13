@@ -3,12 +3,16 @@ from .kick import KickDecision
 from .move import MoveDecision
 from models import Point
 
-def get_decisions(runner, red_responses, blue_responses):
+def get_decisions(runner, red_responses, blue_responses,test_responses):
     red_decisions = []
     blue_decisions = []
+    test_decisions = []
     for red_response in red_responses:
         red_response['player_color'] = 'red'
         red_decisions.append(_decision_factory(runner, red_response))
+    for test_response in test_responses:
+        test_response['player_color'] = 'red'
+        test_decisions.append(_decision_factory(runner,test_response))
     for blue_response in blue_responses:
         blue_response['player_color'] = 'blue'
         if 'direction' in blue_response:
@@ -19,7 +23,7 @@ def get_decisions(runner, red_responses, blue_responses):
                 'y': -blue_response['destination']['y'],
             }
         blue_decisions.append(_decision_factory(runner, blue_response))
-    return _unique_decisions(red_decisions), _unique_decisions(blue_decisions)
+    return _unique_decisions(red_decisions), _unique_decisions(blue_decisions),_unique_decisions(test_decisions)
 
 def _decision_factory(runner, decision):
     if decision['type'] == 'move':
