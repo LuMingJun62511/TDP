@@ -8,8 +8,8 @@ import exception
 import models
 import utils
 from decision import get_decisions
-from team1 import play as red_play
-from team2 import play as blue_play
+from red import play as red_play
+from blue import play as blue_play
 
 
 
