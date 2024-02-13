@@ -26,7 +26,9 @@ def play(red_players, blue_players, ball, scoreboard):
         player_number = 4  # 对号入座，number为4的球员
         player = blue_players[player_number]
         distance = get_distance(player, ball)
+        print(distance)
         if distance >= 10:  
+            print("速度为 10")
             decisions.append({
                 'type': 'move',
                 'player_number': player['number'],
@@ -34,11 +36,14 @@ def play(red_players, blue_players, ball, scoreboard):
                 'speed': 10,
             })
         else:
+            print("grab")
             decisions.append({
                 'type': 'grab',
                 'player_number': player['number'],
             })
+            print(ball['owner_color'])
     else:
+        print("速度为 8")
         maghsad = {'x': 300, 'y': -100}
         ball_owner = blue_players[ball['owner_number']]
         distance = get_distance(ball_owner, maghsad)

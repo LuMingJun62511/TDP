@@ -58,4 +58,3 @@ def play(red_players, blue_players, ball, scoreboard):
 
 
 
-
