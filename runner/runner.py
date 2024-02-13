@@ -10,7 +10,7 @@ import utils
 from decision import get_decisions
 from red import play as red_play
 from blue import play as blue_play
-
+from red import test as test_play
 
 
 
@@ -22,6 +22,9 @@ def blue_fire(*args, **kwargs):
     global blue_responses
     blue_responses = blue_play(*args, **kwargs)
 
+def test_fire(*args, **kwargs):
+    global test_responses
+    test_responses = test_play(*args, **kwargs)
 
 class Runner:
     def __init__(self, config):
@@ -34,7 +37,7 @@ class Runner:
         self._show_and_increase_cycle_number()
 
     def run(self):
-        global red_responses, blue_responses
+        global red_responses, blue_responses,test_responses
         end = False
         pause = False
         while not end:
@@ -54,6 +57,8 @@ class Runner:
                 continue
             red_responses = None
             blue_responses = None
+            test_responses = None
+
             red_thread = Thread(
                 target=red_fire,
                 args=self._get_args_for_red_team(),
@@ -62,18 +67,25 @@ class Runner:
                 target=blue_fire,
                 args=self._get_args_for_blue_team(),
             )
+            test_thread = Thread(
+                target=test_fire,
+                args = self._get_args_for_red_team(),
+            )
             blue_thread.start()
             red_thread.start()
+            test_thread.start()
             for _ in range(self.config.delay_count):
                 time.sleep(self.config.delay_amount)
-                if red_responses is not None and blue_responses is not None:
+                if red_responses is not None and blue_responses is not None and test_responses is not None:
                     break
             if not isinstance(red_responses, list):
                 red_responses = []
             if not isinstance(blue_responses, list):
                 blue_responses = []
+            if not isinstance(test_responses,list):
+                test_responses = []
 
-            self.perform_decisions(red_responses, blue_responses)
+            self.perform_decisions(red_responses, blue_responses,test_responses)
             self.decrement_ban_cycles()
             self.ball.move()
             self.check_if_scored()
@@ -95,14 +107,19 @@ class Runner:
             if utils.SHOULD_PRINT_DECISIONS_ERROR:
                 print(de)
 
-    def perform_decisions(self, red_responses, blue_responses):
-        red_decisions, blue_decisions = get_decisions(self, red_responses, blue_responses)
+    def perform_decisions(self, red_responses, blue_responses,test_responses):
+        red_decisions, blue_decisions,test_decisions = get_decisions(self, red_responses, blue_responses,test_responses)
         
-        while len(red_decisions) != 0 and len(blue_decisions) != 0:
+        while len(red_decisions) != 0 and len(blue_decisions) != 0 and len(test_decisions) != 0:
             r = random.randint(0, 1)
             if r:
-                decision = red_decisions.pop(0)
-                self.handle_decision_perform_with_exception(decision)
+                j = random.randint(0,1)
+                if j:
+                    decision = test_decisions.pop(0)
+                    self.handle_decision_perform_with_exception(decision)
+                else:
+                    decision = red_decisions.pop(0)
+                    self.handle_decision_perform_with_exception(decision)
             else:
                 decision = blue_decisions.pop(0)
                 self.handle_decision_perform_with_exception(decision)

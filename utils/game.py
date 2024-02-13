@@ -26,6 +26,7 @@ RED_PLAYERS_INITIAL_VALUES.append({
     'y': 0,
     'name': "Player{}".format(0),
     'radius': PLAYER_RADIUS + BALL_RADIUS,
+    'role':'goalkeeper',
 })
 
 BLUE_PLAYERS_INITIAL_VALUES.append({
@@ -34,6 +35,7 @@ BLUE_PLAYERS_INITIAL_VALUES.append({
     'y': 0,
     'name': "Player{}".format(0),
     'radius': PLAYER_RADIUS + BALL_RADIUS,
+    'role':'goalkeeper',
 })
 
 
