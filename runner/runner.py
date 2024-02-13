@@ -10,7 +10,7 @@ import utils
 from decision import get_decisions
 from red import play as red_play
 from blue import play as blue_play
-from red import test as test_play
+from red.test import play as test_play
 
 
 
