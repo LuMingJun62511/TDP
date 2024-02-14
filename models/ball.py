@@ -10,7 +10,7 @@ class Ball:
         default_ball_image = pg.image.load(utils.BALL_IMG_LINK)
         default_ball_image = pg.transform.scale(default_ball_image, (2 * utils.BALL_RADIUS, 2 * utils.BALL_RADIUS))
         default_ball_image.convert_alpha()
-        self.x = x or 0
+        self.x = x or -361
         self.y = y or 0
         self.radius = radius or utils.BALL_RADIUS
         self.img = img or default_ball_image

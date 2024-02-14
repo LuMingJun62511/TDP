@@ -31,28 +31,27 @@ def pass_to_teammates():
 # 根据上述代码，
 def play(red_players, blue_players, ball, scoreboard):
     decisions = []
-
-    if ball['x']>700:#球是否打入己方球门？
-        serve_ball
+    if ball['x']<-460:#球是否打入己方球门？
+        serve_ball() #能触发
     else: #球还没进
-        if ball['x']>0:#球在我方半场？
-            if ball['x']>200:#球进入禁区了？
+        if ball['x']<0:#球在我方半场？
+            if ball['x']<-300:#球进入禁区了？
                 if ball['owner_number'] == 0 :  # 守门员是否已经成功拦截了球？
-                    pass_to_teammates
+                    pass_to_teammates() #能触发
                 else:  # 还没拦截到，继续追球
-                    chase_ball
+                    chase_ball() #能触发
             else: #球还没进入禁区
-                adjust_self
+                adjust_self() #能触发
         else:#球还不在我方半场
-            stand_still
+            stand_still() #能触发
 
 
-    # decisions.append({
-    #     'type': 'move',
-    #     'player_number': 0,
-    #     'destination': ball,
-    #     'speed': 10,
-    # })
+    decisions.append({
+        'type': 'move',
+        'player_number': 0,
+        'destination': ball,
+        'speed': 10,
+    })
 
     return decisions
 

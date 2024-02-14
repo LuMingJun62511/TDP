@@ -149,7 +149,7 @@ class Runner:
             if random_player.color == 'red':
                 random_player.y = -random_player.y
             players_in_area.remove(random_player)
-            print("犯规")
+            # print("犯规")
     def check_if_the_bus_is_parked(self):
         ''' RED '''
         red_players_in_area = []

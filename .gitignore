@@ -10,5 +10,8 @@ ENV/
 env.bak/
 venv.bak/
 
+red/.DS_Store
+roles/.DS_Store
+
 result.txt
 Results.xlsx
