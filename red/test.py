@@ -14,51 +14,45 @@ def serve_ball():
     print('捡球')
     return '捡球'
 
-def adjust_self(players, ball, GOALKEEPER_WIDTH, GOALKEEPER_DEPTH):
-    goalkeeper = players[0]  # ゴールキーパーの情報
-    goal_center = {'x': -460, 'y': 0}  # ゴールの中心
+def adjust_self(player, ball, GOALKEEPER_WIDTRH, GOALKEEPER_DEPTH):
+    goalkeeper = player[0]
+    # 楕円形の範囲を定義
+    ellipse_width = GOALKEEPER_WIDTRH
+    ellipse_height = GOALKEEPER_DEPTH
+    goal_x, goal_y = -460, 0
 
-    # 楕円の半径
-    a = GOALKEEPER_DEPTH / 2
-    b = GOALKEEPER_WIDTH / 2
+    # プレイヤーとボールの位置
+    player_x, player_y = goalkeeper['x'], goalkeeper['y']
+    ball_x, ball_y = ball['x'], ball['y']
 
-    # ボールとゴールの中心とを結ぶ直線の傾きと切片を計算
-    if ball['x'] != goal_center['x']:
-        slope = (ball['y'] - goal_center['y']) / (ball['x'] - goal_center['x'])
-        intercept = goal_center['y'] - slope * goal_center['x']
+    # ゴールとボールの間の距離
+    distance_to_ball = get_distance({'x': goal_x, 'y': goal_y}, ball)
+    print('ゴールとボールの間の距離', distance_to_ball)
+
+    # ゴールからボールへの方向
+    angle_to_ball = math.atan2(ball_y - goal_y, ball_x - goal_x)
+
+    # 楕円形の境界上の点を計算
+    ellipse_x = goal_x + (ellipse_width / 2) * math.cos(angle_to_ball)
+    ellipse_y = goal_y + (ellipse_height / 2) * math.sin(angle_to_ball)
+    print('楕円形の境界上の点', ellipse_x, ellipse_y)
+
+    # プレイヤーの位置を調整
+    if distance_to_ball > get_distance({'x': ellipse_x, 'y': ellipse_y}, {'x': goal_x, 'y': goal_y}):
+        # 楕円形の境界上に移動
+        new_x = ellipse_x
+        new_y = ellipse_y
     else:
-        slope = None
-
-    # 楕円と直線の交点を計算
-    if slope is not None:
-        # 楕円の方程式と直線の方程式を組み合わせて交点を求める
-        # y = mx + b を楕円の方程式に代入して解く
-        A = (1 + slope**2 / b**2)
-        B = 2 * slope * intercept / b**2
-        C = (intercept / b)**2 - 1
-        # 二次方程式 Ax^2 + Bx + C = 0 の解
-        delta = B**2 - 4 * A * C
-        if delta >= 0:
-            x1 = (-B + math.sqrt(delta)) / (2 * A)
-            x2 = (-B - math.sqrt(delta)) / (2 * A)
-            # 2つの解のうち、ボールに近い方を選択
-            x_target = x1 if abs(x1 - ball['x']) < abs(x2 - ball['x']) else x2
-            y_target = slope * x_target + intercept
-        else:
-            # 実際にはここに到達することはありませんが、計算上のエラーに備えてゴール中心をターゲットとします。
-            x_target = goal_center['x']
-            y_target = goal_center['y']
-    else:
-        # 傾きが無限大の場合（縦の直線）
-        x_target = goal_center['x']
-        y_target = ball['y']
-        if abs(y_target) > b:  # 楕円の範囲外の場合は、範囲内に修正
-            y_target = b * (y_target / abs(y_target))
-
+        # 現在位置が適切な場合は移動しない
+        new_x = player_x
+        new_y = player_y
+    
+    print('調整', new_x, new_y)
+    
     return {
         'type': 'move',
-        'player_number': goalkeeper['number'],
-        'destination': {'x': x_target, 'y': y_target},
+        'player_number': 0,
+        'destination': {'x': new_x, 'y': new_y},
         'speed': 10
     }
     
