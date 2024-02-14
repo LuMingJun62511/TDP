@@ -35,18 +35,18 @@ class Ball:
             if self.speed < 0:
                 self.speed = 0
                 self.direction = None
-            if self.x < -utils.FOOTBALL_PITCH_WIDTH // 2 + self.radius:
-                self.x = -utils.FOOTBALL_PITCH_WIDTH // 2 + self.radius + 1
+            if self.x < -utils.FOOTBALL_PITCH_LENGTH // 2 + self.radius:
+                self.x = -utils.FOOTBALL_PITCH_LENGTH // 2 + self.radius + 1
                 self.direction = 180 - self.direction
-            if self.x > utils.FOOTBALL_PITCH_WIDTH // 2 - self.radius:
-                self.x = utils.FOOTBALL_PITCH_WIDTH // 2 - self.radius - 1
+            if self.x > utils.FOOTBALL_PITCH_LENGTH // 2 - self.radius:
+                self.x = utils.FOOTBALL_PITCH_LENGTH // 2 - self.radius - 1
                 self.direction = 180 - self.direction
-            if self.y < -utils.FOOTBALL_PITCH_HEIGHT // 2 + self.radius:
-                self.y = -utils.FOOTBALL_PITCH_HEIGHT // 2 + self.radius + 1
+            if self.y < -utils.FOOTBALL_PITCH_WIDTH // 2 + self.radius:
+                self.y = -utils.FOOTBALL_PITCH_WIDTH // 2 + self.radius + 1
                 self.direction = (self.direction + 180) % 360
                 self.direction = 180 - self.direction
-            if self.y > utils.FOOTBALL_PITCH_HEIGHT // 2 - self.radius:
-                self.y = utils.FOOTBALL_PITCH_HEIGHT // 2 - self.radius - 1
+            if self.y > utils.FOOTBALL_PITCH_WIDTH // 2 - self.radius:
+                self.y = utils.FOOTBALL_PITCH_WIDTH // 2 - self.radius - 1
                 self.direction = (self.direction + 180) % 360
                 self.direction = 180 - self.direction
         else:

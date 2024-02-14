@@ -13,8 +13,8 @@ class MoveDecision(Decision):
         super().validate()
         if not 0 <= self.speed <= utils.MAX_PLAYER_SPEED:
             raise exception.DecisionException('Wrong move speed')
-        if not -utils.FOOTBALL_PITCH_WIDTH // 2 < self.destination.x < utils.FOOTBALL_PITCH_WIDTH // 2 or \
-                not -utils.FOOTBALL_PITCH_HEIGHT // 2 < self.destination.y < utils.FOOTBALL_PITCH_HEIGHT // 2:
+        if not -utils.FOOTBALL_PITCH_LENGTH // 2 < self.destination.x < utils.FOOTBALL_PITCH_LENGTH // 2 or \
+                not -utils.FOOTBALL_PITCH_WIDTH // 2 < self.destination.y < utils.FOOTBALL_PITCH_WIDTH // 2:
             raise exception.DecisionException('Cannot move out of screen')
 
     def perform(self):

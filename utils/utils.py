@@ -4,8 +4,8 @@ from .size import *
 
 
 def convert_coordinate_cartesian_to_pygame(cartesian_x, cartesian_y):
-    pygame_x = SCREEN_WIDTH // 2 + cartesian_x
-    pygame_y = SCREEN_HEIGHT // 2 - cartesian_y
+    pygame_x = SCREEN_LENGTH // 2 + cartesian_x
+    pygame_y = SCREEN_WIDTH // 2 - cartesian_y
     return pygame_x, pygame_y
 
 

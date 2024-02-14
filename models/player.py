@@ -55,10 +55,10 @@ class Player:
 
     def is_in_own_penalty_area(self):
         if self.color == 'red':
-            p = Point(-utils.FOOTBALL_PITCH_WIDTH // 2, 0)
+            p = Point(-utils.FOOTBALL_PITCH_LENGTH // 2, 0)
         elif self.color == 'blue':
-            p = Point(utils.FOOTBALL_PITCH_WIDTH // 2, 0)
-        if utils.distance(self, p) < utils.PENALTY_AREA_WIDTH:
+            p = Point(utils.FOOTBALL_PITCH_LENGTH // 2, 0)
+        if utils.distance(self, p) < utils.PENALTY_AREA_LENGTH:
             return True
         else:
             return False
