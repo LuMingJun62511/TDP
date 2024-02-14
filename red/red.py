@@ -50,6 +50,7 @@ def play(red_players, blue_players, ball, scoreboard):
                 'direction': direction,
                 'power': 60,
             })
+
     return decisions
 
 
