@@ -31,6 +31,7 @@ def adjust_self(player, ball, GOALKEEPER_WIDTRH, GOALKEEPER_DEPTH):
 
     # ゴールからボールへの方向
     angle_to_ball = math.atan2(ball_y - goal_y, ball_x - goal_x)
+    print('プレイヤーとボールの間の距離', get_distance({'x': player_x, 'y': player_y}, ball))
 
     # 楕円形の境界上の点を計算
     ellipse_x = goal_x + (ellipse_width / 2) * math.cos(angle_to_ball)
@@ -56,9 +57,6 @@ def adjust_self(player, ball, GOALKEEPER_WIDTRH, GOALKEEPER_DEPTH):
         'speed': 10
     }
     
-    
-    
-    
 
 def stand_still():
     print('站着不动')
@@ -68,8 +66,8 @@ def chase_ball():
     return '追球'
 
 def pass_to_teammates():
-    print('尽快传给队友')
-    return '尽快传给队友'
+    print('传球')
+    return '传球'
 
 # Based on the above code,
 def play(red_players, blue_players, ball, scoreboard):
@@ -78,23 +76,25 @@ def play(red_players, blue_players, ball, scoreboard):
         serve_ball()  # Can trigger
     else:  # The ball hasn't entered the goal
         if ball['x'] < 0:  # Is the ball on our half of the field?
+            print('ball', ball)
             if ball['x'] < -300:  # Has the ball entered the penalty area?
                 if ball['owner_number'] == 0:  # Has the goalkeeper successfully intercepted the ball?
                     pass_to_teammates()  # Can trigger
                 else:  # Not intercepted yet, continue to chase the ball
                     chase_ball()  # Can trigger
-            else:  # The ball has not entered the penalty area
+                    decisions.append({
+                        'type': 'move',
+                        'player_number': 0,
+                        'destination': ball,
+                        'speed': 10,
+                    })
+            else:  # The ball is on our half of the field, but not in the penalty area
+                if ball['owner_number'] == 0:  # Has the goalkeeper successfully intercepted the ball?
+                    pass_to_teammates()  # Can trigger
                 decision = adjust_self(red_players, ball, 160, 210)  
                 decisions.append(decision)
         else:  # The ball is not on our half of the field
             stand_still()  # Can trigger
-
-    decisions.append({
-        'type': 'move',
-        'player_number': 0,
-        'destination': ball,
-        'speed': 10,
-    })
 
     return decisions
 
