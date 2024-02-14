@@ -27,16 +27,13 @@ def adjust_self(player, ball, GOALKEEPER_WIDTRH, GOALKEEPER_DEPTH):
 
     # ゴールとボールの間の距離
     distance_to_ball = get_distance({'x': goal_x, 'y': goal_y}, ball)
-    print('ゴールとボールの間の距離', distance_to_ball)
 
     # ゴールからボールへの方向
     angle_to_ball = math.atan2(ball_y - goal_y, ball_x - goal_x)
-    print('プレイヤーとボールの間の距離', get_distance({'x': player_x, 'y': player_y}, ball))
 
     # 楕円形の境界上の点を計算
     ellipse_x = goal_x + (ellipse_width / 2) * math.cos(angle_to_ball)
     ellipse_y = goal_y + (ellipse_height / 2) * math.sin(angle_to_ball)
-    print('楕円形の境界上の点', ellipse_x, ellipse_y)
 
     # プレイヤーの位置を調整
     if distance_to_ball > get_distance({'x': ellipse_x, 'y': ellipse_y}, {'x': goal_x, 'y': goal_y}):
@@ -47,8 +44,6 @@ def adjust_self(player, ball, GOALKEEPER_WIDTRH, GOALKEEPER_DEPTH):
         # 現在位置が適切な場合は移動しない
         new_x = player_x
         new_y = player_y
-    
-    print('調整', new_x, new_y)
     
     return {
         'type': 'move',
@@ -65,9 +60,39 @@ def chase_ball():
     print('追球')
     return '追球'
 
-def pass_to_teammates():
-    print('传球')
-    return '传球'
+def pass_to_teammates(players, ball):
+    print('パス出す')
+    decisions = []
+    goalkeeper_number = 0  # ゴールキーパーの番号を定義
+
+    # ゴールキーパーの位置を取得
+    goalkeeper_position = next(player for player in players if player['number'] == goalkeeper_number)
+
+    # ゴールキーパー以外のチームメイトを選択
+    teammates = [player for player in players if player['number'] != goalkeeper_number]
+
+    # チームメイトがいない場合、何もしない
+    if not teammates:
+        return decisions
+
+    # 最適なチームメイトを選択するロジック（ここでは単純に最も近いチームメイトを選択）
+    closest_teammate = min(teammates, key=lambda player: get_distance(player, ball))
+
+    # パスの方向を計算
+    pass_direction = get_direction(goalkeeper_position, closest_teammate)
+
+    # パスのパワーを決定（ここでは一定値を使用。状況に応じて調整が必要）
+    pass_power = 50  # 適宜調整
+
+    # パスの決定を追加
+    return {
+        'type': 'kick',
+        'player_number': goalkeeper_number,
+        'direction': pass_direction,
+        'power': pass_power,
+    }
+
+
 
 # Based on the above code,
 def play(red_players, blue_players, ball, scoreboard):
@@ -77,16 +102,18 @@ def play(red_players, blue_players, ball, scoreboard):
     else:  # The ball hasn't entered the goal
         if ball['x'] < 0:  # Is the ball on our half of the field?
             print('ball', ball)
-            if ball['owner_number'] == 0:  # Has the goalkeeper successfully intercepted the ball?
-                    pass_to_teammates()  # Can trigger
             if ball['x'] < -300:  # Has the ball entered the penalty area?
-                chase_ball()  # Can trigger
-                decisions.append({
-                    'type': 'move',
-                    'player_number': 0,
-                    'destination': ball,
-                    'speed': 10,
-                })
+                if ball['owner_number'] == 0:  # Has the goalkeeper successfully intercepted the ball?
+                    decision = pass_to_teammates(red_players, ball)
+                    decisions.append(decision)
+                else:
+                    chase_ball()  # Can trigger
+                    decisions.append({
+                        'type': 'move',
+                        'player_number': 0,
+                        'destination': ball,
+                        'speed': 10,
+                    })
             else:  # The ball is on our half of the field, but not in the penalty area
                 decision = adjust_self(red_players, ball, 160, 210)  
                 decisions.append(decision)
