@@ -77,20 +77,17 @@ def play(red_players, blue_players, ball, scoreboard):
     else:  # The ball hasn't entered the goal
         if ball['x'] < 0:  # Is the ball on our half of the field?
             print('ball', ball)
+            if ball['owner_number'] == 0:  # Has the goalkeeper successfully intercepted the ball?
+                    pass_to_teammates()  # Can trigger
             if ball['x'] < -300:  # Has the ball entered the penalty area?
-                if ball['owner_number'] == 0:  # Has the goalkeeper successfully intercepted the ball?
-                    pass_to_teammates()  # Can trigger
-                else:  # Not intercepted yet, continue to chase the ball
-                    chase_ball()  # Can trigger
-                    decisions.append({
-                        'type': 'move',
-                        'player_number': 0,
-                        'destination': ball,
-                        'speed': 10,
-                    })
+                chase_ball()  # Can trigger
+                decisions.append({
+                    'type': 'move',
+                    'player_number': 0,
+                    'destination': ball,
+                    'speed': 10,
+                })
             else:  # The ball is on our half of the field, but not in the penalty area
-                if ball['owner_number'] == 0:  # Has the goalkeeper successfully intercepted the ball?
-                    pass_to_teammates()  # Can trigger
                 decision = adjust_self(red_players, ball, 160, 210)  
                 decisions.append(decision)
         else:  # The ball is not on our half of the field
