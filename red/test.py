@@ -11,37 +11,37 @@ def get_distance(p1, p2):
 
 
 def serve_ball():
-    print('捡球')
-    return '捡球'
+    print('Pick up the ball')
+    return 'Pick up the ball'
 
-def adjust_self(player, ball, GOALKEEPER_WIDTRH, GOALKEEPER_DEPTH):
+def adjust_self(player, ball, GOALKEEPER_WIDTH, GOALKEEPER_DEPTH):
     goalkeeper = player[0]
-    # 楕円形の範囲を定義
-    ellipse_width = GOALKEEPER_WIDTRH
+    # Define the range of the ellipse
+    ellipse_width = GOALKEEPER_WIDTH
     ellipse_height = GOALKEEPER_DEPTH
     goal_x, goal_y = -460, 0
 
-    # プレイヤーとボールの位置
+    # Positions of the player and the ball
     player_x, player_y = goalkeeper['x'], goalkeeper['y']
     ball_x, ball_y = ball['x'], ball['y']
 
-    # ゴールとボールの間の距離
+    # Distance between the goal and the ball
     distance_to_ball = get_distance({'x': goal_x, 'y': goal_y}, ball)
 
-    # ゴールからボールへの方向
+    # Direction from the goal to the ball
     angle_to_ball = math.atan2(ball_y - goal_y, ball_x - goal_x)
 
-    # 楕円形の境界上の点を計算
+    # Calculate the point on the boundary of the ellipse
     ellipse_x = goal_x + (ellipse_width / 2) * math.cos(angle_to_ball)
     ellipse_y = goal_y + (ellipse_height / 2) * math.sin(angle_to_ball)
 
-    # プレイヤーの位置を調整
+    # Adjust the position of the player
     if distance_to_ball > get_distance({'x': ellipse_x, 'y': ellipse_y}, {'x': goal_x, 'y': goal_y}):
-        # 楕円形の境界上に移動
+        # Move to the boundary of the ellipse
         new_x = ellipse_x
         new_y = ellipse_y
     else:
-        # 現在位置が適切な場合は移動しない
+        # Do not move if the current position is appropriate
         new_x = player_x
         new_y = player_y
     
@@ -54,37 +54,37 @@ def adjust_self(player, ball, GOALKEEPER_WIDTRH, GOALKEEPER_DEPTH):
     
 
 def stand_still():
-    print('站着不动')
-    return '站着不动'
+    print('Stand still')
+    return 'Stand still'
 def chase_ball():
-    print('追球')
-    return '追球'
+    print('Chase the ball')
+    return 'Chase the ball'
 
 def pass_to_teammates(players, ball):
-    print('パス出す')
+    print('Passing the ball')
     decisions = []
-    goalkeeper_number = 0  # ゴールキーパーの番号を定義
+    goalkeeper_number = 0  # Define the goalkeeper's number
 
-    # ゴールキーパーの位置を取得
+    # Get the position of the goalkeeper
     goalkeeper_position = next(player for player in players if player['number'] == goalkeeper_number)
 
-    # ゴールキーパー以外のチームメイトを選択
+    # Select teammates other than the goalkeeper
     teammates = [player for player in players if player['number'] != goalkeeper_number]
 
-    # チームメイトがいない場合、何もしない
+    # Do nothing if there are no teammates
     if not teammates:
         return decisions
 
-    # 最適なチームメイトを選択するロジック（ここでは単純に最も近いチームメイトを選択）
+    # Logic to select the best teammate (here, simply choose the closest teammate)
     closest_teammate = min(teammates, key=lambda player: get_distance(player, ball))
 
-    # パスの方向を計算
+    # Calculate the direction of the pass
     pass_direction = get_direction(goalkeeper_position, closest_teammate)
 
-    # パスのパワーを決定（ここでは一定値を使用。状況に応じて調整が必要）
-    pass_power = 50  # 適宜調整
+    # Determine the power of the pass (use a fixed value here, adjust as necessary)
+    pass_power = 50  # Adjust as needed
 
-    # パスの決定を追加
+    # Add the decision to pass
     return {
         'type': 'kick',
         'player_number': goalkeeper_number,
@@ -121,6 +121,3 @@ def play(red_players, blue_players, ball, scoreboard):
             stand_still()  # Can trigger
 
     return decisions
-
-
-
