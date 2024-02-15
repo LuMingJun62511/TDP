@@ -26,9 +26,13 @@ def play(red_players, blue_players, ball, scoreboard):
         player_number = 4  # 对号入座，number为4的球员
         player = blue_players[player_number]
         distance = get_distance(player, ball)
-        print(distance)
+        direction = get_direction(player,ball)
+        decisions.append({
+            'type':'collision',
+            'player_number': player['number'],
+            'direction': get_direction(player,ball),          
+        })
         if distance >= 10:  
-            # print("速度为 10")
             decisions.append({
                 'type': 'move',
                 'player_number': player['number'],
@@ -36,8 +40,7 @@ def play(red_players, blue_players, ball, scoreboard):
                 'direction':direction,
                 'speed': 10,
             })
-        else:
-            print("grab")
+        elif utils._just_grab(player,blue_players):
             decisions.append({
                 'type': 'grab',
                 'player_number': player['number'],
