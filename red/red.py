@@ -44,6 +44,7 @@ def _how_to_grab(player1,blue_players):
 
 def play(red_players, blue_players, ball, scoreboard):
     decisions = []
+    print(ball['owner_color'],"红方获取的信息")
     if ball['owner_color'] != 'red':
         closest_player = red_players[1]
         for player in red_players[2:]:
@@ -60,7 +61,7 @@ def play(red_players, blue_players, ball, scoreboard):
                 'player_number': closest_player['number'],
                 'destination': ball,
                 'direction': get_direction(closest_player,ball),
-                'speed': 10,
+                'speed': 8,
             })
         elif _just_grab(closest_player,blue_players):
             decisions.append({

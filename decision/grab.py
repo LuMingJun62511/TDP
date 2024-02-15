@@ -60,5 +60,6 @@ class GrabDecision(Decision):
             self.runner.ball.direction = closest_player.direction
             if self.direction:
                 self.runner.ball.direction = self.direction
+                
 
 

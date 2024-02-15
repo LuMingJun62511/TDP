@@ -22,16 +22,14 @@ def play(red_players, blue_players, ball, scoreboard):
 
 def play(red_players, blue_players, ball, scoreboard):
     decisions = []  
+    print(ball['owner_color'],"蓝方获取的信息")
     if ball['owner_color'] != 'blue':  # 对方球员持球时
+        print("现在四号追球")
         player_number = 4  # 对号入座，number为4的球员
         player = blue_players[player_number]
         distance = get_distance(player, ball)
         direction = get_direction(player,ball)
-        decisions.append({
-            'type':'collision',
-            'player_number': player['number'],
-            'direction': get_direction(player,ball),          
-        })
+        
         if distance >= 10:  
             decisions.append({
                 'type': 'move',
@@ -47,6 +45,7 @@ def play(red_players, blue_players, ball, scoreboard):
             })
         else:
             angle = utils._how_to_grab(player,blue_players)
+            
             decisions.append({
                 'type':'grab',
                 'player_number':player['number'],
@@ -58,7 +57,6 @@ def play(red_players, blue_players, ball, scoreboard):
         ball_owner = blue_players[ball['owner_number']]
         distance = get_distance(ball_owner, maghsad)
         direction = get_direction(ball_owner,maghsad)
-        #print("现在蓝方持球")
         if distance >= 10:
             decisions.append({
                 'type': 'move',

@@ -28,17 +28,18 @@ class Collision(Decision):
 
     def perform(self):
         if self._can_collision():
-            print("发生碰撞")
             if self.runner.ball.owner is not None and self.runner.ball.owner != self.player:
-                print(self.player.color,self.player.number,"改变方向",self.player.direction)
+                #print(self.player.color,self.player.number,"改变方向",self.player.direction)
                 direction = -self.player.direction
                 x = self.player.x + int(18 * math.cos(direction))
                 y = self.player.y + int(18 * math.sin(direction))
                 destination = Point(x,y)
                 self.player.move(destination,direction,10)
-                print(self.player.direction,self.runner.ball.owner.color)
+                #print("当前持球人",self.player.direction,self.runner.ball.owner.color)
         elif GrabDecision._can_grab(self):
-            print("截断成功")
+            self.runner.ball.owner = self.player
+            self.runner.ball.direction = self.player.direction
+
         
             
        
