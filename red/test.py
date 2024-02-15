@@ -17,6 +17,7 @@ def play(red_players, blue_players, ball, scoreboard):
         'type': 'move',
         'player_number': 0,
         'destination': ball,
+        'direction':get_direction(blue_players[0],ball),
         'speed': 10,
     })
     
