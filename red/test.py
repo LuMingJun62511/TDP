@@ -1,5 +1,81 @@
 import math
 
+
+def plan_running_route_and_dribble(player, ball, destination):
+    # First, calculate the direction to the destination
+    direction_to_goal = get_direction(player, destination)
+
+    # Consider dribbling speed - faster when farther from opponents, slower when closer to maintain control
+    # For simplicity, we'll set a fixed speed here. In a real scenario, you would adjust based on opponent positions
+    dribble_speed = 7  # Adjusted for control. This could be dynamic based on context.
+
+    # Calculate the distance to the destination to decide on dribbling aggressiveness
+    distance_to_goal = get_distance(player, destination)
+    if distance_to_goal > 200:  # If far from the goal, prioritize forward progress
+        dribble_speed = 9
+    elif distance_to_goal <= 200:  # Closer to goal, prioritize control
+        dribble_speed = 5
+
+    # Here, we could add logic to adjust the dribbling path based on the positions of opponents
+    # For simplicity, this example will not include complex pathfinding or opponent avoidance
+
+    # Update the player's position towards the goal, simulating dribbling
+    # In a real scenario, you would also update the ball's position relative to the player
+    print('Dribbling towards the goal')
+    return {
+        'type': 'move',
+        'player_number': player['number'],
+        'destination': destination,
+        'direction': direction_to_goal,
+        'speed': dribble_speed
+    }
+    
+    
+def collision_detection(player, ball):
+    # Placeholder for collision detection logic
+    # Return True if collision (overlap) is detected, False otherwise
+    # This function needs to be implemented based on game physics
+    return True  # Assuming a collision for demonstration
+
+def execute_bounce_action(player, ball):
+    # Placeholder for bounce action logic after collision
+    # This function can adjust the ball's direction and speed based on the collision impact
+    print('Bouncing the ball away')
+    # For simplicity, this will not change the ball's state in this example
+    return {'type': 'bounce', 'player_number': player['number']}
+
+def move_to_strategic_position(player):
+    # Define the strategic position (could be based on the game state)
+    strategic_position = {'x': -100, 'y': 0}  # Example position
+    print('Moving to strategic position')
+    return {
+        'type': 'move',
+        'player_number': player['number'],
+        'destination': strategic_position,
+        'speed': 7  # Speed adjustment could be dynamic
+    }
+
+def face_ball_direction(player, ball):
+    # Adjust player's orientation to face the ball
+    print('Facing ball direction')
+    direction_to_ball = get_direction(player, ball)
+    # This example does not change the player's state but could in a full implementation
+    return {
+        'type': 'orient',
+        'player_number': player['number'],
+        'direction': direction_to_ball
+    }
+
+def intercept_ball(player, ball):
+    # Move towards the ball to intercept it
+    print('Intercepting the ball')
+    return {
+        'type': 'move',
+        'player_number': player['number'],
+        'destination': ball,
+        'speed': 10  # Speed could be adjusted based on urgency
+    }
+    
 def get_direction(p1, p2):
     x = p2['x'] - p1['x']
     y = p2['y'] - p1['y']
@@ -93,16 +169,45 @@ def pass_to_teammates(players, ball):
         'power': pass_power,
     }
 
+def defend_ball(player, ball):
+    # Define the defensive action
+    print('Defending the ball')
+    player_x, player_y = player['x'], player_y['y']
+    ball_x, ball_y = ball['x'], ball['y']
+    
+    # Calculate the direction to the ball and move towards it
+    direction_to_ball = get_direction(player, ball)
+    
+    # Define a simple logic to move towards the ball aggressively
+    return {
+        'type': 'move',
+        'player_number': player['number'],
+        'destination': {'x': ball_x, 'y': ball_y},
+        'direction': direction_to_ball,
+        'speed': 10  # Adjust the speed as needed
+    }
 
 
 # Based on the above code,
 def play(red_players, blue_players, ball, scoreboard):
     decisions = []
+    
+    ### goal keeper
     if ball['x'] < -460:  # Has the ball entered our goal?
         serve_ball()  # Can trigger
     else:  # The ball hasn't entered the goal
         if ball['x'] < 0:  # Is the ball on our half of the field?
             print('ball', ball)
+            
+            if -460 < ball['x'] < -300:
+                # Find the defender (player number 1)
+                defender = next((player for player in red_players if player['number'] == 1), None)
+                if defender:
+                    # Defender takes action
+                    decision = defend_ball(defender, ball)
+                    decisions.append(decision)
+                    
+                    
             if ball['x'] < -300:  # Has the ball entered the penalty area?
                 if ball['owner_number'] == 0:  # Has the goalkeeper successfully intercepted the ball?
                     decision = pass_to_teammates(red_players, ball)
@@ -121,5 +226,35 @@ def play(red_players, blue_players, ball, scoreboard):
                 decisions.append(decision)
         else:  # The ball is not on our half of the field
             stand_still()  # Can trigger
+            
+    ## defender
+    defender = next((player for player in red_players if player['number'] == 1), None)
+    
+    # Check for collision first
+    if collision_detection(defender, ball):
+        if not ball.get('owner_number') == 1:  # If defender does not own the ball
+            decisions.append(execute_bounce_action(defender, ball))
+    
+    if ball['x'] < 0:  # Ball is on our half of the field
+        if defender and 'owner_number' in ball and ball['owner_number'] == 1:  # Defender owns the ball
+            # Attempt to pass to a teammate or move towards goal if no pass option
+            pass_decision = pass_to_teammates(red_players, ball)
+            if pass_decision:  # If a pass is possible
+                decisions.append(pass_decision)
+            else:  # Move towards the goal
+                decisions.append(plan_running_route_and_dribble(defender, ball, {'x': 0, 'y': defender['y']}))
+        elif not 'owner_number' in ball or ball['owner_number'] != 1:  # Defender does not own the ball
+            # Check if in strategic position
+            if in_strategic_position(defender):  # Assuming this function checks the player's position
+                decisions.append(face_ball_direction(defender, ball))
+            else:
+                decisions.append(move_to_strategic_position(defender))
+            # Additional logic to intercept the ball if closer than teammates could be added here
+    else:  # Ball is not on our half of the field
+        if in_strategic_position(defender):  # Assuming this function checks the player's position
+            decisions.append(face_ball_direction(defender, ball))
+        else:
+            decisions.append(move_to_strategic_position(defender))
+
 
     return decisions
