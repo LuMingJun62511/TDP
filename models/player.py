@@ -59,7 +59,7 @@ class Player:
             self.x += int(speed * math.cos(alpha))
             self.y += int(speed * math.sin(alpha))
             self.direction = alpha
-        print(self.color,self.number,"当前球员的方向",self.direction)
+        #print(self.color,self.number,"当前球员的方向",self.direction)
        
 
     def is_in_own_penalty_area(self):

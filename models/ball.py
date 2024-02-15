@@ -6,7 +6,7 @@ import utils
 
 
 class Ball:
-    def __init__(self, x=None, y=None, radius=None, img=None, owner=None, speed=None, direction=None):
+    def __init__(self, x=None, y=None, radius=None, img=None, owner=None, speed=None, direction=0):
         default_ball_image = pg.image.load(utils.BALL_IMG_LINK)
         default_ball_image = pg.transform.scale(default_ball_image, (2 * utils.BALL_RADIUS, 2 * utils.BALL_RADIUS))
         default_ball_image.convert_alpha()
@@ -52,7 +52,7 @@ class Ball:
         elif self.owner.direction is not None:
             #self.x = self.owner.x + 12
             #self.y = self.owner.y + 12
-            print("这里获取到的反向",self.owner.direction)
+            #print(self.owner.color,"这里获取到的方向",self.owner.direction)
             self.x = self.owner.x + int(10 * math.cos(self.owner.direction))
             self.y = self.owner.y + int(10 * math.cos(self.owner.direction))  #这里为了避免球权无法交换设置了初始位置差，具体数值和方法需要讨论
 
