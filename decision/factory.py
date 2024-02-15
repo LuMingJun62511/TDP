@@ -1,6 +1,7 @@
 from .grab import GrabDecision
 from .kick import KickDecision
 from .move import MoveDecision
+from .collision import Collision
 from models import Point
 
 def get_decisions(runner, red_responses, blue_responses,test_responses):
@@ -32,6 +33,7 @@ def _decision_factory(runner, decision):
             player_number=decision['player_number'],
             player_color=decision['player_color'],
             destination=Point(decision['destination']['x'], decision['destination']['y']),
+            direction=decision['direction'] % 360,
             speed=decision['speed'],
         )
     if decision['type'] == 'kick':
@@ -43,10 +45,27 @@ def _decision_factory(runner, decision):
             power=decision['power'],
         )
     if decision['type'] == 'grab':
-        return GrabDecision(
+        if 'direction' in decision:
+            return GrabDecision(
+                runner=runner,
+                player_number=decision['player_number'],
+                player_color=decision['player_color'],
+                direction=decision['direction'] % 360
+            )
+        else:
+            return GrabDecision(
+                runner=runner,
+                player_number=decision['player_number'],
+                player_color=decision['player_color'],
+                direction=0
+            )
+    if decision['type'] == 'collision':
+        return Collision(
             runner=runner,
             player_number=decision['player_number'],
             player_color=decision['player_color'],
+            direction=decision['direction'] % 360,
+            #speed=decision['speed'],
         )
 
 def _unique_decisions(decisions):
