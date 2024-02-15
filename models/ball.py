@@ -49,9 +49,16 @@ class Ball:
                 self.y = utils.FOOTBALL_PITCH_WIDTH // 2 - self.radius - 1
                 self.direction = (self.direction + 180) % 360
                 self.direction = 180 - self.direction
+        elif self.owner.direction is not None:
+            #self.x = self.owner.x + 12
+            #self.y = self.owner.y + 12
+            print("这里获取到的反向",self.owner.direction)
+            self.x = self.owner.x + int(10 * math.cos(self.owner.direction))
+            self.y = self.owner.y + int(10 * math.cos(self.owner.direction))  #这里为了避免球权无法交换设置了初始位置差，具体数值和方法需要讨论
+
         else:
             self.x = self.owner.x + 12
-            self.y = self.owner.y + 12  #这里为了避免球权无法交换设置了初始位置差，具体数值和方法需要讨论
+            self.y = self.owner.y + 12
 
     @property
     def info(self):

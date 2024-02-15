@@ -35,8 +35,10 @@ class Runner:
         self._init_players()
         self.scoreboard = models.Scoreboard()
         self._show_and_increase_cycle_number()
+        self.players = self._get_players()
 
     def run(self):
+        global actions
         global red_responses, blue_responses,test_responses
         end = False
         pause = False
@@ -232,6 +234,19 @@ class Runner:
         self.red_players = red_players
         self.blue_players = blue_players
         self.players = red_players + blue_players
+
+    def _get_players(self):
+        return self.players
+
+    def _get_actions_for_each(self):
+        global actions
+        all_responses = [red_responses, blue_responses, test_responses]
+        for responses in all_responses:
+            if responses is not None:
+                for response in responses:
+                    actions.append(response)
+        return actions
+
 
     def _get_args_for_red_team(self):
         red_players_info = []
