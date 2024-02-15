@@ -43,6 +43,12 @@ def _how_to_grab(player1,blue_players):
 
 
 def play(red_players, blue_players, ball, scoreboard):
+
+    print('看看看看看看看看看看')
+    print(red_players)
+    print(blue_players)
+    print('劈劈劈劈劈')
+
     decisions = []
     if ball['owner_color'] != 'red':
         closest_player = red_players[1]
