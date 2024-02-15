@@ -49,6 +49,7 @@ def adjust_self(player, ball, GOALKEEPER_WIDTH, GOALKEEPER_DEPTH):
         'type': 'move',
         'player_number': 0,
         'destination': {'x': new_x, 'y': new_y},
+        'direction':get_direction(goalkeeper,ball),
         'speed': 10
     }
     
@@ -112,7 +113,7 @@ def play(red_players, blue_players, ball, scoreboard):
                         'type': 'move',
                         'player_number': 0,
                         'destination': ball,
-        'direction':get_direction(blue_players[0],ball),
+                        'direction':get_direction(red_players[0],ball),
                         'speed': 10,
                     })
             else:  # The ball is on our half of the field, but not in the penalty area

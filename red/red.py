@@ -21,14 +21,14 @@ def _just_grab(player1,players):
 def _how_to_grab(player1,blue_players):
     player_position = (player1['x'],player1['y'])
     # 定义球场划分的网格大小
+    grid_length = 50
     grid_width = 50
-    grid_height = 50
 
     # 确定周围的空区域
     empty_regions = []
-    for x in range(0, utils.SCREEN_WIDTH, grid_width):
-        for y in range(0, utils.SCREEN_HEIGHT, grid_height):
-            region_center = (x + grid_width // 2, y + grid_height // 2)
+    for x in range(0, utils.SCREEN_LENGTH, grid_length):
+        for y in range(0, utils.SCREEN_WIDTH, grid_width):
+            region_center = (x + grid_length // 2, y + grid_width // 2)
             is_empty = all(math.sqrt((blue_player['x'] - region_center[0]) ** 2 + (blue_player['y'] - region_center[1]) ** 2) > 10 for blue_player in blue_players)
             if is_empty:
                 empty_regions.append(region_center)
