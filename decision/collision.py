@@ -21,7 +21,7 @@ class Collision(Decision):
             if player != self.player:  # 排除当前球员自身
                 distance = utils.distance(player, self.player)
                 angle = utils._cal_angle(player,self.player)
-                print(angle,"jihao",player.number,distance)
+                #print(angle,"jihao",player.number,distance)
                 if distance < min_distance and angle < max_angle_degrees:
                     return True
         return False

@@ -1,7 +1,7 @@
 import math
 
 import pygame as pg
-
+import runner
 import utils
 from .point import Point
 from roles import goalkeeper,defender,forward
@@ -47,6 +47,7 @@ class Player:
     def move(self, destination,direction, speed):
         distance = utils.distance(self, destination)
         alpha = math.atan2((destination.y - self.y), (destination.x - self.x))
+        
         if distance < speed:
             self.x = int(destination.x)
             self.y = int(destination.y)
@@ -58,6 +59,7 @@ class Player:
             self.x += int(speed * math.cos(alpha))
             self.y += int(speed * math.sin(alpha))
             self.direction = alpha
+        print(self.color,self.number,"当前球员的方向",self.direction)
        
 
     def is_in_own_penalty_area(self):
