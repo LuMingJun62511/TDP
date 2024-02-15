@@ -1,13 +1,13 @@
 import math
 
 import pygame as pg
-
+import runner
 import utils
 from .point import Point
 from roles import goalkeeper,defender,forward
 
 class Player:
-    def __init__(self, x, y, name, number, color, radius=utils.PLAYER_RADIUS, img=None, ban_cycles=0,role=None):
+    def __init__(self, x, y, name, number, color, radius=utils.PLAYER_RADIUS, img=None, ban_cycles=0,role=None,direction=0):
         img_link = utils.RED_PLAYER_IMG_LINK
         if color == 'blue':
             img_link = utils.BLUE_PLAYER_IMG_LINK
@@ -23,6 +23,7 @@ class Player:
         self.img = img or default_img
         self.ban_cycles = ban_cycles
         self.role = role
+        self.direction = direction
     def draw(self, screen):
         pygame_x, pygame_y = utils.convert_coordinate_cartesian_to_pygame(self.x , self.y)
         screen.blit(self.img, (int(pygame_x)-self.radius, int(pygame_y)-self.radius))
@@ -43,15 +44,23 @@ class Player:
             self.y - self.radius,
         )
 
-    def move(self, destination, speed):
+    def move(self, destination,direction, speed):
         distance = utils.distance(self, destination)
+        alpha = math.atan2((destination.y - self.y), (destination.x - self.x))
+        
         if distance < speed:
             self.x = int(destination.x)
             self.y = int(destination.y)
+            self.direction = alpha
+        
         else:
             alpha = math.atan2((destination.y - self.y), (destination.x - self.x))
+            #alpha = direction
             self.x += int(speed * math.cos(alpha))
             self.y += int(speed * math.sin(alpha))
+            self.direction = alpha
+        print(self.color,self.number,"当前球员的方向",self.direction)
+       
 
     def is_in_own_penalty_area(self):
         if self.color == 'red':

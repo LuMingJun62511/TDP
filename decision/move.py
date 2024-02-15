@@ -4,9 +4,10 @@ from .decision import Decision
 
 
 class MoveDecision(Decision):
-    def __init__(self, runner, player_number, player_color, destination, speed):
+    def __init__(self, runner, player_number, player_color, destination,direction, speed):
         super().__init__(runner, player_number, player_color)
         self.destination = destination
+        self.direction = direction
         self.speed = speed
 
     def validate(self):
@@ -18,4 +19,4 @@ class MoveDecision(Decision):
             raise exception.DecisionException('Cannot move out of screen')
 
     def perform(self):
-        self.player.move(self.destination, self.speed)
+        self.player.move(self.destination,self.direction, self.speed)
