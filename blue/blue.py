@@ -1,5 +1,5 @@
 import math
-import utils
+from utils import utils
 import random
 
 def get_direction(p1, p2):
