@@ -35,7 +35,7 @@ class Runner:
         self._init_players()
         self.scoreboard = models.Scoreboard()
         self._show_and_increase_cycle_number()
-        self.players = self._get_players()
+        # self.players = self._get_players()
 
     def run(self):
         global actions
