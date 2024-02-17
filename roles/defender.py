@@ -82,6 +82,5 @@ class Defender(player.Player):
     def move_to_strategic_position(self, strategic_position):
         strategic_pos = strategic_position
         direction_to_strategic_pos = get_direction({'x': self.x, 'y': self.y}, strategic_pos)
-        return {'type': 'move', 'player_number': self.number, 'destination': strategic_pos, 'direction': direction_to_strategic_pos, 'speed': 7}
     
     
