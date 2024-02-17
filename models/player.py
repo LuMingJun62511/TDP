@@ -22,7 +22,7 @@ class Player:
         self.radius = radius
         self.img = img or default_img
         self.ban_cycles = ban_cycles
-        self.role = role
+        self.set_role(role)
     def draw(self, screen):
         pygame_x, pygame_y = utils.convert_coordinate_cartesian_to_pygame(self.x , self.y)
         screen.blit(self.img, (int(pygame_x)-self.radius, int(pygame_y)-self.radius))
@@ -64,19 +64,29 @@ class Player:
             return False
         
 
-    def role(self):
-        if self.role == 'goalkeeper':
-            role = goalkeeper.GoalKeeper(self,self.color,self.number)
-        elif self.role == 'defender':
-            role = defender.Defender(self,self.color,self.number)
-        elif self.role == 'forward':
-            role = forward.Forward(self,self.color,self.number)
-        #需要异常处理
+    # def role(self):
+    #     if self.role == 'goalkeeper':
+    #         role = goalkeeper.GoalKeeper(self,self.color,self.number)
+    #     elif self.role == 'defender':
+    #         role = defender.Defender(self,self.color,self.number)
+    #     elif self.role == 'forward':
+    #         role = forward.Forward(self,self.color,self.number)
+    #     #需要异常处理
+    #     else:
+    #         print("不匹配的身份定义")
+    #     return role
+    
+    def set_role(self, role_type):
+        if role_type == 'goalkeeper':
+            self.role = goalkeeper.GoalKeeper(self.color, self.number)
+        elif role_type == 'defender':
+            self.role = defender.Defender(self.color, self.number)
+        elif role_type == 'forward':
+            self.role = forward.Forward(self.color, self.number)
         else:
-            print("不匹配的身份定义")
-        
-        return role
-
+            self.role = None
+            print(f"Unmatched role definition for player {self.number}")
+            
     @property
     def info(self):
         return {
@@ -85,7 +95,8 @@ class Player:
             'name': self.name,
             'number': self.number,
             'radius': self.radius,
-            'ban_cycles': self.ban_cycles
+            'ban_cycles': self.ban_cycles,
+            'role': self.role
         }
 
     @property
@@ -97,4 +108,5 @@ class Player:
             'number': self.number,
             'radius': self.radius,
             'ban_cycles': self.ban_cycles,
+            'role': self.role
         }

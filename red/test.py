@@ -97,6 +97,8 @@ def pass_to_teammates(players, ball):
 # Based on the above code,
 def play(red_players, blue_players, ball, scoreboard):
     decisions = []
+    
+    """
     if ball['x'] < -460:  # Has the ball entered our goal?
         serve_ball()  # Can trigger
     else:  # The ball hasn't entered the goal
@@ -119,5 +121,5 @@ def play(red_players, blue_players, ball, scoreboard):
                 decisions.append(decision)
         else:  # The ball is not on our half of the field
             stand_still()  # Can trigger
-
+    """
     return decisions

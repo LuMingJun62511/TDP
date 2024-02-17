@@ -2,7 +2,7 @@ from .size import *
 from .utils import *
 
 
-PLAYER_COUNT = 6
+PLAYER_COUNT = 5
 
 FRICTION = main_size // 2 #5
 MAX_PLAYER_SPEED = PLAYER_RADIUS
@@ -26,7 +26,7 @@ RED_PLAYERS_INITIAL_VALUES.append({
     'y': 0,
     'name': "Player{}".format(0),
     'radius': PLAYER_RADIUS + BALL_RADIUS,
-    'role':'goalkeeper',
+    'role':'goalkeeper'
 })
 
 BLUE_PLAYERS_INITIAL_VALUES.append({
@@ -35,7 +35,7 @@ BLUE_PLAYERS_INITIAL_VALUES.append({
     'y': 0,
     'name': "Player{}".format(0),
     'radius': PLAYER_RADIUS + BALL_RADIUS,
-    'role':'goalkeeper',
+    'role':'goalkeeper'
 })
 
 
@@ -48,6 +48,7 @@ for i in range(1, PLAYER_COUNT):
         'y': y,
         'name': "Player{}".format(i),
         'radius': PLAYER_RADIUS,
+        'role':'forward'
     })
     BLUE_PLAYERS_INITIAL_VALUES.append({
         'number': i,
@@ -55,6 +56,7 @@ for i in range(1, PLAYER_COUNT):
         'y': -y,
         'name': "Player{}".format(i),
         'radius': PLAYER_RADIUS,
+        'role':'defender'
     })
 
 '''
