@@ -1,10 +1,14 @@
 # forward.py
 import utils
 from .role import Role
+from models import player
 
-class Forward(Role):
-    def __init__(self, color, number):
-        super().__init__(color, number)
+class Forward(player.Player):
+    def __init__(self, x,y,name, number, color,radius,img=None, ban_cycles=0,role=None,direction=0):
+        super().__init__(x,y,name, number, color,radius,img, ban_cycles,role,direction)
+
+    def decide_action(self, ball, players, own_half, strategic_position):
+        return super().decide_action(ball, players, own_half, strategic_position)
 
     def move_towards_ball(self, player, ball):
         # Example action to move towards the ball

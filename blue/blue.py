@@ -14,23 +14,28 @@ def get_distance(p1, p2):
 
 def play(red_players, blue_players, ball, scoreboard):
     decisions = []
+    own_half = (-450,0)
+    strategic_position = {'x':-200,'y':100}
+    
     ## if role is defender, move towards the ball
     for player in blue_players:
-        if isinstance(player['role'], defender.Defender):
-            print("defender",player['number'])
-            decisions.append({
-                'type': 'move',
-                'player_number': player['number'],
-                'destination': ball,
-                'direction':get_direction(player,ball),
-                'speed': 10,
-            })
-        elif isinstance(player['role'], forward.Forward):
+        # Depending on the role, call the appropriate decision-making function
+        #if isinstance(player['role'], goalkeeper.GoalKeeper):
+        if player['role'] == 'goalkeeper':
+            #print('player is goalkeeper')
+            pass
+        #elif isinstance(player['role'], defender.Defender):
+        elif player['role'] == 'defender':
+            # Defenders make decisions based on ball possession and strategic positioning
+            #print('player is defender')
+            pass
+        #elif isinstance(player['role'], forward.Forward):
+        elif player['role'] == 'forward':
             # Forwards could have their own logic for attacking plays or positioning
             # This could involve moving towards the goal, attempting shots, or positioning for passes
             # Placeholder for forward decision logic
             pass
         else:
             print(f"Unrecognized player role for player {player['number']}")
-            
+
     return decisions
