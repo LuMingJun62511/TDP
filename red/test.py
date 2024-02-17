@@ -1,14 +1,10 @@
 import math
+from utils.size import *
 import pprint
 
 ## defender part
-def in_strategic_position(player):
-    # Example strategic position criteria
-    strategic_x_min, strategic_x_max = -400, 0  # Half of the field
-    strategic_y_min, strategic_y_max = -100, 100  # Middle strip of the field
-
-    return (strategic_x_min <= player['x'] <= strategic_x_max and
-            strategic_y_min <= player['y'] <= strategic_y_max)
+def in_strategic_position(player,strategic_position):
+    return (strategic_position['x'] == player['x'] and strategic_position['y'] == player['y'])
     
 def plan_running_route_and_dribble(player, ball, destination):
     # First, calculate the direction to the destination
@@ -59,9 +55,9 @@ def execute_bounce_action(player, ball):
             'speed': 0  # Speed is 0 to only adjust the direction
             }
 
-def move_to_strategic_position(player):
+def move_to_strategic_position(player,strategic_position):
     # Define the strategic position (could be based on the game state)
-    strategic_position = {'x': -100, 'y': 0}  # Example position
+    # strategic_position = {'x': -100, 'y': 0}  # Example position
     print('Moving to strategic position')
     return {
         'type': 'move',
@@ -70,6 +66,66 @@ def move_to_strategic_position(player):
         'direction': get_direction(player, strategic_position),  # Face the strategic position
         'speed': 7  # Speed adjustment could be dynamic
     }
+
+def calculate_strategic_position_(player1, player2, ball):
+
+    return
+
+def calculate_strategic_position_(player1, player2, ball):
+
+    return
+def calculate_strategic_position_(player1, player2, ball):
+
+    return
+
+
+def calculate_strategic_position(player1, player2, ball):
+    # center of the whole frame
+    center_x = 0
+    center_y = 0
+
+    # goal post
+    goalpost1_x = center_x - FOOTBALL_PITCH_LENGTH / 2
+    goalpost1_y = GOAL_WIDTH / 2
+    goalpost2_x = center_x - FOOTBALL_PITCH_LENGTH / 2
+    goalpost2_y = -GOAL_WIDTH / 2
+
+    # goal area
+    goal_area_x_min = center_x - FOOTBALL_PITCH_LENGTH / 2
+    goal_area_x_max = goal_area_x_min + GOAL_AREA_LENGTH
+
+    # 另一位球员与两球门的距离,相对靠近一个球门,则我去守另一个,
+    # 可能出现,我相比另一人,我离的两个球门都挺远,这时,还是画图吧
+    # 还得再考虑,
+
+    # 这里我必须说明一下判断的一句为什么是这样
+    # 正如前述,防守的准则是补漏洞,所以,我必须看另一个队友,他相对缺少防守的一侧要交给我,因为他可能在追球,
+
+    # 如果,两个人都这么搞,很可能,他们会同时放弃离自己相对近的球门,转而向远侧跑,而且,这样的情况是可能发生的,就出现在球在我方半场,本队持球,
+    distance_player2_to_goalpost1 = ((player2['x'] - goalpost1_x)**2 + (player1['y'] - goalpost1_y)**2)**0.5
+    distance_player2_to_goalpost2 = ((player2['x'] - goalpost1_x)**2 + (player2['y'] - goalpost1_y)**2)**0.5
+
+    # 观察另一位球员离哪侧近,他守离他近的,我守另一侧,不行,还是有问题,如果都在一侧,那就都往远侧跑了,
+    if distance_player2_to_goalpost1 <= distance_player2_to_goalpost2:
+        # player2 closer to goalpost2 我离球门1更近,不一定我就离球门二更远,有可能你在场外侧,你相对我离两个球门都远,
+        defend_goalpost_x, defend_goalpost_y = goalpost2_x, goalpost2_y
+    else:
+        # player2 closer to goalpost1
+        defend_goalpost_x, defend_goalpost_y = goalpost1_x, goalpost1_y
+
+    # 计算球和防守门柱的连线中点
+    midpoint_x = (ball['x'] + defend_goalpost_x) / 2
+    midpoint_y = (ball['y'] + defend_goalpost_y) / 2
+
+    # 确保战略点不在球门区内
+    if midpoint_x < goal_area_x_max:
+        midpoint_x = goal_area_x_max
+
+    strategic_position = {'x': midpoint_x, 'y': midpoint_y}
+    return strategic_position
+
+
+
 
 def face_ball_direction(player, ball):
     # Adjust player's orientation to face the ball
@@ -211,42 +267,45 @@ def play(red_players, blue_players, ball, scoreboard):
     decisions = []
     
     ### goal keeper
-    if ball['x'] < -460:  # Has the ball entered our goal?
-        serve_ball()  # Can trigger
-    else:  # The ball hasn't entered the goal
-        if ball['x'] < 0:  # Is the ball on our half of the field?
-            print('ball', ball)
-            
-            if -460 < ball['x'] < -300:
-                # Find the defender (player number 1)
-                defender = next((player for player in red_players if player['number'] == 1), None)
-                if defender:
-                    # Defender takes action
-                    decision = defend_ball(defender, ball)
-                    decisions.append(decision)
-                    
-                    
-            if ball['x'] < -300:  # Has the ball entered the penalty area?
-                if ball['owner_number'] == 0:  # Has the goalkeeper successfully intercepted the ball?
-                    decision = pass_to_teammates(red_players, ball)
-                    decisions.append(decision)
-                else:
-                    chase_ball()  # Can trigger
-                    decisions.append({
-                        'type': 'move',
-                        'player_number': 0,
-                        'destination': ball,
-                        'direction':get_direction(red_players[0],ball),
-                        'speed': 10,
-                    })
-            else:  # The ball is on our half of the field, but not in the penalty area
-                decision = adjust_self(red_players, ball, 160, 210)  
+    if ball['x'] < 0:  # Is the ball on our half of the field?
+        print('ball', ball)
+        
+        if -460 < ball['x'] < -300:
+           # Find the defender (player number 1)
+            defender = next((player for player in red_players if player['number'] == 1), None)
+            if defender:
+                # Defender takes action
+                decision = defend_ball(defender, ball)
                 decisions.append(decision)
-        else:  # The ball is not on our half of the field
-            stand_still()  # Can trigger
+                    
+                    
+        if ball['x'] < -300:  # Has the ball entered the penalty area?
+            if ball['owner_number'] == 0:  # Has the goalkeeper successfully intercepted the ball?
+                decision = pass_to_teammates(red_players, ball)
+                decisions.append(decision)
+            else:
+                chase_ball()  # Can trigger
+                decisions.append({
+                    'type': 'move',
+                    'player_number': 0,
+                    'destination': ball,
+                    'direction':get_direction(red_players[0],ball),
+                    'speed': 10,
+                })
+        else:  # The ball is on our half of the field, but not in the penalty area
+            decision = adjust_self(red_players, ball, 160, 210)  
+            decisions.append(decision)
+    else:  # The ball is not on our half of the field
+        stand_still()  # Can trigger
             
     ## defender
+    # defender = next((player for player in red_players if player['number'] == 1), None)
     defender = next((player for player in red_players if player['number'] == 1), None)
+    defender2 = next((player for player in red_players if player['number'] == 2), None)
+
+    # 假设ball是一个字典，包含球的位置信息
+    ball_position = {'x': ball['x'], 'y': ball['y']}
+
     
     # Check for collision first
     if collision_detection(defender, ball):
@@ -269,21 +328,23 @@ def play(red_players, blue_players, ball, scoreboard):
         elif not 'owner_number' in ball or ball['owner_number'] != 1:  # Defender does not own the ball
             print("Defender does not own the ball.")
             # Check if in strategic position
-            if in_strategic_position(defender):  # Assuming this function checks the player's position
+            strategic_position = 
+            if in_strategic_position(defender,strategic_position):  # Assuming this function checks the player's position
                 print("Defender is in strategic position, facing ball direction.")
                 decisions.append(face_ball_direction(defender, ball))
             else:
                 print("Defender is not in strategic position, moving to it.")
-                decisions.append(move_to_strategic_position(defender))
+                decisions.append(move_to_strategic_position(defender,strategic_position))
             # Additional logic to intercept the ball if closer than teammates could be added here
     else:  # Ball is not on our half of the field
         print("Ball is not on our half of the field.")
-        if in_strategic_position(defender):  # Assuming this function checks the player's position
+        strategic_position = 
+        if in_strategic_position(defender,strategic_position):  # Assuming this function checks the player's position
             print("Defender is in strategic position, facing ball direction.")
             decisions.append(face_ball_direction(defender, ball))
         else:
             print("Defender is not in strategic position, moving to it.")
-            decisions.append(move_to_strategic_position(defender))
+            decisions.append(move_to_strategic_position(defender,strategic_position))
 
 
     pprint.pprint(decisions)
