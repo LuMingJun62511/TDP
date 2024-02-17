@@ -24,7 +24,7 @@ class GoalKeeper(Role):
             x_2 = 2
             y_1 = 2
             y_2 = 2
-        if x < x_1 and x > x_2 and y < y_1 and y > y_2:
+        if self.x < x_1 and self.x > x_2 and self.y < y_1 and self.y > y_2:
             return True
         else:
             return False
