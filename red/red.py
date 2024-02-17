@@ -1,6 +1,8 @@
 import math
-import utils
-import random
+from roles import goalkeeper, defender, forward
+
+# Assuming the existence of utility functions get_direction and get_distance
+# These functions compute the direction and distance between two points
 
 def get_direction(p1, p2):
     x = p2['x'] - p1['x']
@@ -11,43 +13,11 @@ def get_direction(p1, p2):
 def get_distance(p1, p2):
     return int(((p1['x'] - p2['x']) ** 2 + (p1['y'] - p2['y']) ** 2) ** 0.5)
 
-def _just_grab(player1,players):
-    collision_distance = 30
-    for player in players:
-        if get_distance(player1,player) < collision_distance:
-            return False
-    return True
-
-def _how_to_grab(player1,blue_players):
-    player_position = (player1['x'],player1['y'])
-    # 定义球场划分的网格大小
-    grid_length = 50
-    grid_width = 50
-
-    # 确定周围的空区域
-    empty_regions = []
-    for x in range(0, utils.SCREEN_LENGTH, grid_length):
-        for y in range(0, utils.SCREEN_WIDTH, grid_width):
-            region_center = (x + grid_length // 2, y + grid_width // 2)
-            is_empty = all(math.sqrt((blue_player['x'] - region_center[0]) ** 2 + (blue_player['y'] - region_center[1]) ** 2) > 10 for blue_player in blue_players)
-            if is_empty:
-                empty_regions.append(region_center)
-
-    # 计算方向
-    kick_directions = []
-    for region_center in empty_regions:
-        direction_angle = math.atan2(region_center[1] - player_position[1], region_center[0] - player_position[0])
-        direction_degree = math.degrees(direction_angle)
-        kick_directions.append(direction_degree)
-    return random.choice(kick_directions)
-
-
 def play(red_players, blue_players, ball, scoreboard):
-    decisions = []
-    print(ball['owner_color'],"红方获取的信息")
+    decisions = []  
     if ball['owner_color'] != 'red':
         closest_player = red_players[1]
-        for player in red_players[2:]:
+        for player in red_players:
             if get_distance(player, ball) < get_distance(closest_player, ball):
                 closest_player = player
         decisions.append({
@@ -98,8 +68,24 @@ def play(red_players, blue_players, ball, scoreboard):
                 'direction': direction,
                 'power': 60,
             })
+    goal_position = {'x': 500, 'y': 0}  # Example goal position for scoring
+    # Loop through each player in the red team
+    for player in red_players:
+        # Depending on the role, call the appropriate decision-making function
+        if isinstance(player['role'], goalkeeper.GoalKeeper):
+            print('player is goalkeeper')
+            decisions.extend(player['role'].decide_action(ball, red_players))
+        elif isinstance(player['role'], defender.Defender):
+            # Defenders make decisions based on ball possession and strategic positioning
+            print('player is defender')
+        elif isinstance(player['role'], forward.Forward):
+            # Forwards could have their own logic for attacking plays or positioning
+            # This could involve moving towards the goal, attempting shots, or positioning for passes
+            # Placeholder for forward decision logic
+            pass
+        else:
+            print(f"Unrecognized player role for player {player['number']}")
 
     return decisions
-
 
 

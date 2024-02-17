@@ -266,86 +266,28 @@ def defend_ball(player, ball):
 def play(red_players, blue_players, ball, scoreboard):
     decisions = []
     
-    ### goal keeper
-    if ball['x'] < 0:  # Is the ball on our half of the field?
-        print('ball', ball)
-        
-        if -460 < ball['x'] < -300:
-           # Find the defender (player number 1)
-            defender = next((player for player in red_players if player['number'] == 1), None)
-            if defender:
-                # Defender takes action
-                decision = defend_ball(defender, ball)
+    """
+    if ball['x'] < -460:  # Has the ball entered our goal?
+        serve_ball()  # Can trigger
+    else:  # The ball hasn't entered the goal
+        if ball['x'] < 0:  # Is the ball on our half of the field?
+            print('ball', ball)
+            if ball['x'] < -300:  # Has the ball entered the penalty area?
+                if ball['owner_number'] == 0:  # Has the goalkeeper successfully intercepted the ball?
+                    decision = pass_to_teammates(red_players, ball)
+                    decisions.append(decision)
+                else:
+                    chase_ball()  # Can trigger
+                    decisions.append({
+                        'type': 'move',
+                        'player_number': 0,
+                        'destination': ball,
+                        'speed': 10,
+                    })
+            else:  # The ball is on our half of the field, but not in the penalty area
+                decision = adjust_self(red_players, ball, 160, 210)  
                 decisions.append(decision)
-                    
-                    
-        if ball['x'] < -300:  # Has the ball entered the penalty area?
-            if ball['owner_number'] == 0:  # Has the goalkeeper successfully intercepted the ball?
-                decision = pass_to_teammates(red_players, ball)
-                decisions.append(decision)
-            else:
-                chase_ball()  # Can trigger
-                decisions.append({
-                    'type': 'move',
-                    'player_number': 0,
-                    'destination': ball,
-                    'direction':get_direction(red_players[0],ball),
-                    'speed': 10,
-                })
-        else:  # The ball is on our half of the field, but not in the penalty area
-            decision = adjust_self(red_players, ball, 160, 210)  
-            decisions.append(decision)
-    else:  # The ball is not on our half of the field
-        stand_still()  # Can trigger
-            
-    ## defender
-    # defender = next((player for player in red_players if player['number'] == 1), None)
-    defender = next((player for player in red_players if player['number'] == 1), None)
-    defender2 = next((player for player in red_players if player['number'] == 2), None)
-
-    # 假设ball是一个字典，包含球的位置信息
-    ball_position = {'x': ball['x'], 'y': ball['y']}
-
-    
-    # Check for collision first
-    if collision_detection(defender, ball):
-        if not ball.get('owner_number') == 1:  # If defender does not own the ball
-            decisions.append(execute_bounce_action(defender, ball))
-    
-    print("Starting ball position check.")
-    if ball['x'] < 0:  # Ball is on our half of the field
-        print("Ball is on our half of the field.")
-        if defender and 'owner_number' in ball and ball['owner_number'] == 1:  # Defender owns the ball
-            print("Defender owns the ball.")
-            # Attempt to pass to a teammate or move towards goal if no pass option
-            pass_decision = pass_to_teammates(red_players, ball)
-            if pass_decision:  # If a pass is possible
-                print("Passing to a teammate.")
-                decisions.append(pass_decision)
-            else:  # Move towards the goal
-                print("No teammate to pass to, moving towards goal.")
-                decisions.append(plan_running_route_and_dribble(defender, ball, {'x': 0, 'y': defender['y']}))
-        elif not 'owner_number' in ball or ball['owner_number'] != 1:  # Defender does not own the ball
-            print("Defender does not own the ball.")
-            # Check if in strategic position
-            strategic_position = 
-            if in_strategic_position(defender,strategic_position):  # Assuming this function checks the player's position
-                print("Defender is in strategic position, facing ball direction.")
-                decisions.append(face_ball_direction(defender, ball))
-            else:
-                print("Defender is not in strategic position, moving to it.")
-                decisions.append(move_to_strategic_position(defender,strategic_position))
-            # Additional logic to intercept the ball if closer than teammates could be added here
-    else:  # Ball is not on our half of the field
-        print("Ball is not on our half of the field.")
-        strategic_position = 
-        if in_strategic_position(defender,strategic_position):  # Assuming this function checks the player's position
-            print("Defender is in strategic position, facing ball direction.")
-            decisions.append(face_ball_direction(defender, ball))
-        else:
-            print("Defender is not in strategic position, moving to it.")
-            decisions.append(move_to_strategic_position(defender,strategic_position))
-
-
-    pprint.pprint(decisions)
+        else:  # The ball is not on our half of the field
+            stand_still()  # Can trigger
+    """
     return decisions
