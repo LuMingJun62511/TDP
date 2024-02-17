@@ -5,7 +5,6 @@ from roles import goalkeeper, defender, forward
 # These functions compute the direction and distance between two points
 
 
-
 def play(red_players, blue_players, ball, scoreboard):
     decisions = []
     goal_position = {'x': 500, 'y': 0}  # Example goal position for scoring
@@ -27,22 +26,10 @@ def play(red_players, blue_players, ball, scoreboard):
         # Depending on the role, call the appropriate decision-making function
         if isinstance(player['role'], goalkeeper.GoalKeeper):
             print('player is goalkeeper')
-            # For a goalkeeper, additional conditions based on the ball's position could be implemented
-            if ball['x'] < -460:
-                print('ball', ball)
-                decisions.append(player.serve_ball())
-            elif ball['x'] < 0:
-                print('ball', ball)
-                if ball['x'] < -300 and ball.get('owner_number') != player['number']:
-                    print('ball', ball)
-                    decisions.append(player.chase_ball(ball))
-                else:
-                    decisions.append(player.stand_still())
-            else:
-                decisions.append(player.stand_still())
+            decisions.extend(player['role'].decide_action(ball, red_players))
         elif isinstance(player['role'], defender.Defender):
             # Defenders make decisions based on ball possession and strategic positioning
-            strategic_decision = player.action_decision(ball, red_players, own_half, is_in_strategic_position)
+            strategic_decision = player['role'].action_decision(ball, red_players, own_half, is_in_strategic_position)
             decisions.extend(strategic_decision)
         elif isinstance(player['role'], forward.Forward):
             # Forwards could have their own logic for attacking plays or positioning

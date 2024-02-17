@@ -27,6 +27,7 @@ class GoalKeeper(Role):
             decisions.append(self.serve_ball())
         elif ball['x'] < 0:
             if ball['x'] < -300:
+                print('ball', ball)
                 if ball['owner_number'] == self.number:
                     decisions.append(self.pass_to_teammates(players, ball))
                 else:
