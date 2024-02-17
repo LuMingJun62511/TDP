@@ -6,7 +6,6 @@
     {'x': -250, 'y': -217, 'name': 'Player2', 'number': 2, 'radius': 10, 'ban_cycles': 0},
     {'x': -167, 'y': 216, 'name': 'Player3', 'number': 3, 'radius': 10, 'ban_cycles': 0},
     {'x': -83, 'y': -217, 'name': 'Player4', 'number': 4, 'radius': 10, 'ban_cycles': 0},
-    {'x': 0, 'y': 216, 'name': 'Player5', 'number': 5, 'radius': 10, 'ban_cycles': 0},
 ]
 </pre>
 
@@ -18,7 +17,6 @@
     {'x': 250, 'y': 217, 'name': 'Player2', 'number': 2, 'radius': 10, 'ban_cycles': 0},
     {'x': 167, 'y': -216, 'name': 'Player3', 'number': 3, 'radius': 10, 'ban_cycles': 0},
     {'x': 83, 'y': 217, 'name': 'Player4', 'number': 4, 'radius': 10, 'ban_cycles': 0},
-    {'x': 0, 'y': -216, 'name': 'Player5', 'number': 5, 'radius': 10, 'ban_cycles': 0},
 ]
 </pre>
 
