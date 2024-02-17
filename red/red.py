@@ -1,5 +1,6 @@
 import math
 from roles import goalkeeper, defender, forward
+from utils import utils
 
 # Assuming the existence of utility functions get_direction and get_distance
 # These functions compute the direction and distance between two points
@@ -33,13 +34,13 @@ def play(red_players, blue_players, ball, scoreboard):
                 'direction': get_direction(closest_player,ball),
                 'speed': 8,
             })
-        elif _just_grab(closest_player,blue_players):
+        elif utils._just_grab(closest_player,blue_players):
             decisions.append({
                 'type': 'grab',
                 'player_number': closest_player['number'],
             })
         else:
-            angle = _how_to_grab(closest_player,blue_players)
+            angle = utils._how_to_grab(closest_player,blue_players)
             decisions.append({
                 'type':'grab',
                 'player_number':closest_player['number'],

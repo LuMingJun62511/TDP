@@ -22,6 +22,7 @@ class Player:
         self.radius = radius
         self.img = img or default_img
         self.ban_cycles = ban_cycles
+        self.direction = direction
         self.set_role(role)
     def draw(self, screen):
         pygame_x, pygame_y = utils.convert_coordinate_cartesian_to_pygame(self.x , self.y)
