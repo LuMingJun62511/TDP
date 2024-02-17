@@ -109,30 +109,27 @@ class Runner:
             if utils.SHOULD_PRINT_DECISIONS_ERROR:
                 print(de)
 
-    def perform_decisions(self, red_responses, blue_responses,test_responses):
-        red_decisions, blue_decisions,test_decisions = get_decisions(self, red_responses, blue_responses,test_responses)
-        
-        while len(red_decisions) != 0 and len(blue_decisions) != 0 and len(test_decisions) != 0:
-            r = random.randint(0, 1)
-            if r:
-                j = random.randint(0,1)
-                if j:
-                    decision = test_decisions.pop(0)
+    def perform_decisions(self, red_responses, blue_responses, test_responses):
+        red_decisions, blue_decisions, test_decisions = get_decisions(self, red_responses, blue_responses, test_responses)
+
+        while red_decisions and blue_decisions and test_decisions:
+            # Randomly choose the order of execution
+            order = random.sample([red_decisions, blue_decisions, test_decisions], k=3)
+            for decisions in order:
+                if decisions:
+                    decision = decisions.pop(0)
                     self.handle_decision_perform_with_exception(decision)
-                else:
-                    decision = red_decisions.pop(0)
-                    self.handle_decision_perform_with_exception(decision)
-            else:
-                decision = blue_decisions.pop(0)
-                self.handle_decision_perform_with_exception(decision)
-        if len(red_decisions) == 0:
-            for decision in blue_decisions:
-                self.handle_decision_perform_with_exception(decision)
-        else:
-            for decision in red_decisions:
-                self.handle_decision_perform_with_exception(decision)
+
+        # Execute remaining decisions if any team is empty
+        for red_decision in red_decisions:
+            self.handle_decision_perform_with_exception(red_decision)
+        for blue_decision in blue_decisions:
+            self.handle_decision_perform_with_exception(blue_decision)
+        for test_decision in test_decisions:
+            self.handle_decision_perform_with_exception(test_decision)
 
         self.decrement_ban_cycles()
+
 
     
     def decrement_ban_cycles(self):
@@ -221,6 +218,7 @@ class Runner:
     def _init_players(self):
         red_players = []
         blue_players = []
+        
         for red_player in utils.RED_PLAYERS_INITIAL_VALUES:
             red_players.append(models.Player(
                 color='red',
@@ -231,6 +229,7 @@ class Runner:
                 color='blue',
                 **blue_player,
             ))
+        
         self.red_players = red_players
         self.blue_players = blue_players
         self.players = red_players + blue_players

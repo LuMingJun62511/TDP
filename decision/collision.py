@@ -36,8 +36,8 @@ class Collision(Decision):
                 y = self.player.y + int(18 * math.sin(direction))
                 destination = Point(x,y)
                 self.player.move(destination,direction,10)
-                print(self.player.direction,self.runner.ball.owner.color)
         elif GrabDecision._can_grab(self):
+            self.runner.ball.owner = self.player
             print("截断成功")
         
             
