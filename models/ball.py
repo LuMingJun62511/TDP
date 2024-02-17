@@ -52,7 +52,6 @@ class Ball:
         elif self.owner.direction is not None:
             #self.x = self.owner.x + 12
             #self.y = self.owner.y + 12
-            #print(self.owner.color,"这里获取到的方向",self.owner.direction)
             self.x = self.owner.x + int(10 * math.cos(self.owner.direction))
             self.y = self.owner.y + int(10 * math.cos(self.owner.direction))  #这里为了避免球权无法交换设置了初始位置差，具体数值和方法需要讨论
 
