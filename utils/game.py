@@ -48,7 +48,7 @@ for i in range(1, PLAYER_COUNT):
         'y': y,
         'name': "Player{}".format(i),
         'radius': PLAYER_RADIUS,
-        'role':'forward'
+        'role':'defender'
     })
     BLUE_PLAYERS_INITIAL_VALUES.append({
         'number': i,
