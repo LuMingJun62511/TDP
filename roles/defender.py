@@ -1,5 +1,6 @@
 import pygame as pg
 from utils import get_direction, get_distance
+from .role import Role
 
 class Defender(Role):
     def __init__(self, color, number):
