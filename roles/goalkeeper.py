@@ -3,6 +3,9 @@ from utils import FOOTBALL_PITCH_LENGTH,GOAL_DEPTH,PLAYER_RADIUS
 from .role import Role
 from utils import utils 
 from models import player
+from utils.size import *
+import math
+
 class GoalKeeper(player.Player):
     def __init__(self, x,y,name, number, color,radius,img=None, ban_cycles=0,role=None,direction=0):
         super().__init__(x,y,name, number, color,radius,img, ban_cycles,role,direction)
@@ -56,7 +59,8 @@ class GoalKeeper(player.Player):
                 else:
                     decisions.append(self.serve_ball())
             else:
-                decisions.append(self.adjust_self(players, ball))
+                print("adjust self")
+                decisions.append(self.adjust_self(players, ball, 260, 60))
         else:
             decisions.append(self.stand_still())
         return decisions
@@ -90,11 +94,40 @@ class GoalKeeper(player.Player):
                     closest_player = player
         return closest_player
 
-    def adjust_self(self, players, ball):
-        print('Adjusting position')
-        direction = utils.get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        return {'type': 'move', 'player_number': self.number, 'destination': {'x': ball['x'], 'y': ball['y']}, 'direction': direction, 'speed': 0}
+    def adjust_self(self, players, ball, GOALKEEPER_WIDTH, GOALKEEPER_DEPTH):
+        goal_x, goal_y = -460, 0  # Center of the goal
+        player_x, player_y = self.x, self.y
+        ball_x, ball_y = ball['x'], ball['y']
 
+        # Calculate the angle from the goal to the ball
+        angle_to_ball = math.atan2(ball_y - goal_y, ball_x - goal_x)
+
+        # Ellipse semi-axes lengths
+        a = GOALKEEPER_WIDTH / 2
+        b = GOALKEEPER_DEPTH / 2
+
+        # Find the intersection point on the ellipse boundary in the direction of the ball
+        ellipse_x = goal_x + a * math.cos(angle_to_ball)
+        ellipse_y = goal_y + b * math.sin(angle_to_ball)
+
+        # Check if the goalkeeper is outside the ellipse
+        if ((player_x - goal_x)**2 / a**2 + (player_y - goal_y)**2 / b**2) > 1:
+            # Goalkeeper is outside the ellipse; adjust to boundary point
+            new_x, new_y = ellipse_x, ellipse_y
+        else:
+            # Goalkeeper is inside the ellipse; no adjustment needed
+            new_x, new_y = player_x, player_y
+
+        # Calculate the direction for the move action
+        direction = math.degrees(math.atan2(new_y - player_y, new_x - player_x))
+        return {
+            'type': 'move',
+            'player_number': self.number,
+            'destination': {'x': new_x, 'y': new_y},
+            'direction': direction,
+            'speed': 10  # Speed adjustment for gameplay balance
+        }
+        
     def stand_still(self):
         print('Standing still')
         return {'type': 'move', 'player_number': self.number, 'destination': {'x':  -FOOTBALL_PITCH_LENGTH // 2 + 3 * GOAL_DEPTH, 'y': 0}, 'direction': 0, 'speed': 8}
