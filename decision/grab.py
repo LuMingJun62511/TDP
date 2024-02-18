@@ -27,11 +27,7 @@ class GrabDecision(Decision):
     def __init__(self, runner, player_number, player_color,direction):
         super().__init__(runner, player_number, player_color)
         self.direction = direction
-    def validate(self):
-        super().validate()
-        if self.runner.ball.owner == self.player:
-            raise exception.DecisionException('The player has already hold the ball!') 
-
+    
 
     def perform(self):
         if self._can_grab():

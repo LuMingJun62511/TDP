@@ -66,7 +66,7 @@ class Defender(Player):
                 else:
                     decisions.append(self.move_to_strategic_position(strategic_position))
             elif self.is_closest_to_ball(players,ball): 
-                if self.distance_to_ball(ball) > 10:   
+                if self.distance_to_ball(ball) > 18:   
                     decisions.append(self.intercept_ball(ball))
                 else:
                     decisions.append(self.grab_ball(ball))
@@ -80,9 +80,10 @@ class Defender(Player):
             decisions.append(self.face_ball_direction(ball))
 
         return decisions
+    
     def calculate_strategic_position(self, ball, players):
         # Implement logic based on documentation
-        if ball['x'] >= 0:
+        if not self.own_half(ball):
             # Scenario 1: Ball not on our half
             return self.default_strategic_position()
         else:
@@ -179,7 +180,8 @@ class Defender(Player):
     def is_closest_to_ball(self, players, ball):
         """Check if this defender is the closest to the ball among all defenders."""
         own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        defenders = [players[1],players[2]]
+        #defenders = [players[1],players[2]]
+        defenders = [player for player in players if player['role'] == 'defender']
         for player in defenders:
             if player['number'] != self.number:
                 if get_distance({'x': player['x'], 'y': player['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
