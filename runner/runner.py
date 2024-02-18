@@ -234,9 +234,9 @@ class Runner:
         red_players[3].set_role('forward')
         red_players[4].set_role('forward')
         blue_players[1].set_role('defender')
-        blue_players[2].set_role('forward')
-        blue_players[4].set_role('defender')
+        blue_players[2].set_role('defender')
         blue_players[3].set_role('forward')
+        blue_players[4].set_role('forward')
         self.red_players = red_players
         self.blue_players = blue_players
         self.players = red_players + blue_players

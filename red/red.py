@@ -17,61 +17,7 @@ def get_distance(p1, p2):
     return int(((p1['x'] - p2['x']) ** 2 + (p1['y'] - p2['y']) ** 2) ** 0.5)
 
 def play(red_players, blue_players, ball, scoreboard):
-    decisions = []  
-    if ball['owner_color'] != 'red':
-        closest_player = red_players[1]
-        for player in red_players:
-            if get_distance(player, ball) < get_distance(closest_player, ball):
-                closest_player = player
-        decisions.append({
-            'type':'collision',
-            'player_number': closest_player['number'],
-            'direction': get_direction(closest_player,ball),          
-        })
-        if get_distance(closest_player, ball) >= 10:
-            decisions.append({
-                'type': 'move',
-                'player_number': closest_player['number'],
-                'destination': ball,
-                'direction': get_direction(closest_player,ball),
-                'speed': 8,
-            })
-        elif utils._just_grab(closest_player,blue_players):
-            decisions.append({
-                'type': 'grab',
-                'player_number': closest_player['number'],
-            })
-        else:
-            angle = utils._how_to_grab(closest_player,blue_players)
-            decisions.append({
-                'type':'grab',
-                'player_number':closest_player['number'],
-                'direction':angle,
-            })
-    else:
-        maghsad = {'x': 300, 'y': -100}
-        ball_owner = red_players[ball['owner_number']]
-        distance = get_distance(ball_owner, maghsad)
-        if distance >= 10:
-            #print("现在红方持球")
-            decisions.append({
-                'type': 'move',
-                'player_number': ball_owner['number'],
-                'destination': maghsad,
-                'direction':get_direction(ball_owner,maghsad),
-                'speed': 8,
-            })
-            
-        else:
-            hadaf = {'x': 500, 'y': -60}
-            direction = get_direction(ball_owner, hadaf)
-            decisions.append({
-                'type': 'kick',
-                'player_number': ball_owner['number'],
-                'direction': direction,
-                'power': 60,
-            })
-
+    decisions = []   
     # Loop through each player in the red team
     for player in red_players:
         # Depending on the role, call the appropriate decision-making function

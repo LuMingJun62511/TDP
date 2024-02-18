@@ -29,20 +29,20 @@ class GoalKeeper(player.Player):
             y2 = 150
         else:
             print("错误的守门员属性")
-        return x1 <= x <= x2 and y1 <= y <= y2
+        return x1 < x < x2 and y1 < y < y2
     
     def own_half(self,ball):
         if self.color == 'red':
             x = ball['x']
             x1 = -450
-            x2 = -0
+            x2 = 0
         elif self.color == 'blue':
             x = ball['x']
             x1 = 0
             x2 = 450
         else:
             print("错误的守门员属性")
-        return x1 <= x <= x2
+        return x1 < x < x2
     def kick(self, direction, power):
         # Placeholder for kicking logic. In a real game, this would interact with the ball object.
         print(f"Kicking in direction {direction} with power {power}")
@@ -97,4 +97,9 @@ class GoalKeeper(player.Player):
 
     def stand_still(self):
         print('Standing still')
-        return {'type': 'move', 'player_number': self.number, 'destination': {'x':  -FOOTBALL_PITCH_LENGTH // 2 + 3 * GOAL_DEPTH, 'y': 0}, 'direction': 0, 'speed': 8}
+        if self.color == 'red':
+            return {'type': 'move', 'player_number': self.number, 'destination': {'x':  -FOOTBALL_PITCH_LENGTH // 2 + 3 * GOAL_DEPTH, 'y': 0}, 'direction': 0, 'speed': 8}
+        elif self.color == 'blue':
+            return {'type': 'move', 'player_number': self.number, 'destination': {'x':  FOOTBALL_PITCH_LENGTH // 2 - 3 * GOAL_DEPTH, 'y': 0}, 'direction': 0, 'speed': 8}
+        else:
+            print("错误的守门员属性")
