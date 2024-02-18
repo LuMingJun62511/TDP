@@ -49,7 +49,7 @@ class Defender(Player):
                 print("Defender is in strategic position")
                 decisions.append(self.face_ball_direction(ball))
         print("Defender Decisions: ")
-        pprint.pprint(decisions)
+        # pprint.pprint(decisions)
         return decisions
 
     def calculate_strategic_position(self, ball, players):

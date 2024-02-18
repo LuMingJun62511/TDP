@@ -58,7 +58,7 @@ class GrabDecision(Decision):
         if closest_player is not None:
             self.runner.ball.owner = closest_player
             self.runner.ball.direction = closest_player.direction
-            print("当前持球人是",closest_player.color,closest_player.number)
+            # print("当前持球人是",closest_player.color,closest_player.number)
                 
 
 

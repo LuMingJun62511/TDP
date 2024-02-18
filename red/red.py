@@ -23,11 +23,11 @@ def play(red_players, blue_players, ball, scoreboard):
         for player in red_players:
             if get_distance(player, ball) < get_distance(closest_player, ball):
                 closest_player = player
-        decisions.append({
-            'type':'collision',
-            'player_number': closest_player['number'],
-            'direction': get_direction(closest_player,ball),          
-        })
+        # decisions.append({
+        #     'type':'collision',
+        #     'player_number': closest_player['number'],
+        #     'direction': get_direction(closest_player,ball),          
+        # })
         if get_distance(closest_player, ball) >= 10:
             decisions.append({
                 'type': 'move',

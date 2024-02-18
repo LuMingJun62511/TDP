@@ -12,7 +12,7 @@ class Forward(player.Player):
 
     def move_towards_ball(self, player, ball):
         # Example action to move towards the ball
-        print(f"Forward {self.number} moving towards the ball at {ball['x']}, {ball['y']}")
+        # print(f"Forward {self.number} moving towards the ball at {ball['x']}, {ball['y']}")
         direction = utils.get_direction(player, ball)
         return {
             'type': 'move',
@@ -24,7 +24,7 @@ class Forward(player.Player):
 
     def attempt_to_score(self, player, goal_position):
         # Example action to attempt scoring
-        print(f"Forward {self.number} attempting to score")
+        # print(f"Forward {self.number} attempting to score")
         direction = utils.get_direction(player, goal_position)
         return {
             'type': 'kick',
