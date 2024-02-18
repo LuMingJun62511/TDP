@@ -10,11 +10,14 @@ class Defender(Player):
 
     def decide_action(self, ball, players):
         decisions = []
-        strategic_pos = self.determine_strategic_position(ball, players)
-
-        # Collision detection and ball ownership checks
-        # if self.collision_detection(ball) and not self.owns_ball(ball):
-        #     decisions.append(self.execute_bounce_action(ball))
+        # Define the strategic position based on the ball's location and possession status
+        strategic_position = self.calculate_strategic_position(ball, players)
+        
+        # if self.collision_detection(ball):
+        #     print("Defender is colliding with the ball")
+        #     if not self.owns_ball(ball):
+        #         print("Defender does not own the ball")
+        #         decisions.append(self.execute_bounce_action(ball))
 
         # Check if in strategic position, if not, move there; otherwise, consider passing or intercepting
         '''
@@ -81,8 +84,9 @@ class Defender(Player):
             if ball['owner_color'] != self.color or not self.is_closest_to_ball(players, ball):
                 # Move to a position that covers the farthest goal from the ball
                 return self.calculate_defensive_strategic_position(ball, players)
-        else:
-            return self.default_strategic_position()
+            else:
+                # Scenario when we own the ball or are closest to it
+                return self.calculate_offensive_strategic_position(ball, players)
 
     def default_strategic_position(self):
         # Return a default strategic position based on the side of the field
@@ -160,8 +164,8 @@ class Defender(Player):
         direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         return {'type': 'move', 'player_number': self.number, 'destination': {'x': self.x, 'y': self.y}, 'direction': direction_to_ball, 'speed': 0}
 
-    # New or refined methods based on the strategic positioning requirements
-    def move_to_strategic_position(self, strategic_pos):
+    def move_to_strategic_position(self, strategic_position):
+        strategic_pos = strategic_position
         direction_to_strategic_pos = get_direction({'x': self.x, 'y': self.y}, strategic_pos)
         return {'type': 'move', 'player_number': self.number, 'destination': strategic_pos, 'direction': direction_to_strategic_pos, 'speed': 7}
     
