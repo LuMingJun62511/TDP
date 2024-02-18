@@ -1,6 +1,9 @@
 import math
-from roles import goalkeeper, defender, forward
-
+from roles.goalkeeper import GoalKeeper
+from roles.defender import Defender
+from roles.forward import Forward
+from utils import utils
+from models import Player
 # Assuming the existence of utility functions get_direction and get_distance
 # These functions compute the direction and distance between two points
 
@@ -33,13 +36,13 @@ def play(red_players, blue_players, ball, scoreboard):
                 'direction': get_direction(closest_player,ball),
                 'speed': 8,
             })
-        elif _just_grab(closest_player,blue_players):
+        elif utils._just_grab(closest_player,blue_players):
             decisions.append({
                 'type': 'grab',
                 'player_number': closest_player['number'],
             })
         else:
-            angle = _how_to_grab(closest_player,blue_players)
+            angle = utils._how_to_grab(closest_player,blue_players)
             decisions.append({
                 'type':'grab',
                 'player_number':closest_player['number'],
@@ -71,14 +74,22 @@ def play(red_players, blue_players, ball, scoreboard):
     goal_position = {'x': 500, 'y': 0}  # Example goal position for scoring
     # Loop through each player in the red team
     for player in red_players:
+        own_half = (-450,0)
+        strategic_position = {'x':-200,'y':100}
         # Depending on the role, call the appropriate decision-making function
-        if isinstance(player['role'], goalkeeper.GoalKeeper):
-            print('player is goalkeeper')
-            decisions.extend(player['role'].decide_action(ball, red_players))
-        elif isinstance(player['role'], defender.Defender):
+        #if isinstance(player['role'], goalkeeper.GoalKeeper):
+        if player['role'] == 'goalkeeper':
+            #print('player is goalkeeper')
+            goalkeeper = GoalKeeper(color='red',**player)
+            decisions.extend(goalkeeper.decide_action(ball, red_players))
+        #elif isinstance(player['role'], defender.Defender):
+        elif player['role'] == 'defender':
             # Defenders make decisions based on ball possession and strategic positioning
-            print('player is defender')
-        elif isinstance(player['role'], forward.Forward):
+            #print('player is defender')
+            defender = Defender(color='red',**player)
+            decisions.extend(defender.decide_action(ball, red_players,own_half, strategic_position))
+        #elif isinstance(player['role'], forward.Forward):
+        elif player['role'] == 'forward':
             # Forwards could have their own logic for attacking plays or positioning
             # This could involve moving towards the goal, attempting shots, or positioning for passes
             # Placeholder for forward decision logic

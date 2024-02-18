@@ -1,22 +1,26 @@
 import pygame as pg
 from utils import get_direction, get_distance
 from .role import Role
+import math
+from models import player
 
-class Defender(Role):
-    def __init__(self, color, number):
-        super().__init__(color, number)
-        # Assuming the player's initial position is set here or elsewhere
-        self.x = 0
-        self.y = 0
+class Defender(player.Player):
+    def __init__(self, x,y,name, number, color,radius,img=None, ban_cycles=0,role=None,direction=0):
+        super().__init__(x,y,name, number, color,radius,img, ban_cycles,role,direction)
 
-    def action_decision(self, ball, players, own_half, strategic_position):
+    def decide_action(self, ball, players, own_half, strategic_position):
         decisions = []
+        decisions.append({
+            'type':'collision',
+            'player_number': self.number,
+            'direction': get_direction({'x': ball['x'], 'y': ball['y']}, {'x': self.x, 'y': self.y}), 
+        })
 
         if self.collision_detection(ball):
             if not self.owns_ball(ball):
                 decisions.append(self.execute_bounce_action(ball))
         
-        if own_half(ball):
+        if ball['x'] in own_half:
             if self.owns_ball(ball):
                 pass_decision = self.pass_to_teammates(players, ball)
                 if pass_decision:
@@ -68,14 +72,15 @@ class Defender(Role):
         return {'type': 'move', 'player_number': self.number, 'destination': goal_position, 'direction': direction_to_goal, 'speed': 7}
 
     def in_strategic_position(self, strategic_position, player):
-        return strategic_position(player)
+        #return strategic_position(player)
+        return player in strategic_position
 
     def face_ball_direction(self, ball):
         direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         return {'type': 'move', 'player_number': self.number, 'destination': {'x': self.x, 'y': self.y}, 'direction': direction_to_ball, 'speed': 0}
 
     def move_to_strategic_position(self, strategic_position):
-        strategic_pos = strategic_position()
+        strategic_pos = strategic_position
         direction_to_strategic_pos = get_direction({'x': self.x, 'y': self.y}, strategic_pos)
         return {'type': 'move', 'player_number': self.number, 'destination': strategic_pos, 'direction': direction_to_strategic_pos, 'speed': 7}
 

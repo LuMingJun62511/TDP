@@ -26,7 +26,7 @@ RED_PLAYERS_INITIAL_VALUES.append({
     'x': -FOOTBALL_PITCH_LENGTH // 2 + 3 * GOAL_DEPTH,
     'y': 0,
     'name': "Player{}".format(0),
-    'radius': PLAYER_RADIUS + BALL_RADIUS,
+    'radius': PLAYER_RADIUS,
     'role':'goalkeeper'
 })
 
@@ -35,7 +35,7 @@ BLUE_PLAYERS_INITIAL_VALUES.append({
     'x': FOOTBALL_PITCH_LENGTH // 2 - 3 * GOAL_DEPTH,
     'y': 0,
     'name': "Player{}".format(0),
-    'radius': PLAYER_RADIUS + BALL_RADIUS,
+    'radius': PLAYER_RADIUS,
     'role':'goalkeeper'
 })
 

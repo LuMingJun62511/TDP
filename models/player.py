@@ -4,7 +4,7 @@ import pygame as pg
 import runner
 import utils
 from .point import Point
-from roles import goalkeeper,defender,forward
+#from roles import goalkeeper,defender,forward
 
 class Player:
     def __init__(self, x, y, name, number, color, radius=utils.PLAYER_RADIUS, img=None, ban_cycles=0,role=None,direction=0):
@@ -22,6 +22,7 @@ class Player:
         self.radius = radius
         self.img = img or default_img
         self.ban_cycles = ban_cycles
+        self.direction = direction
         self.set_role(role)
     def draw(self, screen):
         pygame_x, pygame_y = utils.convert_coordinate_cartesian_to_pygame(self.x , self.y)
@@ -42,6 +43,9 @@ class Player:
             self.x - self.radius,
             self.y - self.radius,
         )
+
+    def decide_action(self, ball, players, own_half, strategic_position):
+        pass
 
     def move(self, destination,direction, speed):
         distance = utils.distance(self, destination)
@@ -84,11 +88,14 @@ class Player:
     
     def set_role(self, role_type):
         if role_type == 'goalkeeper':
-            self.role = goalkeeper.GoalKeeper(self.color, self.number)
+            #self.role = goalkeeper.GoalKeeper(self.color, self.number)
+            self.role = 'goalkeeper'
         elif role_type == 'defender':
-            self.role = defender.Defender(self.color, self.number)
+            #self.role = defender.Defender(self.color, self.number)
+            self.role = 'defender'
         elif role_type == 'forward':
-            self.role = forward.Forward(self.color, self.number)
+            #self.role = forward.Forward(self.color, self.number)
+            self.role = 'forward'
         else:
             self.role = None
             print(f"Unmatched role definition for player {self.number}")
