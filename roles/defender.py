@@ -56,6 +56,47 @@ class Defender(Player):
         print("decisions",decisions)
         return decisions
     
+    def get_strategic_position(self, ball, goal_position):
+        """
+        Calculate the strategic position for the defender based on the ball's position,
+        the goal to defend, and the current game state.
+        """
+        # If the ball is in the opponent's half, position the defenders on either side of the field.
+        if ball['x'] >= 0:
+            # Decide which goal to defend based on their current side
+            # and make sure they don't both defend the same side.
+            # For simplicity, here we assume the left side of the field has negative y values.
+            if self.y < 0:  # Defender is on the left side
+                return {'x': -350, 'y': -100}  # Example coordinates for the left strategic point
+            else:
+                return {'x': -350, 'y': 100}  # Example coordinates for the right strategic point
+
+        # If the ball is on our half but the defender's team does not own the ball
+        elif ball['owner_color'] != self.color:
+            # The defender closest to the ball should intercept, while the other moves to a strategic point
+            if not self.is_closest_to_ball(players, ball):
+                return self.calculate_midpoint_between_ball_and_goal(ball, goal_position)
+            else:
+                # Stay put and prepare to intercept
+                return {'x': self.x, 'y': self.y}
+
+        # If the ball is on our half and the defender's team owns the ball
+        else:
+            # The defender without the ball moves to a strategic point while considering the position of the ball carrier
+            return self.calculate_midpoint_between_ball_and_goal(ball, goal_position)
+
+    def calculate_midpoint_between_ball_and_goal(self, ball, goal_position):
+        """
+        Calculate the midpoint of the line connecting the ball and the goalpost to defend.
+        If the midpoint is inside the goal, adjust the x value to leave the goal area.
+        """
+        mid_x = (ball['x'] + goal_position['x']) / 2
+        mid_y = (ball['y'] + goal_position['y']) / 2
+        # Ensure the strategic point is not inside the goal
+        if mid_x < -400:  # Assuming -400 is the x-coordinate of the goal line
+            mid_x = -400
+        return {'x': mid_x, 'y': mid_y}
+    
     def in_strategic_position(self):
         # Check if the defender is in a strategic position
         strategic_x_min, strategic_x_max = -400, 0
