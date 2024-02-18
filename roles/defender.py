@@ -53,7 +53,7 @@ class Defender(Player):
         #pprint.pprint(decisions)
         '''
         if self.own_half(ball):
-            print(ball['x'],ball['y'],"当前球的位置")
+            #print(ball['x'],ball['y'],"当前球的位置")
             if ball['owner_color'] == self.color:
                 if self.owns_ball(ball):
                     pass_decision = self.pass_to_teammates(players, ball)
@@ -66,14 +66,7 @@ class Defender(Player):
                 else:
                     decisions.append(self.move_to_strategic_position(strategic_position))
             elif self.is_closest_to_ball(players,ball): 
-                if self.distance_to_ball(ball) > 18:   
-                    decisions.append(self.intercept_ball(ball))
-                else:
-                    decisions.append(self.grab_ball(ball))
-            #elif not self.in_strategic_position():
-            #    decisions.append(self.move_to_strategic_position(strategic_position))
-            #else:
-            #    decisions.append(self.face_ball_direction(ball))
+                decisions.append(self.intercept_ball(ball,players))
         elif not self.in_strategic_position():
             decisions.append(self.move_to_strategic_position(strategic_position))
         else:
@@ -97,17 +90,17 @@ class Defender(Player):
 
     def default_strategic_position(self):
         # Return a default strategic position based on the side of the field
-        return {'x': -300, 'y': 0}  # Example value
+        return {'x': -300, 'y': 100}  # Example value
 
     def calculate_defensive_strategic_position(self, ball, players):
         # Calculate defensive position based on ball and goal locations
         # Implement logic from documentation
-        return {'x': -350, 'y': 0}  # Placeholder logic
+        return {'x': -350, 'y': 100}  # Placeholder logic
 
     def calculate_offensive_strategic_position(self, ball, players):
         # Calculate offensive position when in possession but not holding the ball
         # Implement logic from documentation
-        return {'x': -200, 'y': 0}  # Placeholder logic
+        return {'x': -200, 'y': 100}  # Placeholder logic
     
     def in_strategic_position(self):
         # Check if the defender is in a strategic position
@@ -160,7 +153,10 @@ class Defender(Player):
             return None
 
     def move_towards_goal(self, ball):
-        goal_position = {'x': 500, 'y': 0}
+        if self.color == 'red':
+            goal_position = {'x': -250, 'y': 0}
+        else:
+            goal_position = {'x': 250, 'y': 0}
         direction_to_goal = get_direction({'x': self.x, 'y': self.y}, goal_position)
         return {'type': 'move', 'player_number': self.number, 'destination': goal_position, 'direction': direction_to_goal, 'speed': 7}
 
@@ -188,16 +184,26 @@ class Defender(Player):
                     return False
         return True
 
-    def intercept_ball(self, ball):
+    def intercept_ball(self, ball,players):
         """Move towards the ball to intercept it."""
         direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        return {
-            'type': 'move',
-            'player_number': self.number,
-            'destination': {'x': ball['x'], 'y': ball['y']},
-            'direction': direction_to_ball,
-            'speed': 10  # This speed can be adjusted based on gameplay needs
-        }
+        distance_to_ball = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+        if distance_to_ball > 18:
+            if ball['owner_color'] == self.color:
+                speed = 5
+                destination = self.calculate_strategic_position(ball,players)
+            else:
+                speed = 10
+                destination = {'x': ball['x'], 'y': ball['y']}
+            return {
+                'type': 'move',
+                'player_number': self.number,
+                'destination': destination,
+                'direction': direction_to_ball,
+                'speed': speed  # This speed can be adjusted based on gameplay needs
+            }
+        else:
+            return self.grab_ball(ball)
     
     def grab_ball(self,ball):
         direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})

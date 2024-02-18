@@ -7,16 +7,17 @@ class Forward(player.Player):
     def __init__(self, x,y,name, number, color,radius,img=None, ban_cycles=0,role=None,direction=0):
         super().__init__(x,y,name, number, color,radius,img, ban_cycles,role,direction)
 
-    def decide_action(self, ball, players):
+    def decide_action(self, ball, players,opponent_players):
         decisions = []
         strategic_position = self.calculate_strategic_position(ball, players)
         if not self.own_half(ball):
             if self.is_closest_to_ball(players, ball):
                 if self.owns_ball(ball):
-                    pass_decision = self.pass_to_teammates(players, ball)
+                    #pass_decision = self.pass_to_teammates(players, ball)
+                    pass_decision = self.find_best_receiver(players,opponent_players)
                     decisions.append(pass_decision if pass_decision else self.move_towards_goal(ball))
                 else:
-                    decisions.append(self.intercept_ball(ball))
+                    decisions.append(self.intercept_ball(ball,players))
             elif self.in_strategic_position():
                 decisions.append(self.face_ball_direction(ball))
             else:
@@ -24,7 +25,7 @@ class Forward(player.Player):
         elif self.in_strategic_position():
             decisions.append(self.face_ball_direction(ball))
         elif ball['owner_color'] != self.color:
-            decisions.append(self.intercept_ball(ball))
+            decisions.append(self.intercept_ball(ball,players))
         else:
             decisions.append(self.attempt_to_score(ball))
          
@@ -46,9 +47,9 @@ class Forward(player.Player):
         # Example action to attempt scoring
         print(f"Forward {self.number} attempting to score")
         if self.color == 'red':
-            goal_position = {'x': 450, 'y': 0}
+            goal_position = {'x': 350, 'y': 0}
         else:
-            goal_position = {'x': -450, 'y': 0}
+            goal_position = {'x': -350, 'y': 0}
         direction = get_direction({'x': self.x, 'y': self.y}, goal_position)
         if self.in_shoot_area():
             return {
@@ -61,7 +62,9 @@ class Forward(player.Player):
             return self.move_towards_goal(ball)
     
     def in_shoot_area(self):
-        return True  #需要定义射门区域
+        if (self.color == 'red' and self.x > 300) or (self.color == 'blue' and self.x < -300):
+            return True  #需要定义射门区域
+        return False
 
     def calculate_strategic_position(self, ball, players):
         if not self.own_half(ball):
@@ -77,17 +80,17 @@ class Forward(player.Player):
 
     def default_strategic_position(self):
         # Return a default strategic position based on the side of the field
-        return {'x': 300, 'y': 0}  # Example value
+        return {'x': 300, 'y': 100}  # Example value
 
     def calculate_defensive_strategic_position(self, ball, players):
         # Calculate defensive position based on ball and goal locations
         # Implement logic from documentation
-        return {'x': 350, 'y': 0}  # Placeholder logic
+        return {'x': 350, 'y': 100}  # Placeholder logic
 
     def calculate_offensive_strategic_position(self, ball, players):
         # Calculate offensive position when in possession but not holding the ball
         # Implement logic from documentation
-        return {'x': 200, 'y': 0}  # Placeholder logic  
+        return {'x': 200, 'y': 100}  # Placeholder logic  
     
     def in_strategic_position(self):
         # Check if the defender is in a strategic position
@@ -131,11 +134,37 @@ class Forward(player.Player):
         else:
             return None
         
+    def find_best_receiver(self,players, opponent_players):
+        best_receiver = None
+        min_opponent_distance = float('inf')
+        min_goal_distance = float('inf')
+
+        for player in players:
+            if player['role'] != 'goalkeeper':
+                opponent_distance = min([get_distance(player, opponent) for opponent in opponent_players])
+                goal_distance = get_distance(player, {'x': 450 if self.color == 'red' else -450, 'y': 0})
+                if opponent_distance > min_opponent_distance or (opponent_distance == min_opponent_distance and goal_distance < min_goal_distance):
+                    best_receiver = player
+                    min_opponent_distance = opponent_distance
+                    min_goal_distance = goal_distance
+
+        if best_receiver:
+            direction_to_receiver = get_direction({'x': self.x, 'y': self.y}, {'x': best_receiver['x'], 'y': best_receiver['y']})
+            return {
+                'type': 'kick',
+                'player_number': self.number,
+                'direction': direction_to_receiver,
+                'power': 50  # Adjust power as necessary
+            }
+        else:
+            return None
+
+    
     def move_towards_goal(self, ball):
         if self.color == 'red':
-            goal_position = {'x': 450, 'y': 0}
+            goal_position = {'x': 350, 'y': 0}
         else:
-            goal_position = {'x': -450, 'y': 0}
+            goal_position = {'x': -350, 'y': 0}
         direction_to_goal = get_direction({'x': self.x, 'y': self.y}, goal_position)
         return {'type': 'move', 'player_number': self.number, 'destination': goal_position, 'direction': direction_to_goal, 'speed': 7}
 
@@ -170,17 +199,23 @@ class Forward(player.Player):
                     return False
         return True
     
-    def intercept_ball(self, ball):
+    def intercept_ball(self, ball,players):
         """Move towards the ball to intercept it."""
         direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         distance_to_ball = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         if distance_to_ball > 18:
+            if ball['owner_color'] == self.color:
+                speed = 5
+                destination = self.calculate_strategic_position(ball,players)
+            else:
+                speed = 10
+                destination = {'x': ball['x'], 'y': ball['y']}
             return {
                 'type': 'move',
                 'player_number': self.number,
-                'destination': {'x': ball['x'], 'y': ball['y']},
+                'destination': destination,
                 'direction': direction_to_ball,
-                'speed': 10  # This speed can be adjusted based on gameplay needs
+                'speed': speed  # This speed can be adjusted based on gameplay needs
             }
         else:
             return self.grab_ball(ball)

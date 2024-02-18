@@ -36,8 +36,7 @@ def play(red_players, blue_players, ball, scoreboard):
             # This could involve moving towards the goal, attempting shots, or positioning for passes
             # Placeholder for forward decision logic
             forwrad = Forward(color='red',**player)
-            decisions.extend(forwrad.decide_action(ball, red_players))           
-            pass
+            decisions.extend(forwrad.decide_action(ball, red_players,blue_players))           
         else:
             print(f"Unrecognized player role for player {player['number']}")
 
