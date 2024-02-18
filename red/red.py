@@ -71,7 +71,7 @@ def play(red_players, blue_players, ball, scoreboard):
                 'direction': direction,
                 'power': 60,
             })
-    goal_position = {'x': 500, 'y': 0}  # Example goal position for scoring
+
     # Loop through each player in the red team
     for player in red_players:
         # Depending on the role, call the appropriate decision-making function
@@ -84,6 +84,7 @@ def play(red_players, blue_players, ball, scoreboard):
             #print('player is defender')
             defender = Defender(color='red',**player)
             decisions.extend(defender.decide_action(ball, red_players))
+    
         elif player['role'] == 'forward':
             # Forwards could have their own logic for attacking plays or positioning
             # This could involve moving towards the goal, attempting shots, or positioning for passes

@@ -59,23 +59,6 @@ class GoalKeeper(player.Player):
                 decisions.append(self.adjust_self(players, ball))
         else:
             decisions.append(self.stand_still())
-        '''
-        if utils.get_distance({'x':self.x,'y':self.y},ball) >= 10:
-            decisions.append(self.serve_ball())
-        elif ball['x'] < 0:
-            if ball['x'] < -300:
-                print('ball', ball)
-                print(self.x,self.y)
-                print(utils.get_distance({'x':self.x,'y':self.y},ball))
-                if ball['owner_number'] == self.number:
-                    decisions.append(self.pass_to_teammates(players, ball))
-                else:
-                    decisions.append(self.chase_ball(ball))
-            else:
-                decisions.append(self.adjust_self(players, ball))
-        else:
-            decisions.append(self.stand_still())
-        '''
         return decisions
 
     def serve_ball(self):
