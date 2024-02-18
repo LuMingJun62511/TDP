@@ -71,24 +71,20 @@ def play(red_players, blue_players, ball, scoreboard):
                 'direction': direction,
                 'power': 60,
             })
-    goal_position = {'x': 500, 'y': 0}  # Example goal position for scoring
+
     # Loop through each player in the red team
     for player in red_players:
-        own_half = (-450,0)
-        strategic_position = {'x':-200,'y':100}
         # Depending on the role, call the appropriate decision-making function
-        #if isinstance(player['role'], goalkeeper.GoalKeeper):
         if player['role'] == 'goalkeeper':
             #print('player is goalkeeper')
             goalkeeper = GoalKeeper(color='red',**player)
             decisions.extend(goalkeeper.decide_action(ball, red_players))
-        #elif isinstance(player['role'], defender.Defender):
         elif player['role'] == 'defender':
             # Defenders make decisions based on ball possession and strategic positioning
             #print('player is defender')
             defender = Defender(color='red',**player)
-            # decisions.extend(defender.decide_action(ball, red_players,own_half, strategic_position))
-        #elif isinstance(player['role'], forward.Forward):
+            decisions.extend(defender.decide_action(ball, red_players))
+    
         elif player['role'] == 'forward':
             # Forwards could have their own logic for attacking plays or positioning
             # This could involve moving towards the goal, attempting shots, or positioning for passes
