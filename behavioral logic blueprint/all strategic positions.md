@@ -1,11 +1,11 @@
 ## Goalkeeper Strategic Points
-![alt text](image.png)
+![alt text](goalkeeper_adjust_self.png)
 The goalkeeper moves along an elliptical trajectory, where the major axis corresponds to the length of the goal and the minor axis is half the length of the goal area. The goalkeeper endeavors to maintain a position that is centrally aligned with the line connecting the ball to the goal. This strategic position allows the goalkeeper to cover the maximum possible area, enhancing its ability to defend the goal effectively.
 
 ## Defender Strategic Points
 The main purpose is to defend as comprehensively as possible.
 The defination of a strategic point is the midpoint of the line connecting the ball and goalpost to defend. A basic limit is when the strategic point is inside the goal, the x value of the strategic point is modified to leave the goal area.
-![alt text](image-1.png)
+![alt text](defender_strategic_point.png)
 But, for the ball's position is easy to determined, but the goalpost to defend is not so easy to determined, according to the decision tree, there are three major scenarios:
 ### (1) The ball is not in our half 
 Defenders should try to cover both side. In cases where both defenders are on the same side and one taking a longer route around, they should reset to their positions. If defenders are on opposite sides, they choose the nearest goalpost to defend; if on the same side, For instance, if both defenders are on the same side of the pitch and closer to goalpost 1, they should compare their distances to goalpost 2. The one closer to goalpost 2 then moves to defend it, while the other focuses on defending goalpost.
@@ -22,7 +22,7 @@ This defender will cover the goal post that is farther away from the other defen
 
 ## Striker Strategic Points
 For strikers, to maximize the threat, it's crucial that the two strikers do not position themselves too close to each other. The ideal scenario is depicted as follows: Player 1 draws the attention of the goalkeeper, thereby creating an opportunity to pass the ball to Player 2. This strategic move gives Player 2 a significant chance to launch an effective attack.
-![alt text](image-2.png)
+![alt text](striker_strategic_point.png)
 The strategic positioning for attackers is defined as follows, with the y-coordinate of the strategic position extending from the penalty area line. The choice of y-coordinate is binary, similar to the above-mentioned scenario: if the two forwards are on opposite sides, they choose the one closer to themselves; if on the same side, they compare both distances to the far ends and choose the closer striker to that side. Note that while this definition prevents players from entering the goal area, the x-coordinate is still regulated to ensure it does not invade the goal area for reasons such as maintaining sufficient maneuvering space. 
 The selection of the x-coordinate is discussed through several scenarios:
 ### (1) Ball is not in attacking area
