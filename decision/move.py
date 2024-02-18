@@ -19,24 +19,6 @@ class MoveDecision(Decision):
         if not -size.FOOTBALL_PITCH_LENGTH // 2 < self.destination.x < size.FOOTBALL_PITCH_LENGTH // 2 or \
                 not -size.FOOTBALL_PITCH_WIDTH // 2 < self.destination.y < size.FOOTBALL_PITCH_WIDTH // 2:
             raise exception.DecisionException('Cannot move out of screen')
-    
-
-    # def perform(self): # 原版
-    #     distance = utils.distance(self.player, self.destination)
-    #     alpha = math.atan2((self.destination.y - self.player.y), (self.destination.x - self.player.x))
-        
-    #     if distance < self.speed: #一步到位
-    #         self.player.x = int(self.destination.x)
-    #         self.player.y = int(self.destination.y)
-    #         self.player.direction = alpha
-        
-    #     else: #正常走一tick,pfa就是修改了speed和alpha,
-    #         alpha = math.atan2((self.destination.y - self.player.y), (self.destination.x - self.player.x))
-    #         #alpha = direction
-    #         self.player.x += int(self.speed * math.cos(alpha))
-    #         self.player.y += int(self.speed * math.sin(alpha))
-    #         self.player.direction = alpha
-    #         self.player.speed = self.speed
         
     def perform(self):
         #self.player.move(self.destination,self.direction, self.speed) #计算与目的地的距离与角度差
@@ -52,19 +34,31 @@ class MoveDecision(Decision):
             self.player.speed = movement
      
             
-    def get_enemy_team_position(self):
-        # 根据当前球员的颜色决定敌方球队
-        enemy_team = self.runner.blue_players if self.player.color == 'red' else self.runner.red_players
-        enemy_team_position = [(player.x, player.y) for player in enemy_team]
-        return enemy_team_position
+    def get_enemy_positions(self):
+        # 根据当前球员的颜色确定敌方球队
+        enemy_members = self.runner.blue_players if self.player.color == 'red' else self.runner.red_players
+        enemy_positions = [(player.x, player.y) for player in enemy_members]
+        return enemy_positions
     
-    # 其实，该函数可以进一步改进，
-    # 第一，由于在身后的敌人不能直接断我，所以我可以忽视他，不然就成了被他撵着跑
-    # 第二，队友也有斥力，不过判断范围小些，这样就达成了防重叠，现版本只有避敌
+
+
+    def get_teammates_positions(self):
+        # 获取队友列表，并排除当前玩家
+        if self.player.color == 'red':
+            teammates = [player for player in self.runner.red_players if player != self.player]
+        else:
+            teammates = [player for player in self.runner.blue_players if player != self.player]
+        teammates_positions = [(player.x, player.y) for player in teammates]
+        return teammates_positions
+    
+    
     def pfa(self):
-        enemy_team_position = self.get_enemy_team_position()
+        enemy_team_position = self.get_enemy_positions()
+        teammate_position = self.get_teammates_positions()
         attract_force = self.calculate_attract_force()
-        repulse_forces = [self.calculate_repulse_force(enemy_pos_tuple) for enemy_pos_tuple in enemy_team_position]
+        repulse_forces_enemy = [self.calculate_repulse_force(enemy_pos_tuple,50,3) for enemy_pos_tuple in enemy_team_position]
+        repulse_forces_teammates = [self.calculate_repulse_force(teammates_pos_tuple,30,1.2) for teammates_pos_tuple in teammate_position]
+        repulse_forces = repulse_forces_enemy + repulse_forces_teammates
         total_force = self.combine_forces(attract_force, repulse_forces)
         alpha = math.atan2(total_force[1], total_force[0])# 计算总力的方向
         speed = min(self.speed, math.sqrt(total_force[0]**2 + total_force[1]**2))# 计算移动距离，这里假设speed是一个基于力大小的动态值
@@ -76,22 +70,20 @@ class MoveDecision(Decision):
         direction_to_destination = math.atan2((self.destination.y - self.player.y), (self.destination.x - self.player.x))
         attract_force = (math.cos(direction_to_destination) * distance_to_destination, math.sin(direction_to_destination) * distance_to_destination)
         return attract_force
-
-    def calculate_repulse_force(self, enemy_pos_tuple):
-        enemy_pos = Point(enemy_pos_tuple[0], enemy_pos_tuple[1])
+    
+    def calculate_repulse_force(self, others_pos_tuple,repulse_force_intensity_factor,repulse_distance_threshold_factor):
+        # repulse_force_intensity_factor 是斥力强度，敌人设为40，队友设为30
+        others_pos = Point(others_pos_tuple[0], others_pos_tuple[1])
         # 计算当前球员与敌方球员之间的距离
-        distance_to_enemy = utils.distance(self.player, enemy_pos)
-        # 计算指向敌方球员的方向
-        direction_to_enemy = math.atan2((enemy_pos.y - self.player.y), (enemy_pos.x - self.player.x))
+        distance_to_others = utils.distance(self.player, others_pos)
+        # 计算指向其他球员的方向
+        direction_to_others = math.atan2((others_pos.y - self.player.y), (others_pos.x - self.player.x))
         # 根据距离计算排斥力的强度（这里需要您根据实际情况调整计算方式）
-        repulse_strength = max(0, 1 - (distance_to_enemy / self.player.radius*10))  # 假设有一个排斥距离阈值属性,self.repulse_distance_threshold,暂定为self.player.radius*1.2
-        repulse_strength = max(0, 1 - (distance_to_enemy / self.player.repulse_distance_threshold))  
-
-        if repulse_strength != 0:
-            print(self.player.name,'受到斥力',repulse_strength)
-        
-        repulse_force = (-math.cos(direction_to_enemy) * repulse_strength, -math.sin(direction_to_enemy) * repulse_strength)
-        return repulse_force
+        print('看看有没有斥力',1 - (distance_to_others / self.player.radius * 2))
+        repulse_strength = repulse_force_intensity_factor * max(0, 1 - (distance_to_others / (self.player.radius * repulse_distance_threshold_factor)))  
+        # repulse_distance_threshold比较大，则括号内越小，则一减它越大，也就是感应范围越大，所以，enemy设为2，teammates设为1.2
+        repulse_forces = (-math.cos(direction_to_others) * repulse_strength, -math.sin(direction_to_others) * repulse_strength)
+        return repulse_forces
 
     def combine_forces(self, attract_force, repulse_forces):
         # 合成吸引力和排斥力

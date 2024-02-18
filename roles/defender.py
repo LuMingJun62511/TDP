@@ -21,34 +21,34 @@ class Defender(Player):
 
         # Check if in strategic position, if not, move there; otherwise, consider passing or intercepting
         if not self.in_strategic_position():
-            print("Defender is not in strategic position")
+            # print("Defender is not in strategic position")
             decisions.append(self.move_to_strategic_position(strategic_position))
         else:
             if ball['x'] < 0:
-                print("Defender is in strategic position")
+                # print("Defender is in strategic position")
                 if ball['owner_color'] == self.color:
                     if self.owns_ball(ball):
-                        print("Defender owns the ball")
+                        # print("Defender owns the ball")
                         pass_decision = self.pass_to_teammates(players, ball)
                         if pass_decision:
-                            print("Defender is passing the ball")
+                            # print("Defender is passing the ball")
                             decisions.append(pass_decision)
                         else:
-                            print("Defender is moving towards goal")
+                            # print("Defender is moving towards goal")
                             decisions.append(self.move_towards_goal(ball))
                     else:
-                        print("Defender does not own the ball")
+                        # print("Defender does not own the ball")
                         decisions.append(self.face_ball_direction(ball))
                 else:
-                    print("Defender is not in possession")
+                    # print("Defender is not in possession")
                     if self.is_closest_to_ball(players, ball):
                         decisions.append(self.intercept_ball(ball))
                     else:
                         decisions.append(self.face_ball_direction(ball))
             else:
-                print("Defender is in strategic position")
+                # print("Defender is in strategic position")
                 decisions.append(self.face_ball_direction(ball))
-        print("Defender Decisions: ")
+        # print("Defender Decisions: ")
         # pprint.pprint(decisions)
         return decisions
 

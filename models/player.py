@@ -98,7 +98,7 @@ class Player:
             self.role = 'forward'
         else:
             self.role = None
-            print(f"Unmatched role definition for player {self.number}")
+            # print(f"Unmatched role definition for player {self.number}")
             
     @property
     def info(self):

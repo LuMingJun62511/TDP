@@ -75,7 +75,7 @@ class Ball:
     def info_reversed(self):
         owner_color = None
         if self.owner is not None:
-            print("change color")
+            # print("change color")
             if self.owner.color == 'blue':
                 owner_color = 'red'
             else:
