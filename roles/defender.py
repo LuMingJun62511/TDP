@@ -10,82 +10,57 @@ class Defender(Player):
 
     def decide_action(self, ball, players):
         decisions = []
-        # Define the strategic position based on the ball's location and possession status
-        strategic_position = self.calculate_strategic_position(ball, players)
-        
-        # if self.collision_detection(ball):
-        #     print("Defender is colliding with the ball")
-        #     if not self.owns_ball(ball):
-        #         print("Defender does not own the ball")
-        #         decisions.append(self.execute_bounce_action(ball))
+        strategic_pos = self.determine_strategic_position(ball, players)
 
-        # Check if in strategic position, if not, move there; otherwise, consider passing or intercepting
-        if not self.in_strategic_position():
-            print("Defender is not in strategic position")
-            decisions.append(self.move_to_strategic_position(strategic_position))
-        else:
-            if ball['x'] < 0:
-                print("Defender is in strategic position")
-                if ball['owner_color'] == self.color:
-                    if self.owns_ball(ball):
-                        print("Defender owns the ball")
-                        pass_decision = self.pass_to_teammates(players, ball)
-                        if pass_decision:
-                            print("Defender is passing the ball")
-                            decisions.append(pass_decision)
-                        else:
-                            print("Defender is moving towards goal")
-                            decisions.append(self.move_towards_goal(ball))
-                    else:
-                        print("Defender does not own the ball")
-                        decisions.append(self.face_ball_direction(ball))
+        # Collision detection and ball ownership checks
+        # if self.collision_detection(ball) and not self.owns_ball(ball):
+        #     decisions.append(self.execute_bounce_action(ball))
+
+        # Ball on our half
+        if ball['x'] < 0:
+            if self.color == ball['owner_color']:  # Our team has the ball
+                if self.owns_ball(ball):
+                    decisions.append(self.pass_to_teammates(players, ball))
                 else:
-                    print("Defender is not in possession")
-                    if self.is_closest_to_ball(players, ball):
-                        decisions.append(self.intercept_ball(ball))
-                    else:
-                        decisions.append(self.face_ball_direction(ball))
-            else:
-                print("Defender is in strategic position")
-                decisions.append(self.face_ball_direction(ball))
-        print("Defender Decisions: ")
-        pprint.pprint(decisions)
+                    decisions.append(self.move_to_strategic_position(strategic_pos))
+            else:  # Opponent team has the ball
+                if self.is_closest_to_ball(players, ball):
+                    decisions.append(self.intercept_ball(ball))
+                else:
+                    decisions.append(self.move_to_strategic_position(strategic_pos))
+        else:
+            decisions.append(self.move_to_strategic_position(strategic_pos))
+
         return decisions
 
-    def calculate_strategic_position(self, ball, players):
-        # Implement logic based on documentation
-        if ball['x'] >= 0:
-            # Scenario 1: Ball not on our half
-            return self.default_strategic_position()
-        else:
-            # Scenario 2 and 3: Ball on our half
-            if ball['owner_color'] != self.color or not self.is_closest_to_ball(players, ball):
-                # Move to a position that covers the farthest goal from the ball
-                return self.calculate_defensive_strategic_position(ball, players)
-            else:
-                # Scenario when we own the ball or are closest to it
+    def determine_strategic_position(self, ball, players):
+        if ball['x'] < 0:
+            if self.color == ball['owner_color']:
                 return self.calculate_offensive_strategic_position(ball, players)
+            else:
+                return self.calculate_defensive_strategic_position(ball, players)
+        else:
+            return self.default_strategic_position()
 
     def default_strategic_position(self):
-        # Return a default strategic position based on the side of the field
-        return {'x': -300, 'y': 0}  # Example value
+        return {'x': -200, 'y': 0} if self.color == 'red' else {'x': 200, 'y': 0}
 
     def calculate_defensive_strategic_position(self, ball, players):
-        # Calculate defensive position based on ball and goal locations
-        # Implement logic from documentation
-        return {'x': -350, 'y': 0}  # Placeholder logic
+        # Based on the midpoint between the ball and the most threatened goalpost
+        goal_x = -500 if self.color == 'red' else 500
+        goal_y = 0
+        midpoint_x = (ball['x'] + goal_x) / 2
+        # Ensure the defender doesn't position inside the goal area
+        if self.color == 'red':
+            midpoint_x = max(midpoint_x, -400)  # Adjust based on field dimensions
+        else:
+            midpoint_x = min(midpoint_x, 400)
+        return {'x': midpoint_x, 'y': goal_y}
 
     def calculate_offensive_strategic_position(self, ball, players):
-        # Calculate offensive position when in possession but not holding the ball
-        # Implement logic from documentation
-        return {'x': -200, 'y': 0}  # Placeholder logic
+        # Determine position based on attacking opportunities
+        return {'x': 100, 'y': 0} if self.color == 'red' else {'x': -100, 'y': 0}
     
-    def in_strategic_position(self):
-        # Check if the defender is in a strategic position
-        strategic_x_min, strategic_x_max = -400, 0
-        strategic_y_min, strategic_y_max = -100, 100
-        return strategic_x_min <= self.x <= strategic_x_max and strategic_y_min <= self.y <= strategic_y_max
-
     def move_to_strategic_position(self, strategic_pos):
         # Move to a predefined strategic position
         direction_to_strategic_pos = get_direction({'x': self.x, 'y': self.y}, strategic_pos)
@@ -139,11 +114,17 @@ class Defender(Player):
         direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         return {'type': 'move', 'player_number': self.number, 'destination': {'x': self.x, 'y': self.y}, 'direction': direction_to_ball, 'speed': 0}
 
-    def move_to_strategic_position(self, strategic_position):
-        strategic_pos = strategic_position
+    # New or refined methods based on the strategic positioning requirements
+    def move_to_strategic_position(self, strategic_pos):
         direction_to_strategic_pos = get_direction({'x': self.x, 'y': self.y}, strategic_pos)
-        return {'type': 'move', 'player_number': self.number, 'destination': strategic_pos, 'direction': direction_to_strategic_pos, 'speed': 7}
-        
+        return {
+            'type': 'move',
+            'player_number': self.number,
+            'destination': strategic_pos,
+            'direction': direction_to_strategic_pos,
+            'speed': 7
+        }
+    
     def is_closest_to_ball(self, players, ball):
         """Check if this defender is the closest to the ball among all players."""
         own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
