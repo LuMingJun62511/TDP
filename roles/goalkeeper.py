@@ -62,16 +62,13 @@ class GoalKeeper(player.Player):
         return decisions
 
     def serve_ball(self):
-        print('Picking up the ball')
         return {'type': 'grab', 'player_number': self.number}
 
     def chase_ball(self, ball):
-        print('Chasing the ball')
         direction = utils.get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         return {'type': 'move', 'player_number': self.number, 'destination': {'x': ball['x'], 'y': ball['y']}, 'direction': direction, 'speed': 10}
 
     def pass_to_teammates(self, players, ball):
-        print('Passing to teammates')
         teammate = self.find_closest_teammate(players)
         if teammate:
             direction = utils.get_direction({'x': self.x, 'y': self.y}, {'x': teammate['x'], 'y': teammate['y']})
@@ -91,10 +88,8 @@ class GoalKeeper(player.Player):
         return closest_player
 
     def adjust_self(self, players, ball):
-        print('Adjusting position')
         direction = utils.get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         return {'type': 'move', 'player_number': self.number, 'destination': {'x': ball['x'], 'y': ball['y']}, 'direction': direction, 'speed': 0}
 
     def stand_still(self):
-        print('Standing still')
         return {'type': 'move', 'player_number': self.number, 'destination': {'x':  -FOOTBALL_PITCH_LENGTH // 2 + 3 * GOAL_DEPTH, 'y': 0}, 'direction': 0, 'speed': 8}
