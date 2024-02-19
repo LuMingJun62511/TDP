@@ -53,15 +53,14 @@ class Defender(Player):
         #pprint.pprint(decisions)
         '''
         if self.own_half(ball):
-            #print(ball['x'],ball['y'],"当前球的位置")
             if ball['owner_color'] == self.color:
                 if self.owns_ball(ball):
                     pass_decision = self.pass_to_teammates(players, ball)
                     if pass_decision:
-                        #print("Defender is passing the ball")
+                        print("Defender is passing the ball")
                         decisions.append(pass_decision)
                     else:
-                        #print("Defender is moving towards goal")
+                        print("Defender is moving towards goal")
                         decisions.append(self.move_towards_goal(ball))
                 else:
                     decisions.append(self.move_to_strategic_position(strategic_position))
@@ -101,6 +100,7 @@ class Defender(Player):
         # Calculate offensive position when in possession but not holding the ball
         # Implement logic from documentation
         return {'x': -200, 'y': 100}  # Placeholder logic
+    
     
     def in_strategic_position(self):
         # Check if the defender is in a strategic position
@@ -188,7 +188,7 @@ class Defender(Player):
         """Move towards the ball to intercept it."""
         direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         distance_to_ball = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        if distance_to_ball > 18:
+        if distance_to_ball > 10:
             if ball['owner_color'] == self.color:
                 speed = 5
                 destination = self.calculate_strategic_position(ball,players)

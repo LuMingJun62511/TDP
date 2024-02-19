@@ -1,8 +1,8 @@
 import pygame as pg
 from utils import FOOTBALL_PITCH_LENGTH,GOAL_DEPTH,PLAYER_RADIUS
-from .role import Role
-from utils import utils 
+from utils import get_direction, get_distance
 from models import player
+import utils
 from utils.size import *
 import math
 
@@ -57,20 +57,42 @@ class GoalKeeper(player.Player):
                 if ball['owner_number'] == self.number:
                     decisions.append(self.pass_to_teammates(players, ball))
                 else:
-                    decisions.append(self.serve_ball())
+                    decisions.append(self.intercept_ball(ball,players))
             else:
-                print("adjust self")
+                #print("adjust self")
                 decisions.append(self.adjust_self(players, ball, 260, 60))
         else:
             decisions.append(self.stand_still())
         return decisions
-
-    def serve_ball(self):
-        return {'type': 'grab', 'player_number': self.number}
-
-    def chase_ball(self, ball):
-        direction = utils.get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        return {'type': 'move', 'player_number': self.number, 'destination': {'x': ball['x'], 'y': ball['y']}, 'direction': direction, 'speed': 10}
+    
+    def intercept_ball(self, ball,players):
+        """Move towards the ball to intercept it."""
+        direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+        distance_to_ball = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+        if distance_to_ball > 10:
+            if ball['owner_color'] == self.color:
+                speed = 5
+                destination = self.calculate_strategic_position(ball,players)
+            else:
+                speed = 10
+                destination = {'x': ball['x'], 'y': ball['y']}
+            return {
+                'type': 'move',
+                'player_number': self.number,
+                'destination': destination,
+                'direction': direction_to_ball,
+                'speed': speed  # This speed can be adjusted based on gameplay needs
+            }
+        else:
+            return self.grab_ball(ball)
+    
+    def grab_ball(self,ball):
+        direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+        return {
+            'type': 'grab',
+            'player_number': self.number,
+            'direction': direction_to_ball,
+        }
 
     def pass_to_teammates(self, players, ball):
         teammate = self.find_closest_teammate(players)
@@ -92,7 +114,8 @@ class GoalKeeper(player.Player):
         return closest_player
 
     def adjust_self(self, players, ball, GOALKEEPER_WIDTH, GOALKEEPER_DEPTH):
-        goal_x, goal_y = -460, 0  # Center of the goal
+        goal_x = -460 if self.color == 'red' else 460
+        goal_y = 0  # Center of the goal
         player_x, player_y = self.x, self.y
         ball_x, ball_y = ball['x'], ball['y']
 
@@ -126,7 +149,6 @@ class GoalKeeper(player.Player):
         }
         
     def stand_still(self):
-        print('Standing still')
         if self.color == 'red':
             return {'type': 'move', 'player_number': self.number, 'destination': {'x':  -FOOTBALL_PITCH_LENGTH // 2 + 3 * GOAL_DEPTH, 'y': 0}, 'direction': 0, 'speed': 8}
         elif self.color == 'blue':

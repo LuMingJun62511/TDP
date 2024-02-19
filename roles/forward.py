@@ -1,13 +1,17 @@
 # forward.py
 from utils import get_direction, get_distance
-from .role import Role
+
 from models import player
+import heapq
 
 class Forward(player.Player):
-    def __init__(self, x,y,name, number, color,radius,img=None, ban_cycles=0,role=None,direction=0):
+    
+    def __init__(self, x,y,name, number, color,radius,img=None, ban_cycles=0,role=None,direction=0,field_map=None):
         super().__init__(x,y,name, number, color,radius,img, ban_cycles,role,direction)
+        self.field_map = field_map
 
-    def decide_action(self, ball, players,opponent_players):
+    def decide_action(self, ball, players,opponent_players,field_map):
+        self.field_map = field_map
         decisions = []
         strategic_position = self.calculate_strategic_position(ball, players)
         if not self.own_half(ball):
@@ -15,7 +19,7 @@ class Forward(player.Player):
                 if self.owns_ball(ball):
                     #pass_decision = self.pass_to_teammates(players, ball)
                     pass_decision = self.find_best_receiver(players,opponent_players)
-                    decisions.append(pass_decision if pass_decision else self.move_towards_goal(ball))
+                    decisions.append(pass_decision if pass_decision else self.attempt_to_score(ball))
                 else:
                     decisions.append(self.intercept_ball(ball,players))
             elif self.in_strategic_position():
@@ -24,10 +28,10 @@ class Forward(player.Player):
                 decisions.append(self.move_to_strategic_position(strategic_position))
         elif self.in_strategic_position():
             decisions.append(self.face_ball_direction(ball))
-        elif ball['owner_color'] != self.color:
-            decisions.append(self.intercept_ball(ball,players))
-        else:
+        elif self.owns_ball(ball):
             decisions.append(self.attempt_to_score(ball))
+        else:
+            decisions.append(self.move_to_strategic_position(strategic_position))
          
         return decisions
 
@@ -45,7 +49,7 @@ class Forward(player.Player):
 
     def attempt_to_score(self, ball):
         # Example action to attempt scoring
-        print(f"Forward {self.number} attempting to score")
+        #print(f"Forward {self.number} attempting to score")
         if self.color == 'red':
             goal_position = {'x': 350, 'y': 0}
         else:
@@ -85,12 +89,12 @@ class Forward(player.Player):
     def calculate_defensive_strategic_position(self, ball, players):
         # Calculate defensive position based on ball and goal locations
         # Implement logic from documentation
-        return {'x': 350, 'y': 100}  # Placeholder logic
+        return self.calculate_a_star_defensive_position(ball,players)  # Placeholder logic
 
     def calculate_offensive_strategic_position(self, ball, players):
         # Calculate offensive position when in possession but not holding the ball
         # Implement logic from documentation
-        return {'x': 200, 'y': 100}  # Placeholder logic  
+        return self.calculate_a_star_offensive_position(ball,players)  # Placeholder logic  
     
     def in_strategic_position(self):
         # Check if the defender is in a strategic position
@@ -100,7 +104,7 @@ class Forward(player.Player):
 
 
     def is_closest_to_ball(self, players, ball):
-        """Check if this defender is the closest to the ball among all forwards."""
+        """Check if this player is the closest to the ball among all forwards."""
         own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         forwards = [player for player in players if player['role'] == 'forwards']
         for player in forwards:
@@ -203,7 +207,7 @@ class Forward(player.Player):
         """Move towards the ball to intercept it."""
         direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         distance_to_ball = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        if distance_to_ball > 18:
+        if distance_to_ball > 10:
             if ball['owner_color'] == self.color:
                 speed = 5
                 destination = self.calculate_strategic_position(ball,players)
@@ -227,6 +231,62 @@ class Forward(player.Player):
             'player_number': self.number,
             'direction': direction_to_ball,
         }
+    
+    def calculate_a_star_defensive_position(self, ball, players):
+        # Implement A* algorithm for defensive position calculation
+        start_node = (self.field_map['goal']['x'], self.field_map['goal']['y'])
+        goal_node = (ball['x'], ball['y'])
+
+        if 'cost' in self.field_map and len(self.field_map['cost']) > 0 and len(self.field_map['cost'][0]) > 0:
+            open_set = []
+            heapq.heappush(open_set, (0, start_node))
+
+        while open_set:
+            _, current = heapq.heappop(open_set)
+            if current == goal_node:
+                return {'x': current[0], 'y': current[1]}  # Defensive position found
+
+            for neighbor in self.get_neighbors(current):
+                if 0 <= neighbor[0] < len(self.field_map['cost'][0]) and 0 <= neighbor[1] < len(self.field_map['cost']):
+                    new_cost = self.field_map['cost'][neighbor[1]][neighbor[0]]
+                    heapq.heappush(open_set, (new_cost, neighbor))
+
+        # Defensive position not found, return default position
+        return self.default_strategic_position()
+
+    def calculate_a_star_offensive_position(self, ball, players):
+        # Implement A* algorithm for offensive position calculation
+        start_node = (ball['x'], ball['y'])
+        goal_node = (self.field_map['opponent_goal']['x'], self.field_map['opponent_goal']['y'])
+
+        if 'cost' in self.field_map and len(self.field_map['cost']) > 0 and len(self.field_map['cost'][0]) > 0:
+            open_set = []
+            heapq.heappush(open_set, (0, start_node))
+
+        while open_set:
+            _, current = heapq.heappop(open_set)
+            if current == goal_node:
+                return {'x': current[0], 'y': current[1]}  # Offensive position found
+
+            for neighbor in self.get_neighbors(current):
+                if 0 <= neighbor[0] < len(self.field_map['cost'][0]) and 0 <= neighbor[1] < len(self.field_map['cost']):
+                    new_cost = self.field_map['cost'][neighbor[1]][neighbor[0]]
+                    heapq.heappush(open_set, (new_cost, neighbor))
+
+        # Offensive position not found, return default position
+        return self.default_strategic_position()
+
+    def get_neighbors(self, node):
+        x, y = node
+        neighbors = []
+    
+        # 添加当前节点周围的四个相邻节点
+        neighbors.append((x + 1, y))  # 右边节点
+        neighbors.append((x - 1, y))  # 左边节点
+        neighbors.append((x, y + 1))  # 下方节点
+        neighbors.append((x, y - 1))  # 上方节点
+        return neighbors
+
 
     def is_in_goal_area(self,ball):
         if self.color == 'red':

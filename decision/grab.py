@@ -26,7 +26,7 @@ class GrabDecision(Decision):
 class GrabDecision(Decision):
     def __init__(self, runner, player_number, player_color,direction):
         super().__init__(runner, player_number, player_color)
-        self.direction = direction
+        #self.direction = direction
     
 
     def perform(self):
@@ -54,7 +54,7 @@ class GrabDecision(Decision):
         if closest_player is not None:
             self.runner.ball.owner = closest_player
             self.runner.ball.direction = closest_player.direction
-            # print("当前持球人是",closest_player.color,closest_player.number)
+            print("当前持球人是",closest_player.color,closest_player.number)
                 
 
 
