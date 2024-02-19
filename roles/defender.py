@@ -57,10 +57,10 @@ class Defender(Player):
                 if self.owns_ball(ball):
                     pass_decision = self.pass_to_teammates(players, ball)
                     if pass_decision:
-                        print("Defender is passing the ball")
+                        #print("Defender is passing the ball")
                         decisions.append(pass_decision)
                     else:
-                        print("Defender is moving towards goal")
+                        #print("Defender is moving towards goal")
                         decisions.append(self.move_towards_goal(ball))
                 else:
                     decisions.append(self.move_to_strategic_position(strategic_position))

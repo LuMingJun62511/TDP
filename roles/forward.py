@@ -13,7 +13,7 @@ class Forward(player.Player):
     def decide_action(self, ball, players,opponent_players,field_map):
         self.field_map = field_map
         decisions = []
-        strategic_position = self.calculate_strategic_position(ball, players)
+        strategic_position = self.calculate_strategic_position(ball, players,opponent_players)
         if not self.own_half(ball):
             if self.is_closest_to_ball(players, ball):
                 if self.owns_ball(ball):
@@ -21,7 +21,7 @@ class Forward(player.Player):
                     pass_decision = self.find_best_receiver(players,opponent_players)
                     decisions.append(pass_decision if pass_decision else self.attempt_to_score(ball))
                 else:
-                    decisions.append(self.intercept_ball(ball,players))
+                    decisions.append(self.intercept_ball(ball,players,opponent_players))
             elif self.in_strategic_position():
                 decisions.append(self.face_ball_direction(ball))
             else:
@@ -70,31 +70,31 @@ class Forward(player.Player):
             return True  #需要定义射门区域
         return False
 
-    def calculate_strategic_position(self, ball, players):
+    def calculate_strategic_position(self, ball, players,opponent_players):
         if not self.own_half(ball):
             # Scenario 1: Ball on our attacking half
             if ball['owner_color'] != self.color and not self.is_closest_to_ball(players, ball):
                 # Move to a position that covers the farthest goal from the ball
-                return self.calculate_defensive_strategic_position(ball, players)
+                return self.calculate_defensive_strategic_position(ball, players,opponent_players)
             elif ball['owner_color'] == self.color and ball['owner_number'] != self.number:
                 # Scenario when we own the ball or are closest to it
-                return self.calculate_offensive_strategic_position(ball, players)
+                return self.calculate_offensive_strategic_position(ball, players,opponent_players)
         else:
-            return self.calculate_defensive_strategic_position(ball,players)
+            return self.calculate_defensive_strategic_position(ball,players,opponent_players)
 
     def default_strategic_position(self):
         # Return a default strategic position based on the side of the field
         return {'x': 300, 'y': 100}  # Example value
 
-    def calculate_defensive_strategic_position(self, ball, players):
+    def calculate_defensive_strategic_position(self, ball, players,opponent_players):
         # Calculate defensive position based on ball and goal locations
         # Implement logic from documentation
-        return self.calculate_a_star_defensive_position(ball,players)  # Placeholder logic
+        return self.calculate_a_star_defensive_position(ball,players,opponent_players)  # Placeholder logic
 
-    def calculate_offensive_strategic_position(self, ball, players):
+    def calculate_offensive_strategic_position(self, ball, players,opponent_players):
         # Calculate offensive position when in possession but not holding the ball
         # Implement logic from documentation
-        return self.calculate_a_star_offensive_position(ball,players)  # Placeholder logic  
+        return self.calculate_a_star_offensive_position(ball,players,opponent_players)  # Placeholder logic  
     
     def in_strategic_position(self):
         # Check if the defender is in a strategic position
@@ -203,14 +203,14 @@ class Forward(player.Player):
                     return False
         return True
     
-    def intercept_ball(self, ball,players):
+    def intercept_ball(self, ball,players,opponent_players):
         """Move towards the ball to intercept it."""
         direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         distance_to_ball = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         if distance_to_ball > 10:
             if ball['owner_color'] == self.color:
                 speed = 5
-                destination = self.calculate_strategic_position(ball,players)
+                destination = self.calculate_strategic_position(ball,players,opponent_players)
             else:
                 speed = 10
                 destination = {'x': ball['x'], 'y': ball['y']}
@@ -232,59 +232,95 @@ class Forward(player.Player):
             'direction': direction_to_ball,
         }
     
-    def calculate_a_star_defensive_position(self, ball, players):
+    def calculate_a_star_defensive_position(self, ball, players,opponent_players):
         # Implement A* algorithm for defensive position calculation
         start_node = (self.field_map['goal']['x'], self.field_map['goal']['y'])
         goal_node = (ball['x'], ball['y'])
-
+        visited = set()
         if 'cost' in self.field_map and len(self.field_map['cost']) > 0 and len(self.field_map['cost'][0]) > 0:
             open_set = []
             heapq.heappush(open_set, (0, start_node))
 
         while open_set:
             _, current = heapq.heappop(open_set)
+            if current in visited:
+                continue
+            visited.add(current)
             if current == goal_node:
                 return {'x': current[0], 'y': current[1]}  # Defensive position found
 
             for neighbor in self.get_neighbors(current):
                 if 0 <= neighbor[0] < len(self.field_map['cost'][0]) and 0 <= neighbor[1] < len(self.field_map['cost']):
                     new_cost = self.field_map['cost'][neighbor[1]][neighbor[0]]
+                    # 调用代价函数计算新的代价
+                    new_cost += self.heuristic(neighbor, goal_node, players, opponent_players)
                     heapq.heappush(open_set, (new_cost, neighbor))
-
+        print(current)
         # Defensive position not found, return default position
         return self.default_strategic_position()
 
-    def calculate_a_star_offensive_position(self, ball, players):
+    def calculate_a_star_offensive_position(self, ball, players,opponent_players):
         # Implement A* algorithm for offensive position calculation
         start_node = (ball['x'], ball['y'])
         goal_node = (self.field_map['opponent_goal']['x'], self.field_map['opponent_goal']['y'])
-
+        visited = set()
         if 'cost' in self.field_map and len(self.field_map['cost']) > 0 and len(self.field_map['cost'][0]) > 0:
             open_set = []
             heapq.heappush(open_set, (0, start_node))
 
         while open_set:
             _, current = heapq.heappop(open_set)
+            if current in visited:
+                continue
+            visited.add(current)
             if current == goal_node:
                 return {'x': current[0], 'y': current[1]}  # Offensive position found
 
             for neighbor in self.get_neighbors(current):
                 if 0 <= neighbor[0] < len(self.field_map['cost'][0]) and 0 <= neighbor[1] < len(self.field_map['cost']):
                     new_cost = self.field_map['cost'][neighbor[1]][neighbor[0]]
+                    # 调用代价函数计算新的代价
+                    new_cost += self.heuristic(neighbor, goal_node, players, opponent_players)
                     heapq.heappush(open_set, (new_cost, neighbor))
 
         # Offensive position not found, return default position
+        print(current)
         return self.default_strategic_position()
+
+    def heuristic(self,current_position, goal_position, players, opponent_players):
+        # 曼哈顿距离作为启发函数
+        h_cost = abs(current_position[0] - goal_position[0]) + abs(current_position[1] - goal_position[1])
+    
+        # 添加额外的代价
+        extra_cost = 0
+    
+        # 考虑是否经过对方球员位置
+        for player in opponent_players:
+            if player['role'] != 'goalkeeper':
+                distance_to_player = abs(current_position[0] - player['x']) + abs(current_position[1] - player['y'])
+                if distance_to_player < 20:  # 如果距离对方球员太近，增加代价
+                    extra_cost += 1000
+    
+        # 考虑是否经过己方球员位置
+        for player in players:
+            if player['role'] != 'goalkeeper':
+                distance_to_player = abs(current_position[0] - player['x']) + abs(current_position[1] - player['y'])
+                if distance_to_player < 20:  # 如果距离己方球员太近，增加代价
+                    extra_cost += 1000
+    
+        # 返回总代价
+        return h_cost + extra_cost
+
 
     def get_neighbors(self, node):
         x, y = node
         neighbors = []
     
         # 添加当前节点周围的四个相邻节点
-        neighbors.append((x + 1, y))  # 右边节点
-        neighbors.append((x - 1, y))  # 左边节点
-        neighbors.append((x, y + 1))  # 下方节点
-        neighbors.append((x, y - 1))  # 上方节点
+        neighbors.append((x + 10, y))  # 右边节点
+        neighbors.append((x - 10, y))  # 左边节点
+        neighbors.append((x, y + 10))  # 下方节点
+        neighbors.append((x, y - 10))  # 上方节点
         return neighbors
 
 
