@@ -1,7 +1,6 @@
 from .grab import GrabDecision
 from .kick import KickDecision
 from .move import MoveDecision
-from .collision import Collision
 from models import Point
 
 def get_decisions(runner, red_responses, blue_responses,test_responses):
@@ -11,9 +10,6 @@ def get_decisions(runner, red_responses, blue_responses,test_responses):
     for red_response in red_responses:
         red_response['player_color'] = 'red'
         red_decisions.append(_decision_factory(runner, red_response))
-    for test_response in test_responses:
-        test_response['player_color'] = 'red'
-        test_decisions.append(_decision_factory(runner,test_response))
     for blue_response in blue_responses:
         blue_response['player_color'] = 'blue'
         if 'direction' in blue_response:
@@ -59,14 +55,14 @@ def _decision_factory(runner, decision):
                 player_color=decision['player_color'],
                 direction=0
             )
-    if decision['type'] == 'collision':
-        return Collision(
-            runner=runner,
-            player_number=decision['player_number'],
-            player_color=decision['player_color'],
-            direction=decision['direction'] % 360,
-            #speed=decision['speed'],
-        )
+    # if decision['type'] == 'collision':
+    #     return Collision(
+    #         runner=runner,
+    #         player_number=decision['player_number'],
+    #         player_color=decision['player_color'],
+    #         direction=decision['direction'] % 360,
+    #         #speed=decision['speed'],
+    #     )
 
 def _unique_decisions(decisions):
     uniqued_decisions = []

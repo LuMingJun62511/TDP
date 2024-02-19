@@ -10,7 +10,6 @@ import utils
 from decision import get_decisions
 from red import play as red_play
 from blue import play as blue_play
-from red.test import play as test_play
 
 
 
@@ -22,9 +21,6 @@ def blue_fire(*args, **kwargs):
     global blue_responses
     blue_responses = blue_play(*args, **kwargs)
 
-def test_fire(*args, **kwargs):
-    global test_responses
-    test_responses = test_play(*args, **kwargs)
 
 class Runner:
     def __init__(self, config):
@@ -35,7 +31,6 @@ class Runner:
         self._init_players()
         self.scoreboard = models.Scoreboard()
         self._show_and_increase_cycle_number()
-        # self.players = self._get_players()
 
     def run(self):
         global actions
@@ -69,23 +64,16 @@ class Runner:
                 target=blue_fire,
                 args=self._get_args_for_blue_team(),
             )
-            test_thread = Thread(
-                target=test_fire,
-                args = self._get_args_for_red_team(),
-            )
             blue_thread.start()
             red_thread.start()
-            test_thread.start()
             for _ in range(self.config.delay_count):
                 time.sleep(self.config.delay_amount)
-                if red_responses is not None and blue_responses is not None and test_responses is not None:
+                if red_responses is not None and blue_responses is not None:
                     break
             if not isinstance(red_responses, list):
                 red_responses = []
             if not isinstance(blue_responses, list):
                 blue_responses = []
-            if not isinstance(test_responses,list):
-                test_responses = []
 
             self.perform_decisions(red_responses, blue_responses,test_responses)
             self.decrement_ban_cycles()
@@ -229,14 +217,6 @@ class Runner:
                 color='blue',
                 **blue_player,
             ))
-        red_players[1].set_role('defender')
-        red_players[2].set_role('defender')
-        red_players[3].set_role('forward')
-        red_players[4].set_role('forward')
-        blue_players[1].set_role('defender')
-        blue_players[2].set_role('defender')
-        blue_players[3].set_role('forward')
-        blue_players[4].set_role('forward')
         self.red_players = red_players
         self.blue_players = blue_players
         self.players = red_players + blue_players

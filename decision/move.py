@@ -79,7 +79,7 @@ class MoveDecision(Decision):
         # 计算指向其他球员的方向
         direction_to_others = math.atan2((others_pos.y - self.player.y), (others_pos.x - self.player.x))
         # 根据距离计算排斥力的强度（这里需要您根据实际情况调整计算方式）
-        print('看看有没有斥力',1 - (distance_to_others / self.player.radius * 2))
+        # print('看看有没有斥力',1 - (distance_to_others / self.player.radius * 2))
         repulse_strength = repulse_force_intensity_factor * max(0, 1 - (distance_to_others / (self.player.radius * repulse_distance_threshold_factor)))  
         # repulse_distance_threshold比较大，则括号内越小，则一减它越大，也就是感应范围越大，所以，enemy设为2，teammates设为1.2
         repulse_forces = (-math.cos(direction_to_others) * repulse_strength, -math.sin(direction_to_others) * repulse_strength)
