@@ -26,7 +26,7 @@ class GrabDecision(Decision):
 class GrabDecision(Decision):
     def __init__(self, runner, player_number, player_color,direction):
         super().__init__(runner, player_number, player_color)
-        self.direction = direction
+        # self.direction = direction
     
 
     def perform(self):
