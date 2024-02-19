@@ -61,7 +61,7 @@ class GoalKeeper(player.Player):
                 else:
                     decisions.append(self.serve_ball())
             else:
-                print("adjust self")
+                #print("adjust self")
                 decisions.append(self.adjust_self(players, ball, 260, 60))
         else:
             decisions.append(self.stand_still())
@@ -101,7 +101,8 @@ class GoalKeeper(player.Player):
         return closest_player
 
     def adjust_self(self, players, ball, GOALKEEPER_WIDTH, GOALKEEPER_DEPTH):
-        goal_x, goal_y = -460, 0  # Center of the goal
+        goal_x = -460 if self.color == 'red' else 460
+        goal_y = 0  # Center of the goal
         player_x, player_y = self.x, self.y
         ball_x, ball_y = ball['x'], ball['y']
 
@@ -136,7 +137,7 @@ class GoalKeeper(player.Player):
         }
         
     def stand_still(self):
-        print('Standing still')
+        #print('Standing still')
         if self.color == 'red':
             return {
                 'type': 'move', 

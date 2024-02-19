@@ -15,7 +15,7 @@ class Forward(player.Player):
                 if self.owns_ball(ball): #这个时候得知道躲避人了
                     #pass_decision = self.pass_to_teammates(players, ball)
                     pass_decision = self.find_best_receiver(players,opponent_players)
-                    decisions.append(pass_decision if pass_decision else self.move_towards_goal(ball))
+                    decisions.append(pass_decision if pass_decision else self.attempt_to_score(ball))
                 else:
                     decisions.append(self.intercept_ball(ball,players))
             elif self.in_strategic_position():
@@ -24,10 +24,10 @@ class Forward(player.Player):
                 decisions.append(self.move_to_strategic_position(strategic_position))
         elif self.in_strategic_position():
             decisions.append(self.face_ball_direction(ball))
-        elif ball['owner_color'] != self.color:
-            decisions.append(self.intercept_ball(ball,players))
-        else:
+        elif self.owns_ball(ball):
             decisions.append(self.attempt_to_score(ball))
+        else:
+            decisions.append(self.move_to_strategic_position(strategic_position))
          
         return decisions
 
@@ -46,13 +46,14 @@ class Forward(player.Player):
 
     def attempt_to_score(self, ball):
         # Example action to attempt scoring
-        print(f"Forward {self.number} attempting to score")
+        
         if self.color == 'red':
-            goal_position = {'x': 350, 'y': 0}
+            goal_position = {'x': 450, 'y': 0}
         else:
-            goal_position = {'x': -350, 'y': 0}
+            goal_position = {'x': -450, 'y': 0}
         direction = get_direction({'x': self.x, 'y': self.y}, goal_position)
         if self.in_shoot_area():
+            print(f"Forward {self.number} attempting to score")
             return {
                 'type': 'kick',
                 'player_number': self.number,
@@ -219,7 +220,7 @@ class Forward(player.Player):
         """Move towards the ball to intercept it."""
         direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         distance_to_ball = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        if distance_to_ball > 18:
+        if distance_to_ball > 10:
             if ball['owner_color'] == self.color:
                 speed = 5
                 destination = self.calculate_strategic_position(ball,players)
