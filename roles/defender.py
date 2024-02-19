@@ -13,45 +13,6 @@ class Defender(Player):
         # Define the strategic position based on the ball's location and possession status
         strategic_position = self.calculate_strategic_position(ball, players)
         
-        # if self.collision_detection(ball):
-        #     print("Defender is colliding with the ball")
-        #     if not self.owns_ball(ball):
-        #         print("Defender does not own the ball")
-        #         decisions.append(self.execute_bounce_action(ball))
-
-        # Check if in strategic position, if not, move there; otherwise, consider passing or intercepting
-        '''
-        if not self.in_strategic_position():
-            # print("Defender is not in strategic position")
-            decisions.append(self.move_to_strategic_position(strategic_position))
-        else:
-            if ball['x'] < 0:
-                # print("Defender is in strategic position")
-                if ball['owner_color'] == self.color:
-                    if self.owns_ball(ball):
-                        # print("Defender owns the ball")
-                        pass_decision = self.pass_to_teammates(players, ball)
-                        if pass_decision:
-                            # print("Defender is passing the ball")
-                            decisions.append(pass_decision)
-                        else:
-                            # print("Defender is moving towards goal")
-                            decisions.append(self.move_towards_goal(ball))
-                    else:
-                        # print("Defender does not own the ball")
-                        decisions.append(self.face_ball_direction(ball))
-                else:
-                    # print("Defender is not in possession")
-                    if self.is_closest_to_ball(players, ball):
-                        decisions.append(self.intercept_ball(ball))
-                    else:
-                        decisions.append(self.face_ball_direction(ball))
-            else:
-                # print("Defender is in strategic position")
-                decisions.append(self.face_ball_direction(ball))
-        #print("Defender Decisions: ")
-        #pprint.pprint(decisions)
-        '''
         if self.own_half(ball):
             #print(ball['x'],ball['y'],"当前球的位置")
             if ball['owner_color'] == self.color:
@@ -116,19 +77,20 @@ class Defender(Player):
             'player_number': self.number,
             'destination': strategic_pos,
             'direction': direction_to_strategic_pos,
-            'speed': 7
+            'speed': 7,
+            'has_ball':False
         }
 
-    def collision_detection(self, ball):
-        # Adjusted to use 'x' and 'y' directly
-        return get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']}) <= 10
+    # def collision_detection(self, ball):
+    #     # Adjusted to use 'x' and 'y' directly
+    #     return get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']}) <= 10
 
     def owns_ball(self, ball):
         return ball['owner_number'] == self.number
 
-    def execute_bounce_action(self, ball):
-        direction_away_from_ball = get_direction({'x': ball['x'], 'y': ball['y']}, {'x': self.x, 'y': self.y})
-        return {'type': 'move', 'player_number': self.number, 'direction': direction_away_from_ball, 'speed': 0}
+    # def execute_bounce_action(self, ball):
+    #     direction_away_from_ball = get_direction({'x': ball['x'], 'y': ball['y']}, {'x': self.x, 'y': self.y})
+    #     return {'type': 'move', 'player_number': self.number, 'direction': direction_away_from_ball, 'speed': 0}
 
     def pass_to_teammates(self, players, ball):
         most_advanced_teammate = None
@@ -158,16 +120,37 @@ class Defender(Player):
         else:
             goal_position = {'x': 250, 'y': 0}
         direction_to_goal = get_direction({'x': self.x, 'y': self.y}, goal_position)
-        return {'type': 'move', 'player_number': self.number, 'destination': goal_position, 'direction': direction_to_goal, 'speed': 7}
+        return {
+            'type': 'move', 
+            'player_number': self.number, 
+            'destination': goal_position, 
+            'direction': direction_to_goal, 
+            'speed': 7,
+            'has_ball':True
+        }
 
     def face_ball_direction(self, ball):
         direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        return {'type': 'move', 'player_number': self.number, 'destination': {'x': self.x, 'y': self.y}, 'direction': direction_to_ball, 'speed': 0}
+        return {
+            'type': 'move', 
+            'player_number': self.number, 
+            'destination': {'x': self.x, 'y': self.y}, 
+            'direction': direction_to_ball,
+            'speed': 0,
+            'has_ball':False
+        }
 
     def move_to_strategic_position(self, strategic_position):
         strategic_pos = strategic_position
         direction_to_strategic_pos = get_direction({'x': self.x, 'y': self.y}, strategic_pos)
-        return {'type': 'move', 'player_number': self.number, 'destination': strategic_pos, 'direction': direction_to_strategic_pos, 'speed': 7}
+        return {
+            'type': 'move', 
+            'player_number': self.number, 
+            'destination': strategic_pos, 
+            'direction': direction_to_strategic_pos, 
+            'speed': 7,
+            'has_ball':False
+        }
     
     def distance_to_ball(self,ball):
         return get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
@@ -200,7 +183,8 @@ class Defender(Player):
                 'player_number': self.number,
                 'destination': destination,
                 'direction': direction_to_ball,
-                'speed': speed  # This speed can be adjusted based on gameplay needs
+                'speed': speed,  # This speed can be adjusted based on gameplay needs
+                'has_ball':False
             }
         else:
             return self.grab_ball(ball)

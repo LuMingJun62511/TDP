@@ -6,11 +6,12 @@ from models import Point
 
 
 class MoveDecision(Decision):
-    def __init__(self, runner, player_number, player_color, destination,direction, speed):
+    def __init__(self, runner, player_number, player_color, destination, direction, speed, has_ball):
         super().__init__(runner, player_number, player_color)
         self.destination = destination
         self.direction = direction
         self.speed = speed
+        self.has_ball = has_ball
 
     def validate(self):
         super().validate()
@@ -22,21 +23,21 @@ class MoveDecision(Decision):
         
     def perform(self):
         #self.player.move(self.destination,self.direction, self.speed) #计算与目的地的距离与角度差
-        movement,alpha = self.pfa()
-        self.player.x += int(movement * math.cos(alpha))
-        self.player.y += int(movement * math.sin(alpha))
-        self.player.direction = alpha
-        self.player.speed = movement
+        movement,alpha = self.pfa(self.has_ball)
+        # self.player.x += int(movement * math.cos(alpha))
+        # self.player.y += int(movement * math.sin(alpha))
+        # self.player.direction = alpha
+        # self.player.speed = movement
 
-        # if movement < self.speed: #一步到位
-        #     self.player.x = int(self.destination.x)
-        #     self.player.y = int(self.destination.y)
-        #     self.player.direction = alpha
-        # else: #正常走一tick,pfa就是修改了speed和alpha,
-        #     self.player.x += int(movement * math.cos(alpha))
-        #     self.player.y += int(movement * math.sin(alpha))
-        #     self.player.direction = alpha
-        #     self.player.speed = movement
+        if movement < self.speed: #一步到位
+            self.player.x = int(self.destination.x)
+            self.player.y = int(self.destination.y)
+            self.player.direction = alpha
+        else: #正常走一tick,pfa就是修改了speed和alpha,
+            self.player.x += int(movement * math.cos(alpha))
+            self.player.y += int(movement * math.sin(alpha))
+            self.player.direction = alpha
+            self.player.speed = movement
      
     def get_enemy_positions(self):
         # 根据当前球员的颜色确定敌方球队
@@ -53,12 +54,15 @@ class MoveDecision(Decision):
         teammates_positions = [(player.x, player.y) for player in teammates]
         return teammates_positions
     
-    def pfa(self):
+    def pfa(self,has_ball):
         enemy_team_position = self.get_enemy_positions()
         teammate_position = self.get_teammates_positions()
         attract_force = self.calculate_attract_force()
-        repulse_forces_enemy = [self.calculate_repulse_force(enemy_pos_tuple,100,3) for enemy_pos_tuple in enemy_team_position]
-        repulse_forces_teammates = [self.calculate_repulse_force(teammates_pos_tuple,100,2) for teammates_pos_tuple in teammate_position]
+        if has_ball:
+            repulse_forces_enemy = [self.calculate_repulse_force(enemy_pos_tuple,150,5) for enemy_pos_tuple in enemy_team_position]
+        else:
+            repulse_forces_enemy = [self.calculate_repulse_force(enemy_pos_tuple,100,3) for enemy_pos_tuple in enemy_team_position]
+        repulse_forces_teammates = [self.calculate_repulse_force(teammates_pos_tuple,100,2.5) for teammates_pos_tuple in teammate_position]
         repulse_forces = repulse_forces_enemy + repulse_forces_teammates
         total_force = self.combine_forces(attract_force, repulse_forces)
         alpha = math.atan2(total_force[1], total_force[0])# 计算总力的方向

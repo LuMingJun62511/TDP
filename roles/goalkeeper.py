@@ -10,6 +10,8 @@ class GoalKeeper(player.Player):
     def __init__(self, x,y,name, number, color,radius,img=None, ban_cycles=0,role=None,direction=0):
         super().__init__(x,y,name, number, color,radius,img, ban_cycles,role,direction)
 
+    def owns_ball(self, ball):
+        return ball['owner_number'] == self.number
 
     def is_in_own_penalty_area(self):
         # Assuming the penalty area dimensions are defined somewhere
@@ -70,7 +72,14 @@ class GoalKeeper(player.Player):
 
     def chase_ball(self, ball):
         direction = utils.get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        return {'type': 'move', 'player_number': self.number, 'destination': {'x': ball['x'], 'y': ball['y']}, 'direction': direction, 'speed': 10}
+        return {
+            'type': 'move', 
+            'player_number': self.number, 
+            'destination': {'x': ball['x'], 'y': ball['y']}, 
+            'direction': direction, 
+            'speed': 10,
+            'has_ball':False
+        }
 
     def pass_to_teammates(self, players, ball):
         teammate = self.find_closest_teammate(players)
@@ -122,14 +131,29 @@ class GoalKeeper(player.Player):
             'player_number': self.number,
             'destination': {'x': new_x, 'y': new_y},
             'direction': direction,
-            'speed': 10  # Speed adjustment for gameplay balance
+            'speed': 10,  # Speed adjustment for gameplay balance
+            'has_ball':False
         }
         
     def stand_still(self):
         print('Standing still')
         if self.color == 'red':
-            return {'type': 'move', 'player_number': self.number, 'destination': {'x':  -FOOTBALL_PITCH_LENGTH // 2 + 3 * GOAL_DEPTH, 'y': 0}, 'direction': 0, 'speed': 8}
+            return {
+                'type': 'move', 
+                'player_number': self.number, 
+                'destination': {'x':  -FOOTBALL_PITCH_LENGTH // 2 + 3 * GOAL_DEPTH, 'y': 0}, 
+                'direction': 0, 
+                'speed': 8,
+                'has_ball':False
+            }
         elif self.color == 'blue':
-            return {'type': 'move', 'player_number': self.number, 'destination': {'x':  FOOTBALL_PITCH_LENGTH // 2 - 3 * GOAL_DEPTH, 'y': 0}, 'direction': 0, 'speed': 8}
+            return {
+                'type': 'move', 
+                'player_number': self.number, 
+                'destination': {'x':  FOOTBALL_PITCH_LENGTH // 2 - 3 * GOAL_DEPTH, 'y': 0}, 
+                'direction': 0, 
+                'speed': 8,
+                'has_ball':False
+            }
         else:
             print("错误的守门员属性")

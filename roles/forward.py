@@ -12,7 +12,7 @@ class Forward(player.Player):
         strategic_position = self.calculate_strategic_position(ball, players)
         if not self.own_half(ball):
             if self.is_closest_to_ball(players, ball):
-                if self.owns_ball(ball):
+                if self.owns_ball(ball): #这个时候得知道躲避人了
                     #pass_decision = self.pass_to_teammates(players, ball)
                     pass_decision = self.find_best_receiver(players,opponent_players)
                     decisions.append(pass_decision if pass_decision else self.move_towards_goal(ball))
@@ -41,6 +41,7 @@ class Forward(player.Player):
             'destination': ball,
             'direction': direction,
             'speed': 10,  # Speed might be adjusted based on the situation
+            'has_ball':False
         }
 
     def attempt_to_score(self, ball):
@@ -166,7 +167,14 @@ class Forward(player.Player):
         else:
             goal_position = {'x': -350, 'y': 0}
         direction_to_goal = get_direction({'x': self.x, 'y': self.y}, goal_position)
-        return {'type': 'move', 'player_number': self.number, 'destination': goal_position, 'direction': direction_to_goal, 'speed': 7}
+        return {
+            'type': 'move', 
+            'player_number': self.number,
+            'destination': goal_position, 
+            'direction': direction_to_goal, 
+            'speed': 7,
+            'has_ball':True
+        }
 
     def move_to_strategic_position(self, strategic_pos):
         # Move to a predefined strategic position
@@ -176,12 +184,20 @@ class Forward(player.Player):
             'player_number': self.number,
             'destination': strategic_pos,
             'direction': direction_to_strategic_pos,
-            'speed': 7
+            'speed': 7,
+            'has_ball':False
         }
     
     def face_ball_direction(self, ball):
         direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        return {'type': 'move', 'player_number': self.number, 'destination': {'x': self.x, 'y': self.y}, 'direction': direction_to_ball, 'speed': 0}
+        return {
+            'type': 'move', 
+            'player_number': self.number, 
+            'destination': {'x': self.x, 'y': self.y}, 
+            'direction': direction_to_ball, 
+            'speed': 0,
+            'has_ball':False
+        }
 
     
     def distance_to_ball(self,ball):
@@ -215,7 +231,8 @@ class Forward(player.Player):
                 'player_number': self.number,
                 'destination': destination,
                 'direction': direction_to_ball,
-                'speed': speed  # This speed can be adjusted based on gameplay needs
+                'speed': speed,  # This speed can be adjusted based on gameplay needs
+                'has_ball':False
             }
         else:
             return self.grab_ball(ball)

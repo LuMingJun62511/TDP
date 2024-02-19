@@ -30,6 +30,7 @@ def _decision_factory(runner, decision):
             destination=Point(decision['destination']['x'], decision['destination']['y']),
             direction=decision['direction'] % 360,
             speed=decision['speed'],
+            has_ball=decision['has_ball'],
         )
     if decision['type'] == 'kick':
         return KickDecision(
