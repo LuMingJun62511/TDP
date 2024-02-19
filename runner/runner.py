@@ -10,6 +10,7 @@ import utils
 from decision import get_decisions
 from red import play as red_play
 from blue import play as blue_play
+import math
 
 
 
@@ -253,10 +254,13 @@ class Runner:
             self._draw_margins()
             self._draw_football_pitch()
             self._draw_team_names()
+            # Draw players and their direction with team-specific colors
             for red_player in self.red_players:
                 red_player.draw(self.screen)
+                self.draw_player_direction(red_player, 'red')
             for blue_player in self.blue_players:
                 blue_player.draw(self.screen)
+                self.draw_player_direction(blue_player, 'blue')
             self.ball.draw(self.screen)
             self.scoreboard.draw(self.screen)
             pg.display.update()
@@ -418,3 +422,19 @@ class Runner:
             (255, 255, 255),
             (utils.SCREEN_LENGTH - utils.HORIZONTAL_MARGIN, 0, utils.HORIZONTAL_MARGIN, utils.SCREEN_WIDTH)
         )
+
+    def draw_player_direction(self, player, team_color):
+        # Assuming player.direction is the direction in radians
+        line_length = 30  # Length of the direction line
+        end_x = player.x + line_length * math.cos(player.direction)
+        end_y = player.y + line_length * math.sin(player.direction)
+        
+        # Convert player and end point positions if necessary
+        player_pos = utils.convert_coordinate_cartesian_to_pygame(player.x, player.y)
+        end_pos = utils.convert_coordinate_cartesian_to_pygame(end_x, end_y)
+        
+        # Determine color based on the team
+        color = (255, 0, 0) if team_color == 'red' else (0, 0, 255)
+        
+        # Draw the line
+        pg.draw.line(self.screen, color, player_pos, end_pos, 2)
