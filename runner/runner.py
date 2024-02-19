@@ -12,8 +12,6 @@ from red import play as red_play
 from blue import play as blue_play
 import math
 
-
-
 def red_fire(*args, **kwargs):
     global red_responses
     red_responses = red_play(*args, **kwargs)
@@ -82,6 +80,7 @@ class Runner:
             self.check_if_scored()
             self.check_if_the_bus_is_parked()
             self.check_if_ball_is_crowded()
+            self.adjust_overlapping_players()  # Adjust overlapping players to prevent freezing
 
             self._show_and_increase_cycle_number()
             if self.scoreboard.cycle_number > self.config.max_cycle:
@@ -438,3 +437,29 @@ class Runner:
         
         # Draw the line
         pg.draw.line(self.screen, color, player_pos, end_pos, 2)
+        
+    
+    def adjust_overlapping_players(self):
+        for player in self.red_players + self.blue_players:
+            for other_player in self.red_players + self.blue_players:
+                if player != other_player and self.is_overlapping(player, other_player):
+                    self.separate_players(player, other_player)
+
+    def is_overlapping(self, player1, player2):
+        distance = utils.distance(player1, player2)
+        return distance < (player1.radius + player2.radius)  # Assuming players have a 'radius' attribute
+
+    def separate_players(self, player1, player2):
+        # Adjust players' positions slightly to no longer overlap
+        angle = math.atan2(player2.y - player1.y, player2.x - player1.x)
+        displacement = 0.1  # Adjust as needed for your game's scale
+        player1.x -= math.cos(angle) * displacement
+        player1.y -= math.sin(angle) * displacement
+        player2.x += math.cos(angle) * displacement
+        player2.y += math.sin(angle) * displacement
+
+        # Ensure players remain within the game boundaries after adjustment
+        # player1.x = max(min(player1.x, utils.SCREEN_LENGTH - utils.HORIZONTAL_MARGIN), utils.HORIZONTAL_MARGIN)
+        # player1.y = max(min(player1.y, utils.SCREEN_WIDTH - utils.VERTICAL_MARGIN), utils.VERTICAL_MARGIN)
+        # player2.x = max(min(player2.x, utils.SCREEN_LENGTH - utils.HORIZONTAL_MARGIN), utils.HORIZONTAL_MARGIN)
+        # player2.y = max(min(player2.y, utils.SCREEN_WIDTH - utils.VERTICAL_MARGIN), utils.VERTICAL_MARGIN)
