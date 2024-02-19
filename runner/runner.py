@@ -452,7 +452,7 @@ class Runner:
     def separate_players(self, player1, player2):
         # Adjust players' positions slightly to no longer overlap
         angle = math.atan2(player2.y - player1.y, player2.x - player1.x)
-        displacement = 0.1  # Adjust as needed for your game's scale
+        displacement = 1  # Adjust as needed for your game's scale
         player1.x -= math.cos(angle) * displacement
         player1.y -= math.sin(angle) * displacement
         player2.x += math.cos(angle) * displacement

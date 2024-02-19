@@ -36,32 +36,44 @@ class Defender(Player):
         return decisions
     
     def calculate_strategic_position(self, ball, players):
-        # Implement logic based on documentation
-        if not self.own_half(ball):
-            # Scenario 1: Ball not on our half
-            return self.default_strategic_position()
-        else:
-            # Scenario 2 and 3: Ball on our half
-            if ball['owner_color'] != self.color or not self.is_closest_to_ball(players, ball):
-                # Move to a position that covers the farthest goal from the ball
-                return self.calculate_defensive_strategic_position(ball, players)
-            else:
-                # Scenario when we own the ball or are closest to it
+        # Adjusted to dynamically calculate strategic positions
+        if self.own_half(ball):
+            if ball['owner_color'] == self.color:
+                # Offensive positioning when our team possesses the ball
                 return self.calculate_offensive_strategic_position(ball, players)
+            else:
+                # Defensive positioning when the opposing team possesses the ball
+                return self.calculate_defensive_strategic_position(ball, players)
+        else:
+            # Default strategic position when the ball is not on our half
+            return self.default_strategic_position()
 
     def default_strategic_position(self):
         # Return a default strategic position based on the side of the field
         return {'x': -300, 'y': 100}  # Example value
 
     def calculate_defensive_strategic_position(self, ball, players):
-        # Calculate defensive position based on ball and goal locations
-        # Implement logic from documentation
-        return {'x': -350, 'y': 100}  # Placeholder logic
+        # Calculates defensive strategic position based on the ball's location and potential goal threats
+        # Example logic: Positioning based on the midpoint between the ball and the most threatened goalpost
+        goal_x = -460 if self.color == 'red' else 460
+        goal_y = 0
+        midpoint_x = (ball['x'] + goal_x) / 2
+        midpoint_y = (ball['y'] + goal_y) / 2
+        # Adjustments to ensure the defender stays within a defensive zone
+        adjusted_x = max(min(midpoint_x, -100), -350)  # Example adjustment
+        adjusted_y = max(min(midpoint_y, 100), -100)
+        return {'x': adjusted_x, 'y': adjusted_y}
 
     def calculate_offensive_strategic_position(self, ball, players):
-        # Calculate offensive position when in possession but not holding the ball
-        # Implement logic from documentation
-        return {'x': -200, 'y': 100}  # Placeholder logic
+        # Calculates offensive strategic position to maximize scoring opportunities
+        # Example logic: Positioning to support the attacker with the ball or to open up for receiving a pass
+        if self.owns_ball(ball):
+            return {'x': self.x, 'y': self.y}  # Stay in position if the defender owns the ball
+        else:
+            # Find a position that supports the attack or prepares for a pass
+            supporting_x = min(self.x + 100, 300)  # Example logic to move forward but not too close to the attack
+            supporting_y = self.y  # Stay in line with current y position to maintain width
+            return {'x': supporting_x, 'y': supporting_y}
     
     def in_strategic_position(self):
         # Check if the defender is in a strategic position
@@ -69,16 +81,15 @@ class Defender(Player):
         strategic_y_min, strategic_y_max = -100, 100
         return strategic_x_min <= self.x <= strategic_x_max and strategic_y_min <= self.y <= strategic_y_max
 
+    # Example method to adjust for new strategic positioning
     def move_to_strategic_position(self, strategic_pos):
-        # Move to a predefined strategic position
         direction_to_strategic_pos = get_direction({'x': self.x, 'y': self.y}, strategic_pos)
         return {
             'type': 'move',
             'player_number': self.number,
             'destination': strategic_pos,
             'direction': direction_to_strategic_pos,
-            'speed': 7,
-            'has_ball':False
+            'speed': 7  # Adjust speed based on the urgency of repositioning
         }
 
     # def collision_detection(self, ball):
