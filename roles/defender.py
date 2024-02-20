@@ -89,7 +89,8 @@ class Defender(Player):
             'player_number': self.number,
             'destination': strategic_pos,
             'direction': direction_to_strategic_pos,
-            'speed': 7  # Adjust speed based on the urgency of repositioning
+            'speed': 7,  # Adjust speed based on the urgency of repositioning
+            'has_ball':False
         }
 
     # def collision_detection(self, ball):
