@@ -25,46 +25,6 @@ class Ball:
             (int(pygame_x) - self.radius, int(pygame_y) - self.radius)
         )
     
-    '''
-
-    def move(self):
-        if self.owner is None:
-            print(self.direction,"球的 move")
-            if self.speed == 0 or self.direction is None:
-                return
-            self.x += self.speed * math.cos(math.radians(self.direction))
-            self.y += self.speed * math.sin(math.radians(self.direction))
-            self.speed -= utils.FRICTION
-            if self.speed < 0:
-                self.speed = 0
-                self.direction = None
-            if self.x < -utils.FOOTBALL_PITCH_LENGTH // 2 + self.radius:
-                self.x = -utils.FOOTBALL_PITCH_LENGTH // 2 + self.radius + 1
-                self.direction = 180 - self.direction
-            if self.x > utils.FOOTBALL_PITCH_LENGTH // 2 - self.radius:
-                self.x = utils.FOOTBALL_PITCH_LENGTH // 2 - self.radius - 1
-                self.direction = 180 - self.direction
-            if self.y < -utils.FOOTBALL_PITCH_WIDTH // 2 + self.radius:
-                self.y = -utils.FOOTBALL_PITCH_WIDTH // 2 + self.radius + 1
-                self.direction = (self.direction + 180) % 360
-                self.direction = 180 - self.direction
-            if self.y > utils.FOOTBALL_PITCH_WIDTH // 2 - self.radius:
-                self.y = utils.FOOTBALL_PITCH_WIDTH // 2 - self.radius - 1
-                self.direction = (self.direction + 180) % 360
-                self.direction = 180 - self.direction
-        elif self.owner.direction is not None:
-            print("被持球",self.direction)
-            #self.x = self.owner.x + 12
-            #self.y = self.owner.y + 12
-            self.x = self.owner.x + int(10 * math.cos(self.owner.direction))
-            self.y = self.owner.y + int(10 * math.cos(self.owner.direction))  #这里为了避免球权无法交换设置了初始位置差，具体数值和方法需要讨论
-
-        else:
-            print("默认")
-            self.x = self.owner.x + 12
-            self.y = self.owner.y + 12
-    '''
-
     def move(self):
         if self.direction is not None:
             print(self.direction,"球的 move")

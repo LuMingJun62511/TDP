@@ -13,7 +13,7 @@ def get_decisions(runner, red_responses, blue_responses,test_responses):
     for blue_response in blue_responses:
         blue_response['player_color'] = 'blue'
         if 'direction' in blue_response:
-            blue_response['direction'] = (blue_response['direction'] + 180) % 360
+            blue_response['direction'] = blue_response['direction']
         if 'destination' in blue_response:
             blue_response['destination'] = {
                 'x': blue_response['destination']['x'],

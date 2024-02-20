@@ -73,7 +73,7 @@ class Forward(player.Player):
             return self.move_towards_goal(ball)
     
     def in_shoot_area(self):
-        if (self.color == 'red' and self.x > 450) or (self.color == 'blue' and self.x < -450):
+        if (self.color == 'red' and self.x > 300) or (self.color == 'blue' and self.x < -300):
             return True  #需要定义射门区域
         return False
 
@@ -124,17 +124,16 @@ class Forward(player.Player):
         return True
 
     def owns_ball(self, ball):
-        return ball['owner_number'] == self.number
+        return ball['owner_number'] == self.number and ball['owner_color'] == self.color
     
     def opponent_in_randius(self,opponent_players):
         for player in opponent_players:
-            print(get_distance(player,{'x':self.x,'y':self.y}))
+            #print(get_distance(player,{'x':self.x,'y':self.y}))
             if get_distance(player,{'x':self.x,'y':self.y}) <= 100:
                 return player['number']
         return None
     
     def random_kick_out(self,opponent_players):
-        print("随机踢出")
         return{      
             'type': 'kick',
             'player_number': self.number,

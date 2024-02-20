@@ -69,7 +69,6 @@ def how_to_grab(player1,players):
         kick_directions.append(direction_degree)
     if kick_directions:
         random_direction = random.choice(kick_directions)
-        print(random_direction)
         return random_direction
     else:
         print("没有可用的方向")
