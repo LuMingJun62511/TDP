@@ -35,29 +35,27 @@ class Ball:
             if self.speed < 0:
                 self.speed = 0
                 self.direction = None
-            if self.x < -utils.FOOTBALL_PITCH_LENGTH // 2 + self.radius:
+
+            # Check for goal conditions
+            if self.x < -utils.FOOTBALL_PITCH_LENGTH // 2 and not (-utils.GOAL_WIDTH // 2 <= self.y <= utils.GOAL_WIDTH // 2):
                 self.x = -utils.FOOTBALL_PITCH_LENGTH // 2 + self.radius + 1
                 self.direction = 180 - self.direction
-            if self.x > utils.FOOTBALL_PITCH_LENGTH // 2 - self.radius:
+            elif self.x > utils.FOOTBALL_PITCH_LENGTH // 2 and not (-utils.GOAL_WIDTH // 2 <= self.y <= utils.GOAL_WIDTH // 2):
                 self.x = utils.FOOTBALL_PITCH_LENGTH // 2 - self.radius - 1
                 self.direction = 180 - self.direction
-            if self.y < -utils.FOOTBALL_PITCH_WIDTH // 2 + self.radius:
-                self.y = -utils.FOOTBALL_PITCH_WIDTH // 2 + self.radius + 1
-                self.direction = (self.direction + 180) % 360
-                self.direction = 180 - self.direction
-            if self.y > utils.FOOTBALL_PITCH_WIDTH // 2 - self.radius:
-                self.y = utils.FOOTBALL_PITCH_WIDTH // 2 - self.radius - 1
-                self.direction = (self.direction + 180) % 360
-                self.direction = 180 - self.direction
-        elif self.owner.direction is not None:
-            #self.x = self.owner.x + 12
-            #self.y = self.owner.y + 12
-            self.x = self.owner.x + int(10 * math.cos(self.owner.direction))
-            self.y = self.owner.y + int(10 * math.cos(self.owner.direction))  #这里为了避免球权无法交换设置了初始位置差，具体数值和方法需要讨论
 
+            # Boundary conditions for top and bottom
+            if self.y < -utils.FOOTBALL_PITCH_WIDTH // 2:
+                self.y = -utils.FOOTBALL_PITCH_WIDTH // 2 + self.radius + 1
+                self.direction = -self.direction
+            elif self.y > utils.FOOTBALL_PITCH_WIDTH // 2:
+                self.y = utils.FOOTBALL_PITCH_WIDTH // 2 - self.radius - 1
+                self.direction = -self.direction
         else:
-            self.x = self.owner.x + 12
-            self.y = self.owner.y + 12
+            # Logic when the ball is with a player
+            self.x = self.owner.x + int(10 * math.cos(math.radians(self.owner.direction)))
+            self.y = self.owner.y + int(10 * math.sin(math.radians(self.owner.direction)))
+
 
     @property
     def info(self):
