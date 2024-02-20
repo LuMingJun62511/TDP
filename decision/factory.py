@@ -12,7 +12,7 @@ def get_decisions(runner, red_responses, blue_responses):
     for blue_response in blue_responses:
         blue_response['player_color'] = 'blue'
         if 'direction' in blue_response:
-            blue_response['direction'] = (blue_response['direction'] + 180) % 360
+            blue_response['direction'] = blue_response['direction']
         if 'destination' in blue_response:
             blue_response['destination'] = {
                 'x': blue_response['destination']['x'],
@@ -33,6 +33,7 @@ def _decision_factory(runner, decision):
             has_ball=decision['has_ball'],
         )
     if decision['type'] == 'kick':
+        print(decision['direction'],"工厂获取到的方向")
         return KickDecision(
             runner=runner,
             player_number=decision['player_number'],
