@@ -20,3 +20,5 @@ class KickDecision(Decision):
         self.runner.ball.owner = None
         self.runner.ball.direction = self.direction
         self.runner.ball.speed = self.power
+        
+        print(self.runner.ball.direction)

@@ -1,5 +1,5 @@
 # forward.py
-from utils import get_direction, get_distance
+from utils import get_direction, get_distance,how_to_grab
 
 from models import player
 import heapq
@@ -17,19 +17,26 @@ class Forward(player.Player):
         if not self.own_half(ball):
             if self.is_closest_to_ball(players, ball):
                 if self.owns_ball(ball):
-                    #pass_decision = self.pass_to_teammates(players, ball)
-                    pass_decision = self.find_best_receiver(players,opponent_players)
-                    decisions.append(pass_decision if pass_decision else self.attempt_to_score(ball))
+                    if self.opponent_in_randius(opponent_players):
+                        decisions.append(self.random_kick_out(opponent_players))
+                    else:
+                        pass_decision = self.pass_to_teammates(players,opponent_players)
+                        decisions.append(pass_decision if pass_decision else self.attempt_to_score(ball))
+                        #pass_decision = self.pass_to_teammates(players, ball)
+                    
                 else:
                     decisions.append(self.intercept_ball(ball,players,opponent_players))
-            elif self.in_strategic_position():
+            elif self.in_strategic_position(ball,players,opponent_players):
                 decisions.append(self.face_ball_direction(ball))
             else:
                 decisions.append(self.move_to_strategic_position(strategic_position))
-        elif self.in_strategic_position():
+        elif self.in_strategic_position(ball,players,opponent_players):
             decisions.append(self.face_ball_direction(ball))
         elif self.owns_ball(ball):
-            decisions.append(self.attempt_to_score(ball))
+            if self.opponent_in_randius(opponent_players):
+                decisions.append(self.random_kick_out(opponent_players))
+            else:
+                decisions.append(self.attempt_to_score(ball))
         else:
             decisions.append(self.move_to_strategic_position(strategic_position))
          
@@ -51,9 +58,9 @@ class Forward(player.Player):
         # Example action to attempt scoring
         #print(f"Forward {self.number} attempting to score")
         if self.color == 'red':
-            goal_position = {'x': 350, 'y': 0}
+            goal_position = {'x': 450, 'y': 0}
         else:
-            goal_position = {'x': -350, 'y': 0}
+            goal_position = {'x': -450, 'y': 0}
         direction = get_direction({'x': self.x, 'y': self.y}, goal_position)
         if self.in_shoot_area():
             return {
@@ -66,7 +73,7 @@ class Forward(player.Player):
             return self.move_towards_goal(ball)
     
     def in_shoot_area(self):
-        if (self.color == 'red' and self.x > 300) or (self.color == 'blue' and self.x < -300):
+        if (self.color == 'red' and self.x > 450) or (self.color == 'blue' and self.x < -450):
             return True  #需要定义射门区域
         return False
 
@@ -79,6 +86,8 @@ class Forward(player.Player):
             elif ball['owner_color'] == self.color and ball['owner_number'] != self.number:
                 # Scenario when we own the ball or are closest to it
                 return self.calculate_offensive_strategic_position(ball, players,opponent_players)
+        elif self.owns_ball(ball):
+            return self.calculate_offensive_strategic_position(ball,players,opponent_players)
         else:
             return self.calculate_defensive_strategic_position(ball,players,opponent_players)
 
@@ -96,10 +105,11 @@ class Forward(player.Player):
         # Implement logic from documentation
         return self.calculate_a_star_offensive_position(ball,players,opponent_players)  # Placeholder logic  
     
-    def in_strategic_position(self):
+    def in_strategic_position(self,ball,players,opponent_players):
         # Check if the defender is in a strategic position
-        strategic_x_min, strategic_x_max = 400, 0
-        strategic_y_min, strategic_y_max = 100, 100
+        strategic_pos = self.calculate_strategic_position(ball,players,opponent_players)
+        strategic_x_min, strategic_x_max = strategic_pos['x']-100,strategic_pos['x']+100
+        strategic_y_min, strategic_y_max = strategic_pos['y']-100,strategic_pos['y']+100
         return strategic_x_min <= self.x <= strategic_x_max and strategic_y_min <= self.y <= strategic_y_max
 
 
@@ -115,6 +125,23 @@ class Forward(player.Player):
 
     def owns_ball(self, ball):
         return ball['owner_number'] == self.number
+    
+    def opponent_in_randius(self,opponent_players):
+        for player in opponent_players:
+            print(get_distance(player,{'x':self.x,'y':self.y}))
+            if get_distance(player,{'x':self.x,'y':self.y}) <= 100:
+                return player['number']
+        return None
+    
+    def random_kick_out(self,opponent_players):
+        print("随机踢出")
+        return{      
+            'type': 'kick',
+            'player_number': self.number,
+            'direction': how_to_grab({'x': self.x, 'y': self.y},opponent_players),
+            'power': 50,  # Power might be adjusted based on distance to goal
+        }
+
     
     def pass_to_teammates(self, players, ball):
         most_advanced_teammate = None
@@ -142,17 +169,19 @@ class Forward(player.Player):
         best_receiver = None
         min_opponent_distance = float('inf')
         min_goal_distance = float('inf')
+        min_pass_distance = 200
 
         for player in players:
             if player['role'] != 'goalkeeper':
                 opponent_distance = min([get_distance(player, opponent) for opponent in opponent_players])
                 goal_distance = get_distance(player, {'x': 450 if self.color == 'red' else -450, 'y': 0})
-                if opponent_distance > min_opponent_distance or (opponent_distance == min_opponent_distance and goal_distance < min_goal_distance):
+                team_distance = get_distance(player,{'x':self.x,'y':self.y})
+                if opponent_distance > min_opponent_distance + 100 or (opponent_distance == min_opponent_distance and goal_distance < min_goal_distance and team_distance > min_pass_distance):
                     best_receiver = player
                     min_opponent_distance = opponent_distance
                     min_goal_distance = goal_distance
-
-        if best_receiver:
+        
+        if best_receiver['number'] != self.number:
             direction_to_receiver = get_direction({'x': self.x, 'y': self.y}, {'x': best_receiver['x'], 'y': best_receiver['y']})
             return {
                 'type': 'kick',
@@ -196,8 +225,8 @@ class Forward(player.Player):
         """Check if this defender is the closest to the ball among all defenders."""
         own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         #defenders = [players[1],players[2]]
-        defenders = [player for player in players if player['role'] == 'defender']
-        for player in defenders:
+        forwards = [player for player in players if player['role'] == 'forward']
+        for player in forwards:
             if player['number'] != self.number:
                 if get_distance({'x': player['x'], 'y': player['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
                     return False
@@ -255,7 +284,7 @@ class Forward(player.Player):
                     # 调用代价函数计算新的代价
                     new_cost += self.heuristic(neighbor, goal_node, players, opponent_players)
                     heapq.heappush(open_set, (new_cost, neighbor))
-        print(current)
+        #print(current)
         # Defensive position not found, return default position
         return self.default_strategic_position()
 
@@ -284,7 +313,7 @@ class Forward(player.Player):
                     heapq.heappush(open_set, (new_cost, neighbor))
 
         # Offensive position not found, return default position
-        print(current)
+        #print(current)
         return self.default_strategic_position()
 
     def heuristic(self,current_position, goal_position, players, opponent_players):

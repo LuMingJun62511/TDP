@@ -17,8 +17,6 @@ def get_distance(p1, p2):
 
 def play(red_players, blue_players, ball, scoreboard):
     decisions = []
-    own_half = (-450,0)
-    strategic_position = {'x':-200,'y':100}
     
     ## if role is defender, move towards the ball
     for player in blue_players:

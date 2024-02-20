@@ -29,7 +29,7 @@ def get_direction(p1, p2):
 def get_distance(p1, p2):
     return int(((p1['x'] - p2['x'] ) ** 2 + (p1['y'] - p2['y'] ) ** 2) ** 0.5)
 
-def _cal_angle(player1, player2):
+def cal_angle(player1, player2):
     delta_x = player2['x'] - player1['x']
     delta_y = player2['y'] - player1['y']
     # delta_x = player2.x - player1.x
@@ -39,13 +39,13 @@ def _cal_angle(player1, player2):
     return angle_degrees
 
 
-def _just_grab(player1,players):
+def just_grab(player1,players):
     for player in players:
         if get_distance(player1,player) < 20:
             return False
     return True
 
-def _how_to_grab(player1,players):
+def how_to_grab(player1,players):
     # player_position = (player1.x,player1.y)
     player_position = (player1['x'],player1['y'])
     # 定义球场划分的网格大小
@@ -69,6 +69,7 @@ def _how_to_grab(player1,players):
         kick_directions.append(direction_degree)
     if kick_directions:
         random_direction = random.choice(kick_directions)
+        print(random_direction)
         return random_direction
     else:
         print("没有可用的方向")
