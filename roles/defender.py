@@ -14,7 +14,6 @@ class Defender(Player):
         strategic_position = self.calculate_strategic_position(ball, players)
         
         if self.own_half(ball):
-            #print(ball['x'],ball['y'],"当前球的位置")
             if ball['owner_color'] == self.color:
                 if self.owns_ball(ball):
                     pass_decision = self.pass_to_teammates(players, ball)
@@ -28,11 +27,18 @@ class Defender(Player):
                     decisions.append(self.move_to_strategic_position(strategic_position))
             elif self.is_closest_to_ball(players,ball): 
                 decisions.append(self.intercept_ball(ball,players))
-        elif not self.in_strategic_position():
-            decisions.append(self.move_to_strategic_position(strategic_position))
+        #elif not self.in_strategic_position():
+            #decisions.append(self.move_to_strategic_position(strategic_position))
+        elif self.owns_ball(ball):
+            pass_decision = self.pass_to_teammates(players, ball)
+            if pass_decision:
+                #print("Defender is passing the ball")
+                decisions.append(pass_decision)
+            else:
+                #print("Defender is moving towards goal")
+                decisions.append(self.move_to_strategic_position(strategic_position))
         else:
-            decisions.append(self.face_ball_direction(ball))
-
+            decisions.append(self.move_to_strategic_position(strategic_position))
         return decisions
     
     def calculate_strategic_position(self, ball, players):
@@ -74,6 +80,7 @@ class Defender(Player):
             supporting_x = min(self.x + 100, 300)  # Example logic to move forward but not too close to the attack
             supporting_y = self.y  # Stay in line with current y position to maintain width
             return {'x': supporting_x, 'y': supporting_y}
+    
     
     def in_strategic_position(self):
         # Check if the defender is in a strategic position

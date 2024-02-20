@@ -1,6 +1,7 @@
 import math
 from utils import utils
 import random
+from utils import SCREEN_LENGTH,SCREEN_WIDTH
 from roles.goalkeeper import GoalKeeper
 from roles.defender import Defender
 from roles.forward import Forward
@@ -16,11 +17,16 @@ def get_distance(p1, p2):
 
 def play(red_players, blue_players, ball, scoreboard):
     decisions = []
-    own_half = (-450,0)
-    strategic_position = {'x':-200,'y':100}
     
     ## if role is defender, move towards the ball
     for player in blue_players:
+        field_map_blue = {
+            'goal': {'x': -450, 'y': 0},  # 例如，这里是球门的位置
+            'opponent_goal': {'x': 450, 'y': 0},  # 对手的球门位置
+            'width': SCREEN_LENGTH,  # 球场宽度
+            'height': SCREEN_WIDTH,  # 球场高度
+            'cost': [[1, 1, 1], [1, 1, 1], [1, 1, 1]]  # 成本地图，用于A*算法
+        }
         if player['role'] == 'goalkeeper':
 
         # Depending on the role, call the appropriate decision-making function
@@ -39,7 +45,7 @@ def play(red_players, blue_players, ball, scoreboard):
             # This could involve moving towards the goal, attempting shots, or positioning for passes
             # Placeholder for forward decision logic
             forward = Forward(color='blue',**player)
-            decisions.extend(forward.decide_action(ball, blue_players,red_players))
+            decisions.extend(forward.decide_action(ball, blue_players,red_players,field_map_blue))
         else:
             print(f"Unrecognized player role for player {player['number']}")
 
