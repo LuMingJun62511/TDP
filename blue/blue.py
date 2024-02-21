@@ -20,32 +20,27 @@ def play(red_players, blue_players, ball, scoreboard):
     
     ## if role is defender, move towards the ball
     for player in blue_players:
-        field_map_blue = {
-            'goal': {'x': -450, 'y': 0},  # 例如，这里是球门的位置
-            'opponent_goal': {'x': 450, 'y': 0},  # 对手的球门位置
-            'width': SCREEN_LENGTH,  # 球场宽度
-            'height': SCREEN_WIDTH,  # 球场高度
-            'cost': [[1, 1, 1], [1, 1, 1], [1, 1, 1]]  # 成本地图，用于A*算法
-        }
         if player['role'] == 'goalkeeper':
 
         # Depending on the role, call the appropriate decision-making function
         #if isinstance(player['role'], goalkeeper.GoalKeeper):
             goalkeeper = GoalKeeper(color='blue',**player)
             decisions.extend(goalkeeper.decide_action(ball, blue_players))
+
         elif player['role'] == 'defender':
             # Defenders make decisions based on ball possession and strategic positioning
             #print('player is defender')
             defender = Defender(color='blue',**player)
             decisions.extend(defender.decide_action(ball, blue_players))
-    
+            #pass
         #elif isinstance(player['role'], forward.Forward):
         elif player['role'] == 'forward':
             # Forwards could have their own logic for attacking plays or positioning
             # This could involve moving towards the goal, attempting shots, or positioning for passes
             # Placeholder for forward decision logic
             forward = Forward(color='blue',**player)
-            decisions.extend(forward.decide_action(ball, blue_players,red_players,field_map_blue))
+            decisions.extend(forward.decide_action(ball, blue_players,red_players))
+            #pass
         else:
             print(f"Unrecognized player role for player {player['number']}")
 

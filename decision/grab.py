@@ -3,26 +3,6 @@ import exception
 import utils
 from .decision import Decision
 
-'''
-class GrabDecision(Decision):
-    def __init__(self, runner, player_number, player_color):
-        super().__init__(runner, player_number, player_color)
-
-    def perform(self):
-        if self._can_grab():
-            self.runner.ball.owner = self.player
-            self.runner.ball.speed = 0
-            self.runner.ball.direction = None
-
-    def _can_grab(self):
-        grab_radius = self.player.radius + self.runner.ball.radius
-        distance = utils.distance(self.runner.ball, self.player)
-        r = random.randint(0, 9)
-        if distance < grab_radius and (r < 5 or self.runner.ball.owner is None):
-            return True
-        return False
-'''
-
 class GrabDecision(Decision):
     def __init__(self, runner, player_number, player_color,direction):
         super().__init__(runner, player_number, player_color)
@@ -54,7 +34,7 @@ class GrabDecision(Decision):
         if closest_player is not None:
             self.runner.ball.owner = closest_player
             self.runner.ball.direction = closest_player.direction
-            print("当前持球人是",closest_player.color,closest_player.number)
-                
+            print("当前持球人是",self.runner.ball.owner.color,self.runner.ball.owner.number)
+
 
 

@@ -11,7 +11,7 @@ class Defender(Player):
     def decide_action(self, ball, players):
         decisions = []
         # Define the strategic position based on the ball's location and possession status
-        strategic_position = self.calculate_strategic_position(ball, players)
+        #strategic_position = self.calculate_strategic_position(ball, players)
         
         if self.own_half(ball):
             if ball['owner_color'] == self.color:
@@ -24,7 +24,8 @@ class Defender(Player):
                         #print("Defender is moving towards goal")
                         decisions.append(self.move_towards_goal(ball))
                 else:
-                    decisions.append(self.move_to_strategic_position(strategic_position))
+                    #decisions.append(self.move_to_strategic_position(self.calculate_strategic_position(ball,players)))
+                    decisions.append(self.move_to_middle(ball,players))
             elif self.is_closest_to_ball(players,ball): 
                 decisions.append(self.intercept_ball(ball,players))
         #elif not self.in_strategic_position():
@@ -36,9 +37,12 @@ class Defender(Player):
                 decisions.append(pass_decision)
             else:
                 #print("Defender is moving towards goal")
-                decisions.append(self.move_to_strategic_position(strategic_position))
+                decisions.append(self.move_towards_goal(ball))
+        #elif self.in_strategic_position():
+            #decisions.append(self.face_ball_direction(strategic_position))
         else:
-            decisions.append(self.move_to_strategic_position(strategic_position))
+            #decisions.append(self.move_to_strategic_position(self.calculate_strategic_position(ball,players)))
+            decisions.append(self.move_to_middle(ball,players))
         return decisions
     
     def calculate_strategic_position(self, ball, players):
@@ -53,6 +57,7 @@ class Defender(Player):
         else:
             # Default strategic position when the ball is not on our half
             return self.default_strategic_position()
+       
 
     def default_strategic_position(self):
         # Return a default strategic position based on the side of the field
@@ -61,13 +66,14 @@ class Defender(Player):
     def calculate_defensive_strategic_position(self, ball, players):
         # Calculates defensive strategic position based on the ball's location and potential goal threats
         # Example logic: Positioning based on the midpoint between the ball and the most threatened goalpost
-        goal_x = -460 if self.color == 'red' else 460
+        goal_x = -450 if self.color == 'red' else 450
         goal_y = 0
         midpoint_x = (ball['x'] + goal_x) / 2
         midpoint_y = (ball['y'] + goal_y) / 2
         # Adjustments to ensure the defender stays within a defensive zone
-        adjusted_x = max(min(midpoint_x, -100), -350)  # Example adjustment
-        adjusted_y = max(min(midpoint_y, 100), -100)
+        adjusted_x = max(min(midpoint_x, -300), -350)  # Example adjustment
+        adjusted_y = max(min(midpoint_y, 300), -100)
+        print({'x': adjusted_x, 'y': adjusted_y})
         return {'x': adjusted_x, 'y': adjusted_y}
 
     def calculate_offensive_strategic_position(self, ball, players):
@@ -79,6 +85,7 @@ class Defender(Player):
             # Find a position that supports the attack or prepares for a pass
             supporting_x = min(self.x + 100, 300)  # Example logic to move forward but not too close to the attack
             supporting_y = self.y  # Stay in line with current y position to maintain width
+            print({'x': supporting_x, 'y': supporting_y})
             return {'x': supporting_x, 'y': supporting_y}
     
     
@@ -104,8 +111,23 @@ class Defender(Player):
     #     # Adjusted to use 'x' and 'y' directly
     #     return get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']}) <= 10
 
+    def move_to_middle(self,ball,players):
+        for player in players:
+            if player['role'] == 'defender' and player['number'] != self.number:
+                another_defender = player
+        destination = {'x':(ball['x'] + another_defender['x']) / 2,'y':(ball['y'] + another_defender['y']) / 2}
+        return {
+            'type': 'move',
+            'player_number': self.number,
+            'destination': destination,
+            'direction': get_direction({'x': self.x, 'y': self.y},destination),
+            'speed': 7,  # Adjust speed based on the urgency of repositioning
+            'has_ball':False
+        }
+
     def owns_ball(self, ball):
-        return ball['owner_number'] == self.number
+        return ball['owner_number'] == self.number and ball['owner_color'] == self.color
+    
 
     # def execute_bounce_action(self, ball):
     #     direction_away_from_ball = get_direction({'x': ball['x'], 'y': ball['y']}, {'x': self.x, 'y': self.y})

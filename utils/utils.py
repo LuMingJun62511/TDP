@@ -48,27 +48,30 @@ def just_grab(player1,players):
 def how_to_grab(player1,players):
     # player_position = (player1.x,player1.y)
     player_position = (player1['x'],player1['y'])
+    goal = {'x':0,'y':0} 
     # 定义球场划分的网格大小
-    grid_width = 50
-    grid_height = 50
+    grid_width = 100
+    grid_height = 80
     # 确定周围的空区域
     empty_regions = []
     for x in range(0, SCREEN_LENGTH, grid_width):
         for y in range(0, SCREEN_WIDTH, grid_height):
             region_center = (x + grid_width // 2, y + grid_height // 2)
-            is_empty = all(math.sqrt((player['x'] - region_center[0]) ** 2 + (player['y'] - region_center[1]) ** 2) > PLAYER_RADIUS for player in players)
+            is_empty = all(math.sqrt((player['x'] - region_center[0]) ** 2 + (player['y'] - region_center[1]) ** 2) > 100 for player in players)
             # is_empty = all(math.sqrt((player.x - region_center[0]) ** 2 + (player.y - region_center[1]) ** 2) > PLAYER_RADIUS for player in players)
             if is_empty:
-                empty_regions.append(region_center)
+                if -400 <= region_center[0] <= 400 and -250 <= region_center[1] <= 250:
+                    empty_regions.append(region_center)
 
     # 计算方向
     kick_directions = []
     for region_center in empty_regions:
         direction_angle = math.atan2(region_center[1] - player_position[1], region_center[0] - player_position[0])
-        direction_degree = math.degrees(direction_angle)
-        kick_directions.append(direction_degree)
+        if direction_angle >= 120:
+            direction_degree = math.degrees(direction_angle)
+            kick_directions.append(direction_degree)
     if kick_directions:
         random_direction = random.choice(kick_directions)
         return random_direction
     else:
-        print("没有可用的方向")
+        return get_direction(player1,goal)

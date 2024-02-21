@@ -84,7 +84,8 @@ class GoalKeeper(player.Player):
                 'player_number': self.number,
                 'destination': destination,
                 'direction': direction_to_ball,
-                'speed': speed  # This speed can be adjusted based on gameplay needs
+                'speed': speed,  # This speed can be adjusted based on gameplay needs
+                'has_ball':False
             }
         else:
             return self.grab_ball(ball)
@@ -117,9 +118,7 @@ class GoalKeeper(player.Player):
         return closest_player
 
     def adjust_self(self, players, ball, GOALKEEPER_WIDTH, GOALKEEPER_DEPTH):
-        goal_x = -460 if self.color == 'red' else 460
-        goal_y = 0  # Center of the goal
-        goal_x = -460 if self.color == 'red' else 460
+        goal_x = -460 if self.color == 'red' else 450
         goal_y = 0  # Center of the goal
         player_x, player_y = self.x, self.y
         ball_x, ball_y = ball['x'], ball['y']

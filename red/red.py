@@ -18,13 +18,6 @@ def get_distance(p1, p2):
     return int(((p1['x'] - p2['x']) ** 2 + (p1['y'] - p2['y']) ** 2) ** 0.5)
 
 def play(red_players, blue_players, ball, scoreboard):
-    field_map_red = {
-            'goal': {'x': 450, 'y': 0},  # 例如，这里是球门的位置
-            'opponent_goal': {'x': -450, 'y': 0},  # 对手的球门位置
-            'width': SCREEN_LENGTH,  # 球场宽度
-            'height': SCREEN_WIDTH,  # 球场高度
-            'cost': [[1, 1, 1], [1, 1, 1], [1, 1, 1]]  # 成本地图，用于A*算法
-        }
     decisions = []   
     # Loop through each player in the red team
     for player in red_players:
@@ -44,7 +37,7 @@ def play(red_players, blue_players, ball, scoreboard):
             # This could involve moving towards the goal, attempting shots, or positioning for passes
             # Placeholder for forward decision logic
             forwrad = Forward(color='red',**player)
-            decisions.extend(forwrad.decide_action(ball, red_players,blue_players,field_map_red))           
+            decisions.extend(forwrad.decide_action(ball, red_players,blue_players))           
         else:
             print(f"Unrecognized player role for player {player['number']}")
 

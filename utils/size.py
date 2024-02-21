@@ -40,7 +40,7 @@ VERTICAL_MARGIN = make_even_number(int((PLAYER_RADIUS + BALL_RADIUS) * 2.5)) # 4
 HORIZONTAL_MARGIN = make_even_number(int((PLAYER_RADIUS + BALL_RADIUS) * 2.5)) # 46
 #
 SCREEN_LENGTH = 1100 #这个是用来画图的，根据这个多长把自己画在某处
-SCREEN_WIDTH = 742
+SCREEN_WIDTH = 800
 
 GOALKEEPER_WIDTRH = make_even_number(main_size * 16) #160
 GOALKEEPER_DEPTH = make_even_number(main_size * 21) #210

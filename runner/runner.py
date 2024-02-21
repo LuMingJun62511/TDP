@@ -1,6 +1,6 @@
 import random
 import time
-from threading import Thread
+from threading import Thread,Lock
 
 import pygame as pg
 
@@ -30,7 +30,10 @@ class Runner:
         self._init_players()
         self.scoreboard = models.Scoreboard()
         self._show_and_increase_cycle_number()
+        self.red_lock = Lock()  # 创建红队的锁
+        self.blue_lock = Lock()  # 创建蓝队的锁
 
+    '''
     def run(self):
         global actions
         global red_responses, blue_responses
@@ -53,7 +56,6 @@ class Runner:
                 continue
             red_responses = None
             blue_responses = None
-            test_responses = None
 
             red_thread = Thread(
                 target=red_fire,
@@ -69,6 +71,64 @@ class Runner:
                 time.sleep(self.config.delay_amount)
                 if red_responses is not None and blue_responses is not None:
                     break
+            if not isinstance(red_responses, list):
+                red_responses = []
+            if not isinstance(blue_responses, list):
+                blue_responses = []
+
+            self.perform_decisions(red_responses, blue_responses)
+            self.decrement_ban_cycles()
+            self.ball.move()
+            self.check_if_scored()
+            self.check_if_the_bus_is_parked()
+            self.check_if_ball_is_crowded()
+            self.adjust_overlapping_players()  # Adjust overlapping players to prevent freezing
+
+            self._show_and_increase_cycle_number()
+            if self.scoreboard.cycle_number > self.config.max_cycle:
+                if self.config.additional_delay:
+                    time.sleep(4)
+                end = True
+    '''
+    def run(self):
+        global actions
+        global red_responses, blue_responses
+        end = False
+        pause = False
+        while not end:
+            # events: pause and quit
+            for event in pg.event.get():
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_p:
+                        pause = not pause
+                        print('pause')
+                    if event.key == pg.K_ESCAPE:
+                        end = True
+                if event.type == pg.QUIT:
+                    end = True
+            if pause:
+                continue
+            if self.scoreboard.cycle_number > self.config.max_cycle:
+                continue
+            red_responses = None
+            blue_responses = None
+
+            red_thread = Thread(
+                target=red_fire,
+                args=self._get_args_for_red_team(),
+            )
+            blue_thread = Thread(
+                target=blue_fire,
+                args=self._get_args_for_blue_team(),
+            )
+            blue_thread.start()
+            red_thread.start()
+            for _ in range(self.config.delay_count):
+                time.sleep(self.config.delay_amount)
+                with self.red_lock:  # 加锁
+                    with self.blue_lock:  # 加锁
+                        if red_responses is not None and blue_responses is not None:
+                            break
             if not isinstance(red_responses, list):
                 red_responses = []
             if not isinstance(blue_responses, list):
@@ -175,7 +235,7 @@ class Runner:
         self.kick_players(blue_players_arround_ball, utils.ALLOWED_PLAYERS_AROUND_BALL_NUMBER, utils.BALL_CROWDED_BAN_CYCLES)
 
     def check_if_scored(self):
-        if self.ball.x + self.ball.radius <= -utils.FOOTBALL_SITE_LENGTH // 2 + utils.GOAL_DEPTH and \
+        if self.ball.x + self.ball.radius  <= -utils.FOOTBALL_PITCH_LENGTH // 2 + utils.GOAL_DEPTH and \
                 (-utils.GOAL_WIDTH // 2 <= self.ball.y <= utils.GOAL_WIDTH // 2):
             self.scoreboard.blue_score += 1
             self._init_players()
@@ -186,7 +246,7 @@ class Runner:
             self.red_players[utils.PLAYER_COUNT - 1].x, self.red_players[utils.PLAYER_COUNT - 1].y = self.ball.x, self.ball.y
             if self.config.additional_delay:
                 time.sleep(1)
-        if self.ball.x - self.ball.radius >= utils.FOOTBALL_SITE_LENGTH // 2 - utils.GOAL_DEPTH and \
+        if self.ball.x - self.ball.radius>= utils.FOOTBALL_PITCH_LENGTH // 2 - utils.GOAL_DEPTH and \
                 (-utils.GOAL_WIDTH // 2 <= self.ball.y <= utils.GOAL_WIDTH // 2):
             self.scoreboard.red_score += 1
             self._init_players()
