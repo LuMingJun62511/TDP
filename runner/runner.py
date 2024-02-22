@@ -33,63 +33,6 @@ class Runner:
         self.red_lock = Lock()  # 创建红队的锁
         self.blue_lock = Lock()  # 创建蓝队的锁
 
-    '''
-    def run(self):
-        global actions
-        global red_responses, blue_responses
-        end = False
-        pause = False
-        while not end:
-            # events: pause and quit
-            for event in pg.event.get():
-                if event.type == pg.KEYDOWN:
-                    if event.key == pg.K_p:
-                        pause = not pause
-                        print('pause')
-                    if event.key == pg.K_ESCAPE:
-                        end = True
-                if event.type == pg.QUIT:
-                    end = True
-            if pause:
-                continue
-            if self.scoreboard.cycle_number > self.config.max_cycle:
-                continue
-            red_responses = None
-            blue_responses = None
-
-            red_thread = Thread(
-                target=red_fire,
-                args=self._get_args_for_red_team(),
-            )
-            blue_thread = Thread(
-                target=blue_fire,
-                args=self._get_args_for_blue_team(),
-            )
-            blue_thread.start()
-            red_thread.start()
-            for _ in range(self.config.delay_count):
-                time.sleep(self.config.delay_amount)
-                if red_responses is not None and blue_responses is not None:
-                    break
-            if not isinstance(red_responses, list):
-                red_responses = []
-            if not isinstance(blue_responses, list):
-                blue_responses = []
-
-            self.perform_decisions(red_responses, blue_responses)
-            self.decrement_ban_cycles()
-            self.ball.move()
-            self.check_if_scored()
-            self.check_if_the_bus_is_parked()
-            self.check_if_ball_is_crowded()
-            self.adjust_overlapping_players()  # Adjust overlapping players to prevent freezing
-
-            self._show_and_increase_cycle_number()
-            if self.scoreboard.cycle_number > self.config.max_cycle:
-                if self.config.additional_delay:
-                    time.sleep(4)
-                end = True
-    '''
     def run(self):
         global actions
         global red_responses, blue_responses
@@ -289,23 +232,17 @@ class Runner:
         for blue_player in self.blue_players:
             blue_players_info.append(blue_player.info)
         ball_info = self.ball.info
-        scoreboard_info = self.scoreboard.info
-        return red_players_info, blue_players_info, ball_info, scoreboard_info
+        return red_players_info, blue_players_info, ball_info
 
     def _get_args_for_blue_team(self):
         red_players_info = []
         blue_players_info = []
         for red_player in self.red_players:
-            #red_players_info.append(red_player.info_reversed)
             red_players_info.append(red_player.info)
         for blue_player in self.blue_players:
-            #blue_players_info.append(blue_player.info_reversed)
             blue_players_info.append(blue_player.info)
         ball_info = self.ball.info
-        #ball_info = self.ball.info_reversed
-        scoreboard_info = self.scoreboard.info
-        #scoreboard_info = self.scoreboard.info_reversed
-        return red_players_info, blue_players_info, ball_info, scoreboard_info
+        return red_players_info, blue_players_info, ball_info
 
     def _show_and_increase_cycle_number(self):
         if self.config.graphical_output:
@@ -327,7 +264,9 @@ class Runner:
 
     def _draw_football_pitch(self):
         # DRAW GOALS
-        red_goal_pygame_x = utils.HORIZONTAL_MARGIN - utils.GOAL_DEPTH
+        # 红队球门坐上角
+        red_goal_pygame_x = utils.HORIZONTAL_MARGIN + utils.BORDER_STRIP_WIDTH - utils.GOAL_DEPTH
+        # red_goal_pygame_x = utils.HORIZONTAL_MARGIN - utils.GOAL_DEPTH
         red_goal_pygame_y = utils.SCREEN_WIDTH // 2 - utils.GOAL_WIDTH // 2
         pg.draw.rect(
             self.screen,
@@ -335,7 +274,9 @@ class Runner:
             (red_goal_pygame_x, red_goal_pygame_y, utils.GOAL_DEPTH, utils.GOAL_WIDTH),
             0,
         )
-        blue_goal_pygame_x = utils.SCREEN_LENGTH - utils.HORIZONTAL_MARGIN
+        # 蓝队球门坐上角
+        blue_goal_pygame_x = utils.SCREEN_LENGTH - utils.HORIZONTAL_MARGIN - utils.BORDER_STRIP_WIDTH
+        # blue_goal_pygame_x = utils.SCREEN_LENGTH - utils.HORIZONTAL_MARGIN
         blue_goal_pygame_y = utils.SCREEN_WIDTH // 2 - utils.GOAL_WIDTH // 2
         pg.draw.rect(
             self.screen,
@@ -343,9 +284,9 @@ class Runner:
             (blue_goal_pygame_x, blue_goal_pygame_y, utils.GOAL_DEPTH, utils.GOAL_WIDTH),
             0,
         )
-
         # DRAW LEFT GOAL AREA (RED GOAL AREA)
-        left_goal_area_pygame_x = utils.HORIZONTAL_MARGIN
+        left_goal_area_pygame_x = utils.HORIZONTAL_MARGIN + utils.BORDER_STRIP_WIDTH
+        # left_goal_area_pygame_x = utils.HORIZONTAL_MARGIN
         left_goal_area_pygame_y = (utils.SCREEN_WIDTH // 2) - (utils.GOAL_AREA_WIDTH // 2)
         pg.draw.rect(
             self.screen,
@@ -355,7 +296,8 @@ class Runner:
         )
 
         # DRAW RIGHT GOAL AREA (BLUE GOAL AREA)
-        right_goal_area_pygame_x = utils.SCREEN_LENGTH - utils.HORIZONTAL_MARGIN - utils.GOAL_AREA_LENGTH
+        right_goal_area_pygame_x = utils.SCREEN_LENGTH - utils.BORDER_STRIP_WIDTH - utils.HORIZONTAL_MARGIN - utils.GOAL_AREA_LENGTH
+        # right_goal_area_pygame_x = utils.SCREEN_LENGTH - utils.HORIZONTAL_MARGIN - utils.GOAL_AREA_LENGTH
         right_goal_area_pygame_y = (utils.SCREEN_WIDTH // 2) - (utils.GOAL_AREA_WIDTH // 2)
         pg.draw.rect(
             self.screen,
@@ -363,6 +305,103 @@ class Runner:
             (right_goal_area_pygame_x, right_goal_area_pygame_y, utils.GOAL_AREA_LENGTH, utils.GOAL_AREA_WIDTH),
             utils.LINE_THICKNESS
         )
+        # 禁区
+        # DRAW PENALTY AREA
+            # LEFT
+        left_x1 = utils.HORIZONTAL_MARGIN + utils.BORDER_STRIP_WIDTH
+        left_x2 = utils.HORIZONTAL_MARGIN + utils.BORDER_STRIP_WIDTH + utils.PENALTY_AREA_LENGTH
+        left_y1 = utils.SCREEN_WIDTH // 2 - utils.PENALTY_AREA_WIDTH // 2
+        left_y2 = utils.SCREEN_WIDTH // 2 + utils.PENALTY_AREA_WIDTH // 2
+        pg.draw.line(
+            self.screen,
+            utils.LINE_COLOR,
+            (left_x1, left_y1),
+            (left_x2, left_y1),
+            utils.LINE_THICKNESS,
+        )
+        pg.draw.line(
+            self.screen,
+            utils.LINE_COLOR,
+            (left_x2, left_y1),
+            (left_x2, left_y2),
+            utils.LINE_THICKNESS,
+        )
+        pg.draw.line(
+            self.screen,
+            utils.LINE_COLOR,
+            (left_x1, left_y2),
+            (left_x2, left_y2),
+            utils.LINE_THICKNESS,
+        )
+            # RIGHT
+        right_x1 = utils.SCREEN_LENGTH - utils.BORDER_STRIP_WIDTH - utils.HORIZONTAL_MARGIN
+        right_x2 = right_x1 - utils.PENALTY_AREA_LENGTH
+        right_y1 = left_y1
+        right_y2 = left_y2
+        pg.draw.line(
+            self.screen,
+            utils.LINE_COLOR,
+            (right_x1, right_y1),
+            (right_x2, right_y1),
+            utils.LINE_THICKNESS,
+        )
+        pg.draw.line(
+            self.screen,
+            utils.LINE_COLOR,
+            (right_x2, right_y1),
+            (right_x2, right_y2),
+            utils.LINE_THICKNESS,
+        )
+        pg.draw.line(
+            self.screen,
+            utils.LINE_COLOR,
+            (right_x1, right_y2),
+            (right_x2, right_y2),
+            utils.LINE_THICKNESS,
+        )
+
+        # DRAW PITCH BOUNDARY
+        boundary_x_left = utils.HORIZONTAL_MARGIN + utils.BORDER_STRIP_WIDTH
+        boundary_x_right = utils.SCREEN_LENGTH - utils.HORIZONTAL_MARGIN - utils.BORDER_STRIP_WIDTH
+        boundary_y_top = utils.VERTICAL_MARGIN + utils.BORDER_STRIP_WIDTH
+        boundary_y_bottom = utils.SCREEN_WIDTH - utils.VERTICAL_MARGIN - utils.BORDER_STRIP_WIDTH
+
+            # 顶部边界线
+        pg.draw.line(
+            self.screen,
+            utils.LINE_COLOR,
+            (boundary_x_left, boundary_y_top),
+            (boundary_x_right, boundary_y_top),
+            utils.LINE_THICKNESS,
+        )
+
+        # 底部边界线
+        pg.draw.line(
+            self.screen,
+            utils.LINE_COLOR,
+            (boundary_x_left, boundary_y_bottom),
+            (boundary_x_right, boundary_y_bottom),
+            utils.LINE_THICKNESS,
+        )
+
+        # 左侧边界线
+        pg.draw.line(
+            self.screen,
+            utils.LINE_COLOR,
+            (boundary_x_left, boundary_y_top),
+            (boundary_x_left, boundary_y_bottom),
+            utils.LINE_THICKNESS,
+        )
+
+        # 右侧边界线
+        pg.draw.line(
+            self.screen,
+            utils.LINE_COLOR,
+            (boundary_x_right, boundary_y_top),
+            (boundary_x_right, boundary_y_bottom),
+            utils.LINE_THICKNESS,
+        )
+
 
         # DRAW CENTER POINT
         pg.draw.circle(
@@ -388,59 +427,8 @@ class Runner:
             (utils.SCREEN_LENGTH // 2 - utils.LINE_THICKNESS // 2, utils.SCREEN_WIDTH - utils.VERTICAL_MARGIN),
             utils.LINE_THICKNESS,
         )
-        # DRAW PENALTY AREA
-            # LEFT
-        left_x1 = utils.HORIZONTAL_MARGIN
-        left_x2 = utils.HORIZONTAL_MARGIN + utils.PENALTY_AREA_LENGTH
-        left_y1 = utils.SCREEN_WIDTH // 2 - utils.PENALTY_AREA_WIDTH // 2
-        left_y2 = utils.SCREEN_WIDTH // 2 + utils.PENALTY_AREA_WIDTH // 2
-        pg.draw.line(
-            self.screen,
-            utils.LINE_COLOR,
-            (left_x1, left_y1),
-            (left_x2, left_y1),
-            utils.LINE_THICKNESS,
-        )
-        pg.draw.line(
-            self.screen,
-            utils.LINE_COLOR,
-            (left_x2, left_y1),
-            (left_x2, left_y2),
-            utils.LINE_THICKNESS,
-        )
-        pg.draw.line(
-            self.screen,
-            utils.LINE_COLOR,
-            (left_x1, left_y2),
-            (left_x2, left_y2),
-            utils.LINE_THICKNESS,
-        )
-            # RIGHT
-        right_x1 = utils.SCREEN_LENGTH - utils.HORIZONTAL_MARGIN
-        right_x2 = right_x1 - utils.PENALTY_AREA_LENGTH
-        right_y1 = left_y1
-        right_y2 = left_y2
-        pg.draw.line(
-            self.screen,
-            utils.LINE_COLOR,
-            (right_x1, right_y1),
-            (right_x2, right_y1),
-            utils.LINE_THICKNESS,
-        )
-        pg.draw.line(
-            self.screen,
-            utils.LINE_COLOR,
-            (right_x2, right_y1),
-            (right_x2, right_y2),
-            utils.LINE_THICKNESS,
-        )
-        pg.draw.line(
-            self.screen,
-            utils.LINE_COLOR,
-            (right_x1, right_y2),
-            (right_x2, right_y2),
-            utils.LINE_THICKNESS,
-        )
+        
+
 
     def _draw_team_names(self):
         utils.write_text_on_pygame_screen(
@@ -517,9 +505,3 @@ class Runner:
         player1.y -= math.sin(angle) * displacement
         player2.x += math.cos(angle) * displacement
         player2.y += math.sin(angle) * displacement
-
-        # Ensure players remain within the game boundaries after adjustment
-        # player1.x = max(min(player1.x, utils.SCREEN_LENGTH - utils.HORIZONTAL_MARGIN), utils.HORIZONTAL_MARGIN)
-        # player1.y = max(min(player1.y, utils.SCREEN_WIDTH - utils.VERTICAL_MARGIN), utils.VERTICAL_MARGIN)
-        # player2.x = max(min(player2.x, utils.SCREEN_LENGTH - utils.HORIZONTAL_MARGIN), utils.HORIZONTAL_MARGIN)
-        # player2.y = max(min(player2.y, utils.SCREEN_WIDTH - utils.VERTICAL_MARGIN), utils.VERTICAL_MARGIN)
