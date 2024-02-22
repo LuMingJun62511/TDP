@@ -6,7 +6,7 @@ from itertools import combinations
 from models import player
 import random
 import heapq
-class Forward(player.Player):
+class BlueForward(player.Player):
     
     def __init__(self, x,y,name, number, color,radius,img=None, ban_cycles=0,role=None,direction=0):
         super().__init__(x,y,name, number, color,radius,img, ban_cycles,role,direction)

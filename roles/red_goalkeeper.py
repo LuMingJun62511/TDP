@@ -6,7 +6,7 @@ import utils
 from utils.size import *
 import math
 
-class GoalKeeper(player.Player):
+class RedGoalKeeper(player.Player):
     def __init__(self, x,y,name, number, color,radius,img=None, ban_cycles=0,role=None,direction=0):
         super().__init__(x,y,name, number, color,radius,img, ban_cycles,role,direction)
 

@@ -4,7 +4,7 @@ from models.player import Player
 import math
 import pprint
 
-class Defender(Player):
+class BlueDefender(Player):
     def __init__(self, x, y, name, number, color, radius, img=None, ban_cycles=0, role=None, direction=0):
         super().__init__(x, y, name, number, color, radius, img, ban_cycles, role, direction)
 
@@ -107,10 +107,6 @@ class Defender(Player):
             'has_ball':False
         }
 
-    # def collision_detection(self, ball):
-    #     # Adjusted to use 'x' and 'y' directly
-    #     return get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']}) <= 10
-
     def move_to_middle(self,ball,players):
         for player in players:
             if player['role'] == 'defender' and player['number'] != self.number:
@@ -128,11 +124,6 @@ class Defender(Player):
     def owns_ball(self, ball):
         return ball['owner_number'] == self.number and ball['owner_color'] == self.color
     
-
-    # def execute_bounce_action(self, ball):
-    #     direction_away_from_ball = get_direction({'x': ball['x'], 'y': ball['y']}, {'x': self.x, 'y': self.y})
-    #     return {'type': 'move', 'player_number': self.number, 'direction': direction_away_from_ball, 'speed': 0}
-
     def pass_to_teammates(self, players, ball):
         most_advanced_teammate = None
         max_advance_x = -float('inf')  # Initialize with a very small number

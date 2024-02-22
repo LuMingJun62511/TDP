@@ -2,9 +2,9 @@ import math
 from utils import utils
 import random
 from utils import SCREEN_LENGTH,SCREEN_WIDTH
-from roles.goalkeeper import GoalKeeper
-from roles.defender import Defender
-from roles.forward import Forward
+from roles.blue_goalkeeper import BlueGoalKeeper
+from roles.blue_defender import BlueDefender
+from roles.blue_forward import BlueForward
 
 def get_direction(p1, p2):
     x = p2['x'] - p1['x']
@@ -24,13 +24,13 @@ def play(red_players, blue_players, ball, scoreboard):
 
         # Depending on the role, call the appropriate decision-making function
         #if isinstance(player['role'], goalkeeper.GoalKeeper):
-            goalkeeper = GoalKeeper(color='blue',**player)
+            goalkeeper = BlueGoalKeeper(color='blue',**player)
             decisions.extend(goalkeeper.decide_action(ball, blue_players))
 
         elif player['role'] == 'defender':
             # Defenders make decisions based on ball possession and strategic positioning
             #print('player is defender')
-            defender = Defender(color='blue',**player)
+            defender = BlueDefender(color='blue',**player)
             decisions.extend(defender.decide_action(ball, blue_players))
             #pass
         #elif isinstance(player['role'], forward.Forward):
@@ -38,7 +38,7 @@ def play(red_players, blue_players, ball, scoreboard):
             # Forwards could have their own logic for attacking plays or positioning
             # This could involve moving towards the goal, attempting shots, or positioning for passes
             # Placeholder for forward decision logic
-            forward = Forward(color='blue',**player)
+            forward = BlueForward(color='blue',**player)
             decisions.extend(forward.decide_action(ball, blue_players,red_players))
             #pass
         else:
