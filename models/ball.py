@@ -6,11 +6,11 @@ import utils
 
 
 class Ball:
-    def __init__(self, x=None, y=None, radius=None, img=None, owner=None, speed=None, direction=0):
+    def __init__(self, x=400, y=200, radius=None, img=None, owner=None, speed=30, direction=0):
         default_ball_image = pg.image.load(utils.BALL_IMG_LINK)
         default_ball_image = pg.transform.scale(default_ball_image, (2 * utils.BALL_RADIUS, 2 * utils.BALL_RADIUS))
         default_ball_image.convert_alpha()
-        self.x = x or -361
+        self.x = x or 0
         self.y = y or 0
         self.radius = radius or utils.BALL_RADIUS
         self.img = img or default_ball_image
@@ -39,20 +39,27 @@ class Ball:
             # Check for goal conditions
             if self.x < -utils.FOOTBALL_PITCH_LENGTH // 2 and not (-utils.GOAL_WIDTH // 2 <= self.y <= utils.GOAL_WIDTH // 2):
                 self.x = -utils.FOOTBALL_PITCH_LENGTH // 2 + self.radius + 1
-                self.direction = 180 - self.direction
+                self.direction = (180 - self.direction) % 360
             elif self.x > utils.FOOTBALL_PITCH_LENGTH // 2 and not (-utils.GOAL_WIDTH // 2 <= self.y <= utils.GOAL_WIDTH // 2):
                 self.x = utils.FOOTBALL_PITCH_LENGTH // 2 - self.radius - 1
-                self.direction = 180 - self.direction
+                self.direction = (180 - self.direction) % 360
 
             # Boundary conditions for top and bottom
             if self.y < -utils.FOOTBALL_PITCH_WIDTH // 2:
                 self.y = -utils.FOOTBALL_PITCH_WIDTH // 2 + self.radius + 1
-                self.direction = -self.direction
+                self.direction = (360 - self.direction) % 360
             elif self.y > utils.FOOTBALL_PITCH_WIDTH // 2:
                 self.y = utils.FOOTBALL_PITCH_WIDTH // 2 - self.radius - 1
-                self.direction = -self.direction
-                self.direction = (self.direction + 180) % 360
-                self.direction = 180 - self.direction
+                self.direction = (360 - self.direction) % 360
+
+            # if self.y < -utils.FOOTBALL_PITCH_WIDTH // 2:
+            #     self.y = -utils.FOOTBALL_PITCH_WIDTH // 2 + self.radius + 1
+            #     self.direction = -self.direction
+            # elif self.y > utils.FOOTBALL_PITCH_WIDTH // 2:
+            #     self.y = utils.FOOTBALL_PITCH_WIDTH // 2 - self.radius - 1
+            #     self.direction = -self.direction
+            #     self.direction = (self.direction + 180) % 360
+            #     self.direction = 180 - self.direction
         elif self.owner.direction is not None:
             print("带球跑",self.owner.color,self.owner.number)
             self.x = self.owner.x + int(10 * math.cos(self.owner.direction))
@@ -67,23 +74,39 @@ class Ball:
             if self.speed < 0:
                 self.speed = 0
                 self.direction = None
+
             # Check for goal conditions
             if self.x < -utils.FOOTBALL_PITCH_LENGTH // 2 and not (-utils.GOAL_WIDTH // 2 <= self.y <= utils.GOAL_WIDTH // 2):
                 self.x = -utils.FOOTBALL_PITCH_LENGTH // 2 + self.radius + 1
-                self.direction = 180 - self.direction
+                self.direction = (180 - self.direction) % 360
             elif self.x > utils.FOOTBALL_PITCH_LENGTH // 2 and not (-utils.GOAL_WIDTH // 2 <= self.y <= utils.GOAL_WIDTH // 2):
                 self.x = utils.FOOTBALL_PITCH_LENGTH // 2 - self.radius - 1
-                self.direction = 180 - self.direction
+                self.direction = (180 - self.direction) % 360
 
             # Boundary conditions for top and bottom
             if self.y < -utils.FOOTBALL_PITCH_WIDTH // 2:
                 self.y = -utils.FOOTBALL_PITCH_WIDTH // 2 + self.radius + 1
-                self.direction = -self.direction
+                self.direction = (360 - self.direction) % 360
             elif self.y > utils.FOOTBALL_PITCH_WIDTH // 2:
                 self.y = utils.FOOTBALL_PITCH_WIDTH // 2 - self.radius - 1
-                self.direction = -self.direction
-                self.direction = (self.direction + 180) % 360
-                self.direction = 180 - self.direction
+                self.direction = (360 - self.direction) % 360
+            # # Check for goal conditions
+            # if self.x < -utils.FOOTBALL_PITCH_LENGTH // 2 and not (-utils.GOAL_WIDTH // 2 <= self.y <= utils.GOAL_WIDTH // 2):
+            #     self.x = -utils.FOOTBALL_PITCH_LENGTH // 2 + self.radius + 1
+            #     self.direction = 180 - self.direction
+            # elif self.x > utils.FOOTBALL_PITCH_LENGTH // 2 and not (-utils.GOAL_WIDTH // 2 <= self.y <= utils.GOAL_WIDTH // 2):
+            #     self.x = utils.FOOTBALL_PITCH_LENGTH // 2 - self.radius - 1
+            #     self.direction = 180 - self.direction
+
+            # # Boundary conditions for top and bottom
+            # if self.y < -utils.FOOTBALL_PITCH_WIDTH // 2:
+            #     self.y = -utils.FOOTBALL_PITCH_WIDTH // 2 + self.radius + 1
+            #     self.direction = -self.direction
+            # elif self.y > utils.FOOTBALL_PITCH_WIDTH // 2:
+            #     self.y = utils.FOOTBALL_PITCH_WIDTH // 2 - self.radius - 1
+            #     self.direction = -self.direction
+            #     self.direction = (self.direction + 180) % 360
+            #     self.direction = 180 - self.direction
         else:
             print("默认")
             self.x = self.owner.x + 12

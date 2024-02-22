@@ -4,7 +4,7 @@ from models import player
 
 PLAYER_COUNT = 5
 
-FRICTION = 5 
+FRICTION = 3 
 MAX_PLAYER_SPEED = PLAYER_RADIUS
 MAX_KICK_POWER = 60 
 
