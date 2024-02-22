@@ -13,9 +13,9 @@ class RedGoalKeeper(player.Player):
     def owns_ball(self, ball):
         return ball['owner_number'] == self.number
 
-    def is_in_own_penalty_area(self):
-        # Assuming the penalty area dimensions are defined somewhere
-        return utils.is_in_penalty_area({'x': self.x, 'y': self.y}, self.color)
+    # def is_in_own_penalty_area(self):
+    #     # Assuming the penalty area dimensions are defined somewhere
+    #     return utils.is_in_penalty_area({'x': self.x, 'y': self.y}, self.color)
     
     def is_in_goal_area(self,ball):
         if self.color == 'red':

@@ -6,7 +6,7 @@ import utils
 
 
 class Ball:
-    def __init__(self, x=400, y=200, radius=None, img=None, owner=None, speed=30, direction=0):
+    def __init__(self, x=None, y=None, radius=None, img=None, owner=None, speed=None, direction=None):
         default_ball_image = pg.image.load(utils.BALL_IMG_LINK)
         default_ball_image = pg.transform.scale(default_ball_image, (2 * utils.BALL_RADIUS, 2 * utils.BALL_RADIUS))
         default_ball_image.convert_alpha()
