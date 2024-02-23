@@ -16,40 +16,43 @@ class RedForward(player.Player):
 
     def decide_action(self, ball, players,opponent_players):
         decisions = []
-        #strategic_position = self.calculate_strategic_position(ball, players,opponent_players)
+        strategic_position = self.calculate_strategic_position(ball, players,opponent_players)
         self.update_cost_map(ball,players,opponent_players)
         #test = self.calculate_a_star_defensive_position(ball,players,opponent_players)
         if not self.own_half(ball):
             if self.is_closest_to_ball(players, ball):
                 if self.owns_ball(ball):
-                    pass_decision = self.pass_to_teammates(players,ball)
-                    if pass_decision:
+                    pass_decision = self.find_best_receiver(players,opponent_players)
+                    if self.in_shoot_area():
+                        decisions.append(self.attempt_to_score(ball))
+                    elif pass_decision:
                         decisions.append(pass_decision)
                     elif self.opponent_in_randius(opponent_players):
                         decisions.append(self.random_kick_out(opponent_players))
                     else:
-                        decisions.append(self.attempt_to_score(ball))
-                else:
-                    print(f"Forward {self.color} {self.number} is closet")
+                        decisions.append(self.move_towards_goal(ball))
+                elif ball['owner_color'] != self.color:
                     decisions.append(self.intercept_ball(ball,players,opponent_players))
             elif self.in_strategic_position(ball,players,opponent_players):
                 decisions.append(self.face_ball_direction(ball))
             else:
-                decisions.append(self.move_to_strategic_position(self.calculate_strategic_position(ball, players,opponent_players)))
+                decisions.append(self.move_to_strategic_position(strategic_position))
 
         elif self.owns_ball(ball):
-            if self.opponent_in_randius(opponent_players):
+            print(f"forward{self.color}{self.number}")
+            pass_decision = self.find_best_receiver(players,opponent_players)              
+            if pass_decision:
+                decisions.append(pass_decision)
+            elif self.opponent_in_randius(opponent_players):
                 decisions.append(self.random_kick_out(opponent_players))
             else:
                 decisions.append(self.attempt_to_score(ball))
+        
         elif self.in_strategic_position(ball,players,opponent_players):
-            if self.is_closest_to_ball(players,ball):
-                decisions.append(self.intercept_ball(ball,players,opponent_players))
-            else:
                 decisions.append(self.face_ball_direction(ball))        
         else:
-            decisions.append(self.move_to_strategic_position(self.calculate_strategic_position(ball, players,opponent_players)))
-         
+            decisions.append(self.move_to_strategic_position(strategic_position))
+            
         return decisions
 
     def move_towards_ball(self,ball):
@@ -66,28 +69,25 @@ class RedForward(player.Player):
         }
 
     def attempt_to_score(self, ball):
-        # Example action to attempt scoring
-        
+        # Example action to attempt scoring        
         if self.color == 'red':
-            goal_position = {'x': 450, 'y': 0}
             goal_position = {'x': 450, 'y': 0}
         else:
             goal_position = {'x': -450, 'y': 0}
-            goal_position = {'x': -450, 'y': 0}
         direction = get_direction({'x': self.x, 'y': self.y}, goal_position)
+        print(direction)
         if self.in_shoot_area():
-            #print(f"Forward {self.number} attempting to score")
             return {
                 'type': 'kick',
                 'player_number': self.number,
                 'direction': direction,
-                'power': 60,  # Power might be adjusted based on distance to goal
+                'power': 50,  # Power might be adjusted based on distance to goal
             }
         else:
             return self.move_towards_goal(ball)
     
     def in_shoot_area(self):
-        if (self.color == 'red' and self.x > 300) or (self.color == 'blue' and self.x < -300):
+        if (self.color == 'red' and self.x > 200) or (self.color == 'blue' and self.x < -200):
             return True  #需要定义射门区域
         return False
 
@@ -103,11 +103,15 @@ class RedForward(player.Player):
         elif self.owns_ball(ball):
             return self.calculate_offensive_strategic_position(ball,players,opponent_players)
         else:
-            return self.calculate_defensive_strategic_position(ball,players,opponent_players)
+            return self.calculate_offensive_strategic_position(ball,players,opponent_players)
 
     def default_strategic_position(self,ball):
         # Return a default strategic position based on the side of the field
-        return {'x': (self.x + ball['x'])/2, 'y': (self.y + ball['y'])/2}  # Example value
+        y = 200 if self.number == 3 else -200
+        x = 100 
+        #两个前锋一人一个默认的战略点，避免打架
+        return{'x':x,'y':y}
+        #return {'x': (self.x + ball['x'])/2, 'y': (self.y + ball['y'])/2}  # Example value
 
     def calculate_defensive_strategic_position(self, ball, players,opponent_players):
         # Calculate defensive position based on ball and goal locations
@@ -131,55 +135,6 @@ class RedForward(player.Player):
         strategic_y_min, strategic_y_max = strategic_y - 10, strategic_y + 10  
         return strategic_x_min <= self.x <= strategic_x_max and strategic_y_min <= self.y <= strategic_y_max
 
-
-    def get_triangles(self,points):
-        triangles = []
-        for combo in combinations(points, 3):
-            triangles.append(np.array(combo))
-        return triangles
-
-    def is_point_in_triangle(self,point, triangle):
-        A, B, C = triangle
-        return (np.cross(B - A, point - A) > 0) & (np.cross(C - B, point - B) > 0) & (np.cross(A - C, point - C) > 0)
-
-    def cal_sparse_area(self,ball,players):
-        all_players = players
-        points = np.array([(player['x'], player['y']) for player in all_players])
-        triangles = self.get_triangles(points)
-        centers = []
-        # 计算历史空旷点的平均值作为参考点
-        if hasattr(self, 'historic_centers') and self.historic_centers:
-            # 提取字典中的 x 和 y 值，并存储在数组中
-            points = np.array([[point['x'], point['y']] for point in self.historic_centers[0]])
-
-            # 计算数组的平均值
-            reference_point = np.mean(points, axis=0)
-        else:
-            reference_point = np.array([0, 0])  # 默认参考点
-
-        for triangle in triangles:
-            triangle_center = np.mean(triangle, axis=0)
-            # 如果新计算的空旷点与历史空旷点的距离小于阈值，则将其添加到有效空旷点列表中
-            if np.linalg.norm(triangle_center - reference_point) < 50:
-                if all(not self.is_point_in_triangle((player['x'], player['y']), triangle) for player in all_players):
-                    centers.append({'x': triangle_center[0], 'y': triangle_center[1]})
-        # 如果空旷区域列表为空，则返回默认位置或者不执行任何操作
-        if not centers:
-            return self.default_strategic_position(ball)
-
-        # 更新历史空旷点数据
-        if hasattr(self, 'historic_centers'):
-            self.historic_centers.append(centers)
-            if len(self.historic_centers) > 10:
-                self.historic_centers.pop(0)
-        else:
-            self.historic_centers = [centers]
-        
-        if centers:
-            choice = random.choice(centers)
-        return choice
-
-
     def is_closest_to_ball(self, players, ball):
         """Check if this player is the closest to the ball among all forwards."""
         own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
@@ -194,10 +149,13 @@ class RedForward(player.Player):
         return ball['owner_number'] == self.number and ball['owner_color'] == self.color
     
     def opponent_in_randius(self,opponent_players):
+        count = 0
         for player in opponent_players:
             if get_distance(player,{'x':self.x,'y':self.y}) <= 100 and player['role'] != 'goalkeeper':
-                return player['number']
-        return None
+                count += 1
+        if count >= 2:  #感觉一碰到人就立即传球不合理，所以半径人遇到两人以上拦截再传
+            return True
+        return False
     
     def random_kick_out(self,opponent_players):
         print(f"{self.color}Forward {self.number}检测到拦截风险大，随机踢出")
@@ -206,7 +164,7 @@ class RedForward(player.Player):
             'type': 'kick',
             'player_number': self.number,
             'direction': angle,
-            'power': 60,  
+            'power': 50,  
         }
 
     
@@ -227,14 +185,14 @@ class RedForward(player.Player):
                 'type': 'kick',
                 'player_number': self.number,
                 'direction': direction_to_teammate,
-                'power': 60  # Adjust power as necessary
+                'power': 50  # Adjust power as necessary
             }
         else:
             return None
         
     def find_best_receiver(self,players, opponent_players):
         best_receiver = None
-        min_opponent_distance = 50
+        min_opponent_distance = 100
         min_goal_distance = 100
         min_pass_distance = 200
 
@@ -251,13 +209,19 @@ class RedForward(player.Player):
                     min_goal_distance = goal_distance
         
         if best_receiver is not None and best_receiver['number'] != self.number:
+            goal_x = 200 if self.color == 'red' else -200
+            goal_y = 0
             direction_to_receiver = get_direction({'x': self.x, 'y': self.y}, {'x': best_receiver['x'], 'y': best_receiver['y']})
+            distance_to_receiver = get_distance({'x': self.x, 'y': self.y}, {'x': best_receiver['x'], 'y': best_receiver['y']})
+            distance_to_goal = get_distance({'x': self.x, 'y': self.y},{'x':goal_x,'y':goal_y})
+            if distance_to_goal <= distance_to_receiver:
+                return None   #如果可以进球，那么优先进球而不是传球
             print(f"Forward {self.color}{self.number}有适合传球的队员，传球")
             return {
                 'type': 'kick',
                 'player_number': self.number,
                 'direction': direction_to_receiver,
-                'power': 60  # Adjust power as necessary
+                'power': 50  # Adjust power as necessary
             }
         else:
             return None
@@ -265,9 +229,9 @@ class RedForward(player.Player):
     
     def move_towards_goal(self, ball):
         if self.color == 'red':
-            goal_position = {'x': 350, 'y': 0}
+            goal_position = {'x': 200, 'y': 0}
         else:
-            goal_position = {'x': -350, 'y': 0}
+            goal_position = {'x': -200, 'y': 0}
         direction_to_goal = get_direction({'x': self.x, 'y': self.y}, goal_position)
         print(f"{self.color}Forward {self.number}尝试接近射门区域")
         return {
@@ -281,14 +245,13 @@ class RedForward(player.Player):
 
     def move_to_strategic_position(self, strategic_pos):
         # Move to a predefined strategic position
-        #print(f"{self.color}Forward {self.number}跑向战略点",strategic_pos)
         direction_to_strategic_pos = get_direction({'x': self.x, 'y': self.y}, strategic_pos)
         return {
             'type': 'move',
             'player_number': self.number,
             'destination': strategic_pos,
             'direction': direction_to_strategic_pos,
-            'speed': 7,
+            'speed': 10,
             'has_ball':False
         }
     
@@ -334,7 +297,6 @@ class RedForward(player.Player):
                 'has_ball':False
             }
         else:
-            print(f"Forward {self.color} {self.number} try to grab")
             return self.grab_ball(ball)
     
     def grab_ball(self,ball):
@@ -345,24 +307,6 @@ class RedForward(player.Player):
             'direction': direction_to_ball,
         }
 
-    def is_in_goal_area(self,ball):
-        if self.color == 'red':
-            x = ball['x']
-            y = ball['y']
-            x1 = -450
-            x2 = -350
-            y1 = -150
-            y2 = 150
-        elif self.color == 'blue':
-            x = ball['x']
-            y = ball['y']
-            x1 = 350
-            x2 = 450
-            y1 = -150
-            y2 = 150
-        else:
-            print("错误的前锋属性")
-        return x1 < x < x2 and y1 < y < y2
     
     def own_half(self,ball):
         if self.color == 'red':
@@ -375,10 +319,8 @@ class RedForward(player.Player):
             x2 = 450
         else:
             print("错误的前锋属性")
-        return x1 < x < x2
+        return x1 <= x <= x2
     
-
-
 
     def calculate_a_star_defensive_position(self, ball, players, opponent_players):
         # Implement A* algorithm for defensive position calculation
@@ -399,7 +341,7 @@ class RedForward(player.Player):
             tolerance = 5  # 容忍范围
             if abs(current[0] - goal_node[0]) <= tolerance and abs(current[1] - goal_node[1]) <= tolerance:
                 # 到达目标节点
-                print(f"Forward {self.color} {self.number} reached",current[0],current[1])
+                #print(f"Forward {self.color} {self.number} reached",current[0],current[1])
                 return {'x': current[0], 'y': current[1]}  # Defensive position found
 
             for neighbor in self.get_neighbors(current):
@@ -413,20 +355,18 @@ class RedForward(player.Player):
 
     def calculate_a_star_offensive_position(self, ball, players,opponent_players):
         # Implement A* algorithm for offensive position calculation
-        #self.update_cost_map(players,opponent_players)
-        defenders = [player for player in opponent_players if player['role'] == 'goalkeeper']
+        #这个方法即是前锋的战略点
         if self.owns_ball(ball):
-            goal_node = (-400 if self.color == 'red' else 400, 0)
+            goal_node = (300 if self.color == 'red' else -300, 0)
         elif ball['owner_color'] == self.color:
-            defenders_x = [player['x'] for player in defenders]
-            defenders_y = [player['y'] for player in defenders]
+            # 定义矩形区域的边界
+            x_min, y_min = 100, 0 if self.number == 3 else -200
+            x_max, y_max = 300, 200 if self.number == 3 else 0
 
-            midpoint_x = sum(defenders_x) / len(defenders_x)
-            midpoint_y = sum(defenders_y) / len(defenders_y)
-
-            midpoint = (midpoint_x, midpoint_y)
-           
-            goal_node = midpoint
+            # 生成随机坐标点
+            random_x = random.uniform(x_min, x_max)
+            random_y = random.uniform(y_min, y_max)        
+            goal_node = (random_x, random_y)
         else:
             goal_node = (ball['x'], ball['y'])
         
@@ -444,7 +384,7 @@ class RedForward(player.Player):
             tolerance = 20  # 容忍范围
             if abs(current[0] - goal_node[0]) <= tolerance and abs(current[1] - goal_node[1]) <= tolerance:
                 # 到达目标节点
-                print(f"Forward {self.color} {self.number} reached",current[0],current[1])
+                #print(f"Forward {self.color} {self.number} reached",current[0],current[1])
                 return {'x': current[0], 'y': current[1]}  # Offensive position found
 
             for neighbor in self.get_neighbors(current):
