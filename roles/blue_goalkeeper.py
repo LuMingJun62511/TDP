@@ -7,6 +7,21 @@ class BlueGoalKeeper(player.Player):
     def __init__(self, x,y,name, number, color,radius,img=None, ban_cycles=0,role=None,direction=0):
         super().__init__(x,y,name, number, color,radius,img, ban_cycles,role,direction)
 
+    def decide_action(self, ball, players):
+        decisions = []
+        if self.own_half(ball):
+            if self.is_in_goal_area(ball):
+                if ball['owner_number'] == self.number:
+                    decisions.append(self.pass_to_teammates(players, ball))
+                else:
+                    decisions.append(self.chase_ball(ball))
+            else:
+                decisions.append(self.adjust_self(players, ball))
+        else:
+            decisions.append(self.stand_still())
+        return decisions
+
+
     def owns_ball(self, ball):
         return ball['owner_number'] == self.number
 
@@ -29,19 +44,6 @@ class BlueGoalKeeper(player.Player):
         # Placeholder for kicking logic. In a real game, this would interact with the ball object.
         print(f"Kicking in direction {direction} with power {power}")
 
-    def decide_action(self, ball, players):
-        decisions = []
-        if self.own_half(ball):
-            if self.is_in_goal_area(ball):
-                if ball['owner_number'] == self.number:
-                    decisions.append(self.pass_to_teammates(players, ball))
-                else:
-                    decisions.append(self.chase_ball(ball))
-            else:
-                decisions.append(self.adjust_self(players, ball))
-        else:
-            decisions.append(self.stand_still())
-        return decisions
 
     def serve_ball(self):
         return {'type': 'grab', 'player_number': self.number}

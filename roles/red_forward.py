@@ -19,8 +19,9 @@ class RedForward(player.Player):
         strategic_position = self.calculate_strategic_position(ball, players,opponent_players)
         self.update_cost_map(ball,players,opponent_players)
         #test = self.calculate_a_star_defensive_position(ball,players,opponent_players)
-        if not self.own_half(ball):
+        if self.in_attacking_area(ball):
             if self.is_closest_to_ball(players, ball):
+                print(self.x,self.y)
                 if self.owns_ball(ball):
                     pass_decision = self.find_best_receiver(players,opponent_players)
                     if self.in_shoot_area():
@@ -54,6 +55,18 @@ class RedForward(player.Player):
             decisions.append(self.move_to_strategic_position(strategic_position))
             
         return decisions
+    
+    def in_attacking_area(self,ball):
+        print(ball['x'],ball['y'])
+        if self.color == 'blue':
+            x = ball['x']
+            x1 = -450
+            x2 = 75
+        elif self.color == 'red':
+            x = ball['x']
+            x1 = -75
+            x2 = 450
+        return x1 < x < x2
 
     def move_towards_ball(self,ball):
         # Example action to move towards the ball
@@ -87,7 +100,7 @@ class RedForward(player.Player):
             return self.move_towards_goal(ball)
     
     def in_shoot_area(self):
-        if (self.color == 'red' and self.x > 200) or (self.color == 'blue' and self.x < -200):
+        if (self.color == 'red' and self.x >= 200) or (self.color == 'blue' and self.x <= -200):
             return True  #需要定义射门区域
         return False
 
@@ -312,10 +325,10 @@ class RedForward(player.Player):
         if self.color == 'red':
             x = ball['x']
             x1 = -450
-            x2 = 0
+            x2 = 75
         elif self.color == 'blue':
             x = ball['x']
-            x1 = 0
+            x1 = -75
             x2 = 450
         else:
             print("错误的前锋属性")
