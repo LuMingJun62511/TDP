@@ -9,16 +9,15 @@ class BlueDefender(Player):
     def decide_action(self, ball, players):
         decisions = []
         strategic_position = self.calculate_strategic_position(ball, players)
-        # 挨个写测试案例，保证每个分支都被测试到了
         if self.own_half(ball):  # For blue team, the own half is the positive x 
             if ball['owner_color'] == self.color:
-                if self.owns_ball(ball): #传球这几条没问题
+                if self.owns_ball(ball): 
                     pass_decision = self.pass_to_teammates(players, ball)
                     if pass_decision:
                         decisions.append(pass_decision)
                     else:
                         decisions.append(self.move_towards_goal(ball))
-                else: #跑点至少跑到了，就看这个move_to_strategic_position
+                else: #这个move_to_strategic_position
                     decisions.append(self.move_to_strategic_position(strategic_position))
             elif self.is_closest_to_ball(players, ball): 
                 decisions.append(self.intercept_ball(ball, players))
@@ -30,6 +29,11 @@ class BlueDefender(Player):
         return decisions
 
     def calculate_strategic_position(self, ball, players):
+        goal_x = 450
+        goal_y = 0
+        midpoint_x = (ball['x'] + goal_x) // 2
+        midpoint_y = (ball['y'] + goal_y) // 2
+
         if not self.own_half(ball):  # For blue team, the own half is the positive x
             if ball['owner_color'] == self.color:
                 return self.calculate_offensive_strategic_position(ball, players)
@@ -38,26 +42,26 @@ class BlueDefender(Player):
         else:
             return self.default_strategic_position()
 
-    def default_strategic_position(self):
-        # Adjust for blue team orientation
-        return {'x': 300, 'y': -100}  # Adjusted example value for blue team
+    # def default_strategic_position(self):
+    #     # Adjust for blue team orientation
+    #     return {'x': 300, 'y': -100}  # Adjusted example value for blue team
 
-    def calculate_defensive_strategic_position(self, ball, players):
-        goal_x = 450  # Goal location for blue team
-        goal_y = 0
-        midpoint_x = (ball['x'] + goal_x) / 2
-        midpoint_y = (ball['y'] + goal_y) / 2
-        adjusted_x = min(max(midpoint_x, 300), 350)  # Adjusted for blue team's defensive zone
-        adjusted_y = max(min(midpoint_y, 100), -300)  # Adjust y-axis positioning
-        return {'x': adjusted_x, 'y': adjusted_y}
+    # def calculate_defensive_strategic_position(self, ball, players):
+    #     goal_x = 450  # Goal location for blue team
+    #     goal_y = 0
+    #     midpoint_x = (ball['x'] + goal_x) / 2
+    #     midpoint_y = (ball['y'] + goal_y) / 2
+    #     adjusted_x = min(max(midpoint_x, 300), 350)  # Adjusted for blue team's defensive zone
+    #     adjusted_y = max(min(midpoint_y, 100), -300)  # Adjust y-axis positioning
+    #     return {'x': adjusted_x, 'y': adjusted_y}
 
-    def calculate_offensive_strategic_position(self, ball, players):
-        if self.owns_ball(ball):
-            return {'x': self.x, 'y': self.y}  # Maintain current position if the defender owns the ball
-        else:
-            supporting_x = max(self.x - 100, -300)  # Adjusted logic for blue team moving forward
-            supporting_y = self.y  # Maintain y position
-            return {'x': supporting_x, 'y': supporting_y}
+    # def calculate_offensive_strategic_position(self, ball, players):
+    #     if self.owns_ball(ball):
+    #         return {'x': self.x, 'y': self.y}  # Maintain current position if the defender owns the ball
+    #     else:
+    #         supporting_x = max(self.x - 100, -300)  # Adjusted logic for blue team moving forward
+    #         supporting_y = self.y  # Maintain y position
+    #         return {'x': supporting_x, 'y': supporting_y}
 
     def in_strategic_position(self):
         # Adjust for blue team's strategic positioning checks
@@ -65,17 +69,6 @@ class BlueDefender(Player):
         strategic_y_min, strategic_y_max = -100, 100
         return strategic_x_min <= self.x <= strategic_x_max and strategic_y_min <= self.y <= strategic_y_max
 
-    # Example method to adjust for new strategic positioning
-    def move_to_strategic_position(self, strategic_pos):
-        direction_to_strategic_pos = get_direction({'x': self.x, 'y': self.y}, strategic_pos)
-        return {
-            'type': 'move',
-            'player_number': self.number,
-            'destination': strategic_pos,
-            'direction': direction_to_strategic_pos,
-            'speed': 7,  # Adjust speed based on the urgency of repositioning
-            'has_ball':False
-        }
 
     def move_to_middle(self,ball,players):
         for player in players:
@@ -142,15 +135,15 @@ class BlueDefender(Player):
             'has_ball':False
         }
 
-    def move_to_strategic_position(self, strategic_position):
-        strategic_pos = strategic_position
+    # Example method to adjust for new strategic positioning
+    def move_to_strategic_position(self, strategic_pos):
         direction_to_strategic_pos = get_direction({'x': self.x, 'y': self.y}, strategic_pos)
         return {
-            'type': 'move', 
-            'player_number': self.number, 
-            'destination': strategic_pos, 
-            'direction': direction_to_strategic_pos, 
-            'speed': 7,
+            'type': 'move',
+            'player_number': self.number,
+            'destination': strategic_pos,
+            'direction': direction_to_strategic_pos,
+            'speed': 7,  # Adjust speed based on the urgency of repositioning
             'has_ball':False
         }
 
