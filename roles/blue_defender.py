@@ -29,11 +29,6 @@ class BlueDefender(Player):
         return decisions
 
     def calculate_strategic_position(self, ball, players):
-        goal_x = 450
-        goal_y = 0
-        midpoint_x = (ball['x'] + goal_x) // 2
-        midpoint_y = (ball['y'] + goal_y) // 2
-
         if not self.own_half(ball):  # For blue team, the own half is the positive x
             if ball['owner_color'] == self.color:
                 return self.calculate_offensive_strategic_position(ball, players)
@@ -42,26 +37,26 @@ class BlueDefender(Player):
         else:
             return self.default_strategic_position()
 
-    # def default_strategic_position(self):
-    #     # Adjust for blue team orientation
-    #     return {'x': 300, 'y': -100}  # Adjusted example value for blue team
+    def default_strategic_position(self):
+        # Adjust for blue team orientation
+        return {'x': 300, 'y': -100}  # Adjusted example value for blue team
 
-    # def calculate_defensive_strategic_position(self, ball, players):
-    #     goal_x = 450  # Goal location for blue team
-    #     goal_y = 0
-    #     midpoint_x = (ball['x'] + goal_x) / 2
-    #     midpoint_y = (ball['y'] + goal_y) / 2
-    #     adjusted_x = min(max(midpoint_x, 300), 350)  # Adjusted for blue team's defensive zone
-    #     adjusted_y = max(min(midpoint_y, 100), -300)  # Adjust y-axis positioning
-    #     return {'x': adjusted_x, 'y': adjusted_y}
+    def calculate_defensive_strategic_position(self, ball, players):
+        goal_x = 450  # Goal location for blue team
+        goal_y = 0
+        midpoint_x = (ball['x'] + goal_x) / 2
+        midpoint_y = (ball['y'] + goal_y) / 2
+        adjusted_x = min(max(midpoint_x, 300), 350)  # Adjusted for blue team's defensive zone
+        adjusted_y = max(min(midpoint_y, 100), -300)  # Adjust y-axis positioning
+        return {'x': adjusted_x, 'y': adjusted_y}
 
-    # def calculate_offensive_strategic_position(self, ball, players):
-    #     if self.owns_ball(ball):
-    #         return {'x': self.x, 'y': self.y}  # Maintain current position if the defender owns the ball
-    #     else:
-    #         supporting_x = max(self.x - 100, -300)  # Adjusted logic for blue team moving forward
-    #         supporting_y = self.y  # Maintain y position
-    #         return {'x': supporting_x, 'y': supporting_y}
+    def calculate_offensive_strategic_position(self, ball, players):
+        if self.owns_ball(ball):
+            return {'x': self.x, 'y': self.y}  # Maintain current position if the defender owns the ball
+        else:
+            supporting_x = max(self.x - 100, -300)  # Adjusted logic for blue team moving forward
+            supporting_y = self.y  # Maintain y position
+            return {'x': supporting_x, 'y': supporting_y}
 
     def in_strategic_position(self):
         # Adjust for blue team's strategic positioning checks
