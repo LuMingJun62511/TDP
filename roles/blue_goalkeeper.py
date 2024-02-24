@@ -1,9 +1,9 @@
 from utils import utils 
-from models import player
+from models.player import Player
 from utils.size import *
 import math
 
-class BlueGoalKeeper(player.Player):
+class BlueGoalKeeper(Player):
     def __init__(self, x,y,name, number, color,radius,img=None, ban_cycles=0,role=None,direction=0):
         super().__init__(x,y,name, number, color,radius,img, ban_cycles,role,direction)
 
@@ -12,11 +12,11 @@ class BlueGoalKeeper(player.Player):
         if self.own_half(ball):
             if self.is_in_goal_area(ball):
                 if ball['owner_number'] == self.number:
-                    decisions.append(self.pass_to_teammates(players, ball))
+                    decisions.append(self.pass_to_teammates(players))
                 else:
                     decisions.append(self.chase_ball(ball))
             else:
-                decisions.append(self.adjust_self(players, ball))
+                decisions.append(self.adjust_self(ball))
         else:
             decisions.append(self.stand_still())
         return decisions
@@ -59,7 +59,7 @@ class BlueGoalKeeper(player.Player):
             'has_ball':False
         }
 
-    def pass_to_teammates(self, players, ball):
+    def pass_to_teammates(self, players):
         teammate = self.find_closest_teammate(players)
         if teammate:
             direction = utils.get_direction({'x': self.x, 'y': self.y}, {'x': teammate['x'], 'y': teammate['y']})
@@ -78,7 +78,7 @@ class BlueGoalKeeper(player.Player):
                     closest_player = player
         return closest_player
 
-    def adjust_self(self, players, ball):
+    def adjust_self(self, ball):
         # goal_x = -460 if self.color == 'red' else 460
         goal_x = 450 #毕竟特化为蓝方守门员
         goal_y = 0  # Center of the goal
@@ -96,7 +96,6 @@ class BlueGoalKeeper(player.Player):
         ellipse_x = goal_x + b * math.cos(angle_to_ball)
         ellipse_y = goal_y + a * math.sin(angle_to_ball)
 
-
         # Calculate the direction for the move action
         direction = math.degrees(math.atan2(ellipse_y - player_y, ellipse_x - player_x)) #注意，这里就是典型的出现direction为负的，atan2都要谨慎
         return {
@@ -112,7 +111,7 @@ class BlueGoalKeeper(player.Player):
         return {
             'type': 'move', 
             'player_number': self.number, 
-            'destination': {'x':  440, 'y': 0}, 
+            'destination': {'x':  400, 'y': 0}, 
             'direction': 0, 
             'speed': 8,
             'has_ball':False
