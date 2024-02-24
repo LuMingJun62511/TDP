@@ -1,6 +1,7 @@
 from utils import utils 
 from models import player
 from utils.size import *
+from utils import get_direction, get_distance
 import math
 
 class BlueGoalKeeper(player.Player):
@@ -14,7 +15,7 @@ class BlueGoalKeeper(player.Player):
                 if ball['owner_number'] == self.number:
                     decisions.append(self.pass_to_teammates(players, ball))
                 else:
-                    decisions.append(self.chase_ball(ball))
+                    decisions.append(self.intercept_ball(ball))
             else:
                 decisions.append(self.adjust_self(players, ball))
         else:
@@ -57,6 +58,35 @@ class BlueGoalKeeper(player.Player):
             'direction': direction, 
             'speed': 10,
             'has_ball':False
+        }
+    
+    def intercept_ball(self, ball):
+        """Move towards the ball to intercept it."""
+        direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+        distance_to_ball = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+        if distance_to_ball > 10:
+            if ball['owner_color'] == self.color:
+                speed = 5
+            else:
+                speed = 10
+            destination = {'x': ball['x'], 'y': ball['y']}
+            return {
+                'type': 'move',
+                'player_number': self.number,
+                'destination': destination,
+                'direction': direction_to_ball,
+                'speed': speed,  # This speed can be adjusted based on gameplay needs
+                'has_ball':False
+            }
+        else:
+            return self.grab_ball(ball)
+    
+    def grab_ball(self,ball):
+        direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+        return {
+            'type': 'grab',
+            'player_number': self.number,
+            'direction': direction_to_ball,
         }
 
     def pass_to_teammates(self, players, ball):

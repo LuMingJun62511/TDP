@@ -75,10 +75,9 @@ class RedGoalKeeper(player.Player):
         if distance_to_ball > 10:
             if ball['owner_color'] == self.color:
                 speed = 5
-                destination = self.calculate_strategic_position(ball,players)
             else:
                 speed = 10
-                destination = {'x': ball['x'], 'y': ball['y']}
+            destination = {'x': ball['x'], 'y': ball['y']}
             return {
                 'type': 'move',
                 'player_number': self.number,
