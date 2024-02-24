@@ -25,11 +25,11 @@ class BlueForward(player.Player):
                 else:
                     decisions.append(self.move_to_strategic_position(strategic_position))
         else:
-            print('球不在')
-            if self.in_strategic_position():
-                decisions.append(self.face_ball_direction(ball))
-            else:
-                decisions.append(self.move_to_strategic_position(strategic_position))  
+            decisions.append(self.move_to_strategic_position(strategic_position)) 
+            # if self.in_strategic_position():
+            #     decisions.append(self.face_ball_direction(ball))
+            # else:
+            #     decisions.append(self.move_to_strategic_position(strategic_position))  
         return decisions
     
     def ball_in_attacking_area(self, ball):

@@ -153,8 +153,8 @@ class BlueDefender(Player):
     def is_closest_to_ball(self, players, ball):
         """Check if this forward is the closest to the ball among two forwards."""
         own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        other_forward = [player for player in players if player['role'] == 'forward' and player['number'] != self.number][0]
-        other_distance = get_distance({'x': other_forward['x'], 'y': other_forward['y']}, {'x': ball['x'], 'y': ball['y']})
+        other_denfender = [player for player in players if player['role'] == 'defender' and player['number'] != self.number][0]
+        other_distance = get_distance({'x': other_denfender['x'], 'y': other_denfender['y']}, {'x': ball['x'], 'y': ball['y']})
         return own_distance < other_distance
 
     def intercept_ball(self, ball,players):
