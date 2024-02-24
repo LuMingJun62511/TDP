@@ -35,20 +35,22 @@ class BlueDefender(Player):
         return decisions
 
     def calculate_strategic_position(self, ball, players):
-        goal_x = 450
-        midpoint_x = (ball['x'] + goal_x) / 2
-        adjusted_x = min(midpoint_x, 350)  # Example adjustment
+        # goal_x = 450
+        # midpoint_x = (ball['x'] + goal_x) / 2
+        # adjusted_x = min(midpoint_x, 350)  # Example adjustment
 
-        adjusted_y = self.choose_side_for_strategic_position(ball,players) #返回一侧的，
-        return {'x': adjusted_x, 'y': adjusted_y}
+        # adjusted_y = self.choose_side_for_strategic_position(ball,players) #返回一侧的，
+        
+        # return {'x': adjusted_x, 'y': adjusted_y}
+        return {'x': 350, 'y': -150} if self.number == 1 else {'x': 350, 'y': 150}
 
         
     def choose_side_for_strategic_position(self,ball,players):
         other_defender = [player for player in players if player['role'] == 'defender' and player['number'] != self.number][0]
         other_defender_y = other_defender['y']
         other_forward_has_ball = ball['owner_color'] == self.color and ball['owner_number'] != other_defender['number']
-        goalpost_y_left = -200
-        goalpost_y_right = 200
+        goalpost_y_left = -50
+        goalpost_y_right = 50
         strategic_y_left = (ball['y'] + goalpost_y_left) // 2
         strategic_y_right = (ball['y'] + goalpost_y_right) // 2
 
