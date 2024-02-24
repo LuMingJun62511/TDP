@@ -106,7 +106,6 @@ class RedDefender(Player):
     # Example method to adjust for new strategic positioning
     def move_to_strategic_position(self, strategic_pos):
         direction_to_strategic_pos = get_direction({'x': self.x, 'y': self.y}, strategic_pos)
-        print('看看应该给的输入',strategic_pos)
         return {
             'type': 'move',
             'player_number': self.number,

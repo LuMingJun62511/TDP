@@ -19,44 +19,52 @@ class BlueDefender(Player):
                         decisions.append(self.move_towards_goal(ball))
                 else: #这个move_to_strategic_position
                     decisions.append(self.move_to_strategic_position(strategic_position))
-            elif self.is_closest_to_ball(players, ball): 
-                decisions.append(self.intercept_ball(ball, players))
-        elif not self.in_strategic_position():
-            decisions.append(self.move_to_strategic_position(strategic_position))
+            else:
+                if self.is_closest_to_ball(players, ball): 
+                    decisions.append(self.intercept_ball(ball, players))
+                else:
+                    decisions.append(self.move_to_strategic_position(strategic_position))
         else:
-            decisions.append(self.face_ball_direction(ball)) #行吧，这里有问题，这里会一直背对着球，这显然不合适
+            decisions.append(self.move_to_strategic_position(strategic_position))
+            # # print('球不在我方半场，进入了分支')
+            # if not self.in_strategic_position():
+                # decisions.append(self.move_to_strategic_position(strategic_position))
+            # else:
+            #     decisions.append(self.face_ball_direction(ball)) #行吧，这里有问题，这里会一直背对着球，这显然不合适
 
         return decisions
 
     def calculate_strategic_position(self, ball, players):
-        if not self.own_half(ball):  # For blue team, the own half is the positive x
-            if ball['owner_color'] == self.color:
-                return self.calculate_offensive_strategic_position(ball, players)
-            else:
-                return self.calculate_defensive_strategic_position(ball, players)
-        else:
-            return self.default_strategic_position()
-
-    def default_strategic_position(self):
-        # Adjust for blue team orientation
-        return {'x': 300, 'y': -100}  # Adjusted example value for blue team
-
-    def calculate_defensive_strategic_position(self, ball, players):
-        goal_x = 450  # Goal location for blue team
-        goal_y = 0
+        goal_x = 450
         midpoint_x = (ball['x'] + goal_x) / 2
-        midpoint_y = (ball['y'] + goal_y) / 2
-        adjusted_x = min(max(midpoint_x, 300), 350)  # Adjusted for blue team's defensive zone
-        adjusted_y = max(min(midpoint_y, 100), -300)  # Adjust y-axis positioning
+        adjusted_x = min(midpoint_x, 350)  # Example adjustment
+
+        adjusted_y = self.choose_side_for_strategic_position(ball,players) #返回一侧的，
         return {'x': adjusted_x, 'y': adjusted_y}
 
-    def calculate_offensive_strategic_position(self, ball, players):
-        if self.owns_ball(ball):
-            return {'x': self.x, 'y': self.y}  # Maintain current position if the defender owns the ball
-        else:
-            supporting_x = max(self.x - 100, -300)  # Adjusted logic for blue team moving forward
-            supporting_y = self.y  # Maintain y position
-            return {'x': supporting_x, 'y': supporting_y}
+        
+    def choose_side_for_strategic_position(self,ball,players):
+        other_defender = [player for player in players if player['role'] == 'defender' and player['number'] != self.number][0]
+        other_defender_y = other_defender['y']
+        other_forward_has_ball = ball['owner_color'] == self.color and ball['owner_number'] != other_defender['number']
+        goalpost_y_left = -200
+        goalpost_y_right = 200
+        strategic_y_left = (ball['y'] + goalpost_y_left) // 2
+        strategic_y_right = (ball['y'] + goalpost_y_right) // 2
+
+        if other_forward_has_ball:#如果队友持球,我去另侧
+            if other_defender_y < 0:
+                return strategic_y_right
+            else:
+                return strategic_y_left
+        else:# 如果队友也不持球
+            if (self.y < 0 and other_defender_y >= 0) or (self.y >= 0 and other_defender_y < 0):# 如果我们在场地的不同侧，选择离自己近的侧翼
+                return strategic_y_left if self.y < 0 else strategic_y_right
+            else:# 如果我们在同一侧，选择离两人都较远但相对离自己更近的侧翼
+                if self.y > other_defender_y: 
+                    return strategic_y_right
+                else:
+                    return strategic_y_left
 
     def in_strategic_position(self):
         # Adjust for blue team's strategic positioning checks
@@ -180,6 +188,7 @@ class BlueDefender(Player):
         }
     
     def own_half(self,ball):
+        print('难道此时没进入？',ball['x'])
         x = ball['x']
         x1 = 0
         x2 = 450

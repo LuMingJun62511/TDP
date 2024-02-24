@@ -11,25 +11,18 @@ class BlueForward(player.Player):
     
         decisions = []
         if self.ball_in_attacking_area(ball):
-            # print('球在')
             if self.blue_team_owns_ball(ball):#
-                # print('有球权')
                 if self.owns_ball(ball):#这里我先简化一下，防止红方断不了球，它就只会去射门
-                    # print('本人持球,笨一点，就会射门')
                     decisions.append(self.attempt_to_score(ball))
                 else:#另一个就也跟着跑
                     decisions.append(self.move_to_strategic_position(strategic_position))
             else: #没球权
-                # print('相对近就追球，相对远则跑点')
                 if self.is_closest_to_ball(players, ball):#往球跑，跑到了就抓球，
-                    print('这个人相对近，他选择追球')
                     if self.distance_to_ball_close_enough(ball):
                         decisions.append(self.grab_ball(ball))
                     else: #往球跑，没跑到就继续跑
-                        
                         decisions.append(self.move_towards_ball(ball)) 
                 else:
-                    print('难道没人相对远,需要有人选择跑点')
                     decisions.append(self.move_to_strategic_position(strategic_position))
         else:
             print('球不在')
@@ -51,7 +44,7 @@ class BlueForward(player.Player):
 
     def move_towards_ball(self,ball):
         # Example action to move towards the ball
-        print(f"Forward {self.number} moving towards the ball at {ball['x']}, {ball['y']}")
+        # print(f"Forward {self.number} moving towards the ball at {ball['x']}, {ball['y']}")
         direction = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         return {
             'type': 'move',
@@ -63,7 +56,6 @@ class BlueForward(player.Player):
         }
     
     def grab_ball(self,ball):
-        print('grab_ball已经执行')
         direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         return {
             'type': 'grab',
@@ -73,7 +65,7 @@ class BlueForward(player.Player):
 
     def attempt_to_score(self, ball):
         # Example action to attempt scoring
-        print(f"Forward {self.number} attempting to score")
+        # print(f"Forward {self.number} attempting to score")
         goal_position = {'x': -450, 'y': 0}
         direction = get_direction({'x': self.x, 'y': self.y}, goal_position)
         if self.in_shoot_area():
@@ -90,7 +82,6 @@ class BlueForward(player.Player):
         if (self.color == 'red' and self.x > 300) or (self.color == 'blue' and self.x < -300):
             return True  #需要定义射门区域
         return False
-
 
     def calculate_strategic_position(self, ball, players):#3种情况
         if self.ball_in_attacking_area(ball):
@@ -127,8 +118,6 @@ class BlueForward(player.Player):
                 else:
                     return strategic_y_left
 
-
-        
     def calculate_support_strategic_position(self, ball,players):
         adjusted_y = self.choose_side_for_strategic_position(ball,players)
         return {'x': 75, 'y': adjusted_y}  # Example value
