@@ -15,14 +15,6 @@ def play(red_players, blue_players, ball):
             # Defenders make decisions based on ball possession and strategic positioning
             defender = RedDefender(color='red',**player)
             decisions.extend(defender.decide_action(ball, red_players))
-        elif player['role'] == 'forward':
-            # Forwards could have their own logic for attacking plays or positioning
-            # This could involve moving towards the goal, attempting shots, or positioning for passes
-            forwrad = RedForward(color='red',**player)
-            decisions.extend(forwrad.decide_action(ball, red_players,blue_players))           
-        else:
-            print(f"Unrecognized player role for player {player['number']}")
-
     return decisions
 
 

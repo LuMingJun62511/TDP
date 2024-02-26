@@ -93,7 +93,6 @@ class RedForward(player.Player):
         return decisions
     
     def in_attacking_area(self,ball):
-        print(ball['x'],ball['y'])
         if self.color == 'blue':
             x = ball['x']
             x1 = -450
@@ -138,7 +137,6 @@ class RedForward(player.Player):
         else:
             goal_position = {'x': -450, 'y': 0}
         direction = get_direction({'x': self.x, 'y': self.y}, goal_position)
-        print(direction)
         if self.in_shoot_area():
             return {
                 'type': 'kick',

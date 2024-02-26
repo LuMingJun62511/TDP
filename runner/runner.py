@@ -1,14 +1,13 @@
 import random
 import time
 from threading import Thread,Lock
-
 import pygame as pg
-
 import exception
 import models
 import utils
 from decision import get_decisions
-from red import play as red_play
+from red.red import play as red_play
+from red.red_forward_left import play as red_forward_left
 from blue import play as blue_play
 import math
 
@@ -20,6 +19,10 @@ def blue_fire(*args, **kwargs):
     global blue_responses
     blue_responses = blue_play(*args, **kwargs)
 
+def red_forward_left_fire(*args, **kwargs):
+    global red_forward_left_responses
+    red_forward_left_responses = red_forward_left(*args, **kwargs)
+   
 
 class Runner:
     def __init__(self, config):
@@ -35,7 +38,7 @@ class Runner:
 
     def run(self):
         global actions
-        global red_responses, blue_responses
+        global red_responses, blue_responses,red_forward_left_responses
         end = False
         pause = False
         while not end:
@@ -55,6 +58,7 @@ class Runner:
                 continue
             red_responses = None
             blue_responses = None
+            red_forward_left_responses = None
 
             red_thread = Thread(
                 target=red_fire,
@@ -64,20 +68,30 @@ class Runner:
                 target=blue_fire,
                 args=self._get_args_for_blue_team(),
             )
+            red_forward_left_thread = Thread(
+                target=red_forward_left_fire,
+                args=self._get_args_for_red_team(),
+            )
+
             blue_thread.start()
             red_thread.start()
+            red_forward_left_thread.start()
             for _ in range(self.config.delay_count):
                 time.sleep(self.config.delay_amount)
                 with self.red_lock:  # 加锁
                     with self.blue_lock:  # 加锁
-                        if red_responses is not None and blue_responses is not None:
+                        #if red_responses is not None and blue_responses is not None:
+                        if red_responses is not None and blue_responses is not None and red_forward_left_responses is not None:
                             break
             if not isinstance(red_responses, list):
                 red_responses = []
             if not isinstance(blue_responses, list):
                 blue_responses = []
+            if not isinstance(red_forward_left_responses, list):
+                print("置空")
+                red_forward_left_responses = []
 
-            self.perform_decisions(red_responses, blue_responses)
+            self.perform_decisions(red_responses, blue_responses,red_forward_left_responses)
             self.decrement_ban_cycles()
             self.ball.move()
             self.check_if_scored()
@@ -100,12 +114,11 @@ class Runner:
             if utils.SHOULD_PRINT_DECISIONS_ERROR:
                 print(de)
 
-    def perform_decisions(self, red_responses, blue_responses):
-        red_decisions, blue_decisions = get_decisions(self, red_responses, blue_responses)
-
-        while red_decisions and blue_decisions:
+    def perform_decisions(self, red_responses, blue_responses,red_forward_left_responses):
+        red_decisions, blue_decisions,red_forward_left_decisions = get_decisions(self, red_responses, blue_responses,red_forward_left_responses)
+        while red_decisions and blue_decisions and red_forward_left_decisions:
             # Randomly choose the order of execution
-            order = random.sample([red_decisions, blue_decisions], k=2)
+            order = random.sample([red_decisions, blue_decisions,red_forward_left_decisions], k=3)
             for decisions in order:
                 if decisions:
                     decision = decisions.pop(0)
@@ -114,6 +127,8 @@ class Runner:
         # Execute remaining decisions if any team is empty
         for red_decision in red_decisions:
             self.handle_decision_perform_with_exception(red_decision)
+        for red_forward_left_decision in red_forward_left_decisions:
+            self.handle_decision_perform_with_exception(red_forward_left_decision)
         for blue_decision in blue_decisions:
             self.handle_decision_perform_with_exception(blue_decision)
         # for test_decision in test_decisions:

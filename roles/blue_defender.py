@@ -190,7 +190,7 @@ class BlueDefender(Player):
         }
     
     def own_half(self,ball):
-        print('难道此时没进入？',ball['x'])
+        #print('难道此时没进入？',ball['x'])
         x = ball['x']
         x1 = 0
         x2 = 450
