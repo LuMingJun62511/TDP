@@ -41,7 +41,6 @@ class BlueForward(player.Player):
     def owns_ball(self, ball):
         return ball['owner_number'] == self.number and ball['owner_color'] == self.color
     
-
     def move_towards_ball(self,ball):
         # Example action to move towards the ball
         # print(f"Forward {self.number} moving towards the ball at {ball['x']}, {ball['y']}")
@@ -186,13 +185,13 @@ class BlueForward(player.Player):
             'has_ball':False
         }
     
-    def face_ball_direction(self, ball):
-        direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        return {
-            'type': 'move', 
-            'player_number': self.number, 
-            'destination': {'x': self.x, 'y': self.y}, 
-            'direction': direction_to_ball, 
-            'speed': 0,
-            'has_ball':False
-            }
+    # def face_ball_direction(self, ball):
+    #     direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+    #     return {
+    #         'type': 'move', 
+    #         'player_number': self.number, 
+    #         'destination': {'x': self.x, 'y': self.y}, 
+    #         'direction': direction_to_ball, 
+    #         'speed': 0,
+    #         'has_ball':False
+    #         }

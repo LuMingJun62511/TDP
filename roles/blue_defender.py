@@ -45,49 +45,49 @@ class BlueDefender(Player):
         return {'x': 350, 'y': -150} if self.number == 1 else {'x': 350, 'y': 150}
 
         
-    def choose_side_for_strategic_position(self,ball,players):
-        other_defender = [player for player in players if player['role'] == 'defender' and player['number'] != self.number][0]
-        other_defender_y = other_defender['y']
-        other_forward_has_ball = ball['owner_color'] == self.color and ball['owner_number'] != other_defender['number']
-        goalpost_y_left = -50
-        goalpost_y_right = 50
-        strategic_y_left = (ball['y'] + goalpost_y_left) // 2
-        strategic_y_right = (ball['y'] + goalpost_y_right) // 2
+    # def choose_side_for_strategic_position(self,ball,players):
+    #     other_defender = [player for player in players if player['role'] == 'defender' and player['number'] != self.number][0]
+    #     other_defender_y = other_defender['y']
+    #     other_forward_has_ball = ball['owner_color'] == self.color and ball['owner_number'] != other_defender['number']
+    #     goalpost_y_left = -50
+    #     goalpost_y_right = 50
+    #     strategic_y_left = (ball['y'] + goalpost_y_left) // 2
+    #     strategic_y_right = (ball['y'] + goalpost_y_right) // 2
 
-        if other_forward_has_ball:#如果队友持球,我去另侧
-            if other_defender_y < 0:
-                return strategic_y_right
-            else:
-                return strategic_y_left
-        else:# 如果队友也不持球
-            if (self.y < 0 and other_defender_y >= 0) or (self.y >= 0 and other_defender_y < 0):# 如果我们在场地的不同侧，选择离自己近的侧翼
-                return strategic_y_left if self.y < 0 else strategic_y_right
-            else:# 如果我们在同一侧，选择离两人都较远但相对离自己更近的侧翼
-                if self.y > other_defender_y: 
-                    return strategic_y_right
-                else:
-                    return strategic_y_left
+    #     if other_forward_has_ball:#如果队友持球,我去另侧
+    #         if other_defender_y < 0:
+    #             return strategic_y_right
+    #         else:
+    #             return strategic_y_left
+    #     else:# 如果队友也不持球
+    #         if (self.y < 0 and other_defender_y >= 0) or (self.y >= 0 and other_defender_y < 0):# 如果我们在场地的不同侧，选择离自己近的侧翼
+    #             return strategic_y_left if self.y < 0 else strategic_y_right
+    #         else:# 如果我们在同一侧，选择离两人都较远但相对离自己更近的侧翼
+    #             if self.y > other_defender_y: 
+    #                 return strategic_y_right
+    #             else:
+    #                 return strategic_y_left
 
-    def in_strategic_position(self):
-        # Adjust for blue team's strategic positioning checks
-        strategic_x_min, strategic_x_max = 0, 400  # Adjusted range for blue team
-        strategic_y_min, strategic_y_max = -100, 100
-        return strategic_x_min <= self.x <= strategic_x_max and strategic_y_min <= self.y <= strategic_y_max
+    # def in_strategic_position(self):
+    #     # Adjust for blue team's strategic positioning checks
+    #     strategic_x_min, strategic_x_max = 0, 400  # Adjusted range for blue team
+    #     strategic_y_min, strategic_y_max = -100, 100
+    #     return strategic_x_min <= self.x <= strategic_x_max and strategic_y_min <= self.y <= strategic_y_max
 
 
-    def move_to_middle(self,ball,players):
-        for player in players:
-            if player['role'] == 'defender' and player['number'] != self.number:
-                another_defender = player
-        destination = {'x':(ball['x'] + another_defender['x']) / 2,'y':(ball['y'] + another_defender['y']) / 2}
-        return {
-            'type': 'move',
-            'player_number': self.number,
-            'destination': destination,
-            'direction': get_direction({'x': self.x, 'y': self.y},destination),
-            'speed': 7,  # Adjust speed based on the urgency of repositioning
-            'has_ball':False
-        }
+    # def move_to_middle(self,ball,players):
+    #     for player in players:
+    #         if player['role'] == 'defender' and player['number'] != self.number:
+    #             another_defender = player
+    #     destination = {'x':(ball['x'] + another_defender['x']) / 2,'y':(ball['y'] + another_defender['y']) / 2}
+    #     return {
+    #         'type': 'move',
+    #         'player_number': self.number,
+    #         'destination': destination,
+    #         'direction': get_direction({'x': self.x, 'y': self.y},destination),
+    #         'speed': 7,  # Adjust speed based on the urgency of repositioning
+    #         'has_ball':False
+    #     }
 
     def owns_ball(self, ball):
         return ball['owner_number'] == self.number and ball['owner_color'] == self.color
@@ -129,16 +129,16 @@ class BlueDefender(Player):
             'has_ball':True
         }
 
-    def face_ball_direction(self, ball):
-        direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        return {
-            'type': 'move', 
-            'player_number': self.number, 
-            'destination': {'x': self.x, 'y': self.y}, 
-            'direction': direction_to_ball,
-            'speed': 1,
-            'has_ball':False
-        }
+    # def face_ball_direction(self, ball):
+    #     direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+    #     return {
+    #         'type': 'move', 
+    #         'player_number': self.number, 
+    #         'destination': {'x': self.x, 'y': self.y}, 
+    #         'direction': direction_to_ball,
+    #         'speed': 1,
+    #         'has_ball':False
+    #     }
 
     # Example method to adjust for new strategic positioning
     def move_to_strategic_position(self, strategic_pos):
@@ -190,7 +190,7 @@ class BlueDefender(Player):
         }
     
     def own_half(self,ball):
-        print('难道此时没进入？',ball['x'])
+        # print('难道此时没进入？',ball['x'])
         x = ball['x']
         x1 = 0
         x2 = 450
