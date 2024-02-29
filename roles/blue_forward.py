@@ -95,27 +95,27 @@ class BlueForward(player.Player):
             return self.calculate_support_strategic_position(ball,players) #(1)满足了
         
     def choose_side_for_strategic_position(self,ball,players):#这个会返回你y选哪一个    
-        other_forward = [player for player in players if player['role'] == 'forward' and player['number'] != self.number][0]
-        other_forward_y = other_forward['y']
-        other_forward_has_ball = ball['owner_color'] == self.color and ball['owner_number'] != other_forward['number']
+        #other_forward = [player for player in players if player['role'] == 'forward' and player['number'] != self.number][0]
+        #other_forward_y = other_forward['y']
+        #other_forward_has_ball = ball['owner_color'] == self.color and ball['owner_number'] != other_forward['number']
         # 如果队友持球,则我补弱侧,
         # 如果队友不持球,异侧则选离自己近的,同侧,则那个都离二者远的,谁相对离的近谁去
         strategic_y_left = -230
         strategic_y_right = 230
 
-        if other_forward_has_ball:#如果队友持球,我去另侧
-            if other_forward_y < 0:
-                return strategic_y_right
-            else:
-                return strategic_y_left
-        else:# 如果队友不持球
-            if (self.y < 0 and other_forward_y >= 0) or (self.y >= 0 and other_forward_y < 0):# 如果我们在场地的不同侧，选择离自己近的侧翼
-                return strategic_y_left if self.y < 0 else strategic_y_right
-            else:# 如果我们在同一侧，选择离两人都较远但相对离自己更近的侧翼
-                if self.y > other_forward_y: 
-                    return strategic_y_right
-                else:
-                    return strategic_y_left
+        #if other_forward_has_ball:#如果队友持球,我去另侧
+        #    if other_forward_y < 0:
+        #        return strategic_y_right
+        #    else:
+        #        return strategic_y_left
+        #else:# 如果队友不持球
+        #    if (self.y < 0 and other_forward_y >= 0) or (self.y >= 0 and other_forward_y < 0):# 如果我们在场地的不同侧，选择离自己近的侧翼
+        #        return strategic_y_left if self.y < 0 else strategic_y_right
+        #    else:# 如果我们在同一侧，选择离两人都较远但相对离自己更近的侧翼
+        #        if self.y > other_forward_y: 
+        #            return strategic_y_right
+        #        else:
+        return strategic_y_left
 
     def calculate_support_strategic_position(self, ball,players):
         adjusted_y = self.choose_side_for_strategic_position(ball,players)
@@ -148,15 +148,15 @@ class BlueForward(player.Player):
     def is_closest_to_ball(self, players, ball):
         """Check if this forward is the closest to the ball among two forwards."""
         own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        other_forward = [player for player in players if player['role'] == 'forward' and player['number'] != self.number][0]
-        other_distance = get_distance({'x': other_forward['x'], 'y': other_forward['y']}, {'x': ball['x'], 'y': ball['y']})
+        #other_forward = [player for player in players if player['role'] == 'forward' and player['number'] != self.number][0]
+        #other_distance = get_distance({'x': other_forward['x'], 'y': other_forward['y']}, {'x': ball['x'], 'y': ball['y']})
         #is_closest_to_ball可能都有错,注意
-        # forwards = [player for player in players if player['role'] == 'forwards'] 
-        # for player in forwards:
-        #     if player['number'] != self.number:
-        #         if get_distance({'x': player['x'], 'y': player['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
-        #             return False
-        return own_distance < other_distance
+        forwards = [player for player in players if player['role'] == 'forwards'] 
+        for player in forwards:
+            if player['number'] != self.number:
+                if get_distance({'x': player['x'], 'y': player['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
+                    return False
+        return True
     
     def distance_to_ball_close_enough(self,ball):
         return get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']}) < 10

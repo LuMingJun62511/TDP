@@ -2,7 +2,7 @@ from .size import *
 from .utils import *
 from models import player
 
-PLAYER_COUNT = 5
+PLAYER_COUNT = 4
 
 FRICTION = 3 
 MAX_PLAYER_SPEED = PLAYER_RADIUS
@@ -37,6 +37,7 @@ RED_PLAYERS_INITIAL_VALUES.append({
     'radius': PLAYER_RADIUS,
     'role':'defender'
 })
+'''
 RED_PLAYERS_INITIAL_VALUES.append({
     'number': 2,
     'x': -250,
@@ -45,8 +46,9 @@ RED_PLAYERS_INITIAL_VALUES.append({
     'radius': PLAYER_RADIUS,
     'role':'defender'
 })
+'''
 RED_PLAYERS_INITIAL_VALUES.append({
-    'number': 3,
+    'number': 2,
     'x': -167,
     'y': 216,
     'name': "Player3 ",
@@ -54,7 +56,7 @@ RED_PLAYERS_INITIAL_VALUES.append({
     'role':'forward'
 })
 RED_PLAYERS_INITIAL_VALUES.append({
-    'number': 4,
+    'number': 3,
     'x': -83,
     'y': -217,
     'name': "Player4 ",
@@ -97,6 +99,7 @@ BLUE_PLAYERS_INITIAL_VALUES.append({
     'radius': PLAYER_RADIUS,
     'role':'forward'
 })
+'''
 BLUE_PLAYERS_INITIAL_VALUES.append({
     'number': 4,
     'x': 83,
@@ -105,6 +108,7 @@ BLUE_PLAYERS_INITIAL_VALUES.append({
     'radius': PLAYER_RADIUS,
     'role':'forward'
 })
+'''
 
 
 
