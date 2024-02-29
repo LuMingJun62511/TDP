@@ -36,7 +36,7 @@ class RedDefender(Player):
         return decisions
     
     def in_defender_area(self):
-        x1 = -450
+        x1 = -400
         x2 = 0
         return x1 <= self.x <= x2
     
