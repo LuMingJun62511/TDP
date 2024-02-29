@@ -13,6 +13,7 @@ class RedForward(player.Player):
         self.historic_centers = []
         self.cost_map = [[1] * (FOOTBALL_PITCH_LENGTH // 50) for _ in range(FOOTBALL_PITCH_WIDTH // 50)]  # Default cost value
 
+    '''
     def decide_action(self, ball, players,opponent_players):
         decisions = []
         strategic_position = self.calculate_strategic_position(ball, players,opponent_players)
@@ -54,7 +55,43 @@ class RedForward(player.Player):
             decisions.append(self.move_to_strategic_position(strategic_position))
             
         return decisions
-    
+    '''
+
+    def decide_action(self, ball, players,opponent_players):
+        decisions = []
+        strategic_position = self.calculate_strategic_position(ball, players,opponent_players)
+        self.update_cost_map(ball,players,opponent_players)
+        if self.in_attacking_area(ball):
+            if ball['owner_color'] == self.color:
+                if self.owns_ball(ball):
+                    pass_decision = self.find_best_receiver(players,opponent_players)
+                    if self.in_shoot_area():
+                        decisions.append(self.attempt_to_score(ball))
+                    elif pass_decision:
+                        decisions.append(pass_decision)
+                    elif self.opponent_in_randius(opponent_players):
+                        decisions.append(self.random_kick_out(opponent_players))
+                    elif self.can_be_grab(opponent_players):
+                        decisions.append(self.shoot())
+                    else:
+                        decisions.append(self.move_towards_goal(ball))
+                elif self.is_closest_to_ball(players, ball):
+                    decisions.append(self.intercept_ball(ball,players,opponent_players))
+                else:
+                    decisions.append(self.move_to_strategic_position(strategic_position))
+            elif self.is_closest_to_ball(players,ball):
+                decisions.append(self.intercept_ball(ball,players,opponent_players))
+            elif self.in_strategic_position(ball,players,opponent_players):
+                decisions.append(self.face_ball_direction(ball))
+            else:
+                decisions.append(self.move_to_strategic_position(strategic_position)) 
+        elif self.in_strategic_position(ball,players,opponent_players):
+                decisions.append(self.face_ball_direction(ball))        
+        else:
+            decisions.append(self.move_to_strategic_position(strategic_position))
+            
+        return decisions
+
     def in_attacking_area(self,ball):
         print(ball['x'],ball['y'])
         if self.color == 'blue':
