@@ -1,20 +1,17 @@
-import pygame as pg
 from utils import get_direction, get_distance
 from models.player import Player
 import math
-import pprint
-
 class RedDefender(Player):
     def __init__(self, x, y, name, number, color, radius, img=None, ban_cycles=0, role=None, direction=0):
         super().__init__(x, y, name, number, color, radius, img, ban_cycles, role, direction)
 
-    def decide_action(self, ball, players):
+    def decide_action(self, ball, players,opponents):
         decisions = []
         # Define the strategic position based on the ball's location and possession status     
         if self.own_half(ball):
             if ball['owner_color'] == self.color:
                 if self.owns_ball(ball):
-                    pass_decision = self.pass_to_teammates(players, ball)
+                    pass_decision = self.pass_to_teammates(players, opponents)
                     if pass_decision:
                         #print("Defender is passing the ball")
                         decisions.append(pass_decision)
@@ -34,23 +31,6 @@ class RedDefender(Player):
             decisions.append(self.move_to_point(ball))
 
         return decisions
-    
-    def in_defender_area(self):
-        x1 = -400
-        x2 = 0
-        return x1 <= self.x <= x2
-    
-    def move_to_area(self):
-        destination = {'x':-100,'y':self.y}
-        direction = get_direction({'x': self.x, 'y': self.y}, destination)
-        return {
-            'type': 'move',
-            'player_number': self.number,
-            'destination': destination,
-            'direction': direction,
-            'speed': 7,  # Adjust speed based on the urgency of repositioning
-            'has_ball':False
-        }
 
 
     def calculate_strategic_position(self, ball, players):
@@ -157,19 +137,39 @@ class RedDefender(Player):
     def owns_ball(self, ball):
         return ball['owner_number'] == self.number and ball['owner_color'] == self.color
     
-    def pass_to_teammates(self, players, ball):
-        most_advanced_teammate = None
-        max_advance_x = -float('inf')  # Initialize with a very small number
+
+    def get_angle(self,ax,ay,bx,by,cx,cy):
+        # b为顶点
+        ba = [ax - bx, ay - by]
+        bc = [cx - bx, cy - by]
+        cosine_angle = (ba[0] * bc[0] + ba[1] * bc[1]) / (math.sqrt(ba[0]**2 + ba[1]**2) * math.sqrt(bc[0]**2 + bc[1]**2))
+        angle = math.acos(cosine_angle)
+        return math.degrees(angle)
+
+    def pass_to_teammates(self, players, opponents):
+        best_teammate = None
+        max_angle = -float('inf')
 
         for player in players:
-            if player['number'] != self.number and player['role'] != 'goalkeeper':
-                # Check if this player is more advanced towards the opponent's goal
-                if player['x'] > max_advance_x:
-                    most_advanced_teammate = player
-                    max_advance_x = player['x']
-        
-        if most_advanced_teammate:
-            direction_to_teammate = get_direction({'x': self.x, 'y': self.y}, {'x': most_advanced_teammate['x'], 'y': most_advanced_teammate['y']})
+            if player['role'] == 'forward':
+                closest_opponent = None
+                min_distance_to_line = float('inf')
+
+                for opponent in opponents:
+                    if self.x < opponent['x'] < player['x'] or self.x > opponent['x'] > player['x']:
+                        distance_to_line = abs((player['y'] - self.y) * opponent['x'] - (player['x'] - self.x) * opponent['y'] + player['x'] * self.y - player['y'] * self.x) / math.sqrt((player['y'] - self.y)**2 + (player['x'] - self.x)**2)
+                        if distance_to_line < min_distance_to_line:
+                            min_distance_to_line = distance_to_line
+                            closest_opponent = opponent
+
+                if closest_opponent:
+                    angle = self.get_angle(player['x'],player['y'],self.x,self.y,opponent['x'],opponent['y'])
+                    if angle > max_angle:
+                        best_teammate = player
+                        max_angle = angle
+
+        if best_teammate:
+            direction_to_teammate = get_direction({'x': self.x, 'y': self.y}, {'x': best_teammate['x'], 'y': best_teammate['y']})
             return {
                 'type': 'kick',
                 'player_number': self.number,
@@ -258,25 +258,6 @@ class RedDefender(Player):
             'player_number': self.number,
             'direction': direction_to_ball,
         }
-
-    def is_in_goal_area(self,ball):
-        if self.color == 'red':
-            x = ball['x']
-            y = ball['y']
-            x1 = -450
-            x2 = -350
-            y1 = -150
-            y2 = 150
-        elif self.color == 'blue':
-            x = ball['x']
-            y = ball['y']
-            x1 = 350
-            x2 = 450
-            y1 = -150
-            y2 = 150
-        else:
-            print("错误的后卫属性")
-        return x1 < x < x2 and y1 < y < y2
     
     def own_half(self,ball):
         if self.color == 'red':
