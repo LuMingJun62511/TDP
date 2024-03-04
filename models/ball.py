@@ -25,40 +25,15 @@ class Ball:
             (int(pygame_x) - self.radius, int(pygame_y) - self.radius)
         )
     def move(self):
-        # print('啊看看owner',self.owner)
-        if self.direction is not None:
-            if self.speed == 0:
-                return
-            self.x += self.speed * math.cos(math.radians(self.direction))
-            self.y += self.speed * math.sin(math.radians(self.direction))
-            self.speed -= utils.FRICTION
-            if self.speed < 0:
-                self.speed = 0
-                print("置空")
-                self.direction = None
-
-            # Check for goal conditions
-            if self.x < -utils.FOOTBALL_PITCH_LENGTH // 2 and not (-utils.GOAL_WIDTH // 2 <= self.y <= utils.GOAL_WIDTH // 2):
-                self.x = -utils.FOOTBALL_PITCH_LENGTH // 2 + self.radius + 1
-                self.direction = (180 - self.direction) % 360
-            elif self.x > utils.FOOTBALL_PITCH_LENGTH // 2 and not (-utils.GOAL_WIDTH // 2 <= self.y <= utils.GOAL_WIDTH // 2):
-                self.x = utils.FOOTBALL_PITCH_LENGTH // 2 - self.radius - 1
-                self.direction = (180 - self.direction) % 360
-
-            # Boundary conditions for top and bottom
-            if self.y < -utils.FOOTBALL_PITCH_WIDTH // 2:
-                self.y = -utils.FOOTBALL_PITCH_WIDTH // 2 + self.radius + 1
-                self.direction = (360 - self.direction) % 360
-            elif self.y > utils.FOOTBALL_PITCH_WIDTH // 2:
-                self.y = utils.FOOTBALL_PITCH_WIDTH // 2 - self.radius - 1
-                self.direction = (360 - self.direction) % 360
-        # elif self.owner.direction is not None:#这里的self.owner一直报None,这条分支进来就报错，所以修改了一下，原代码在左
-        elif self.owner is not None:#这里的self.owner一直报None,这条分支进来就报错
-            print("带球跑",self.owner.color,self.owner.number)
-            self.x = self.owner.x + int(10 * math.cos(self.owner.direction))
-            self.y = self.owner.y + int(10 * math.cos(self.owner.direction))  #这里为了避免球权无法交换设置了初始位置差，具体数值和方法需要讨论
-        elif self.owner is None:
-            print("自由")
+        if self.owner is not None:
+            # Logic when the ball is with a player
+            ball_placement_angle = 180 if self.owner.color == 'blue' else 0  # Blue faces right, red faces left.
+            placement_direction = math.radians(self.owner.direction + ball_placement_angle)
+            self.x = self.owner.x + (self.owner.radius + self.radius) * math.cos(placement_direction)
+            self.y = self.owner.y + (self.owner.radius + self.radius) * math.sin(placement_direction)
+            #self.x = self.owner.x + (self.owner.radius + self.radius) * math.cos(math.radians(self.owner.direction))
+            #self.y = self.owner.y + (self.owner.radius + self.radius) * math.sin(math.radians(self.owner.direction))
+        elif self.direction is not None:
             if self.speed == 0 or self.direction is None:
                 return
             self.x += self.speed * math.cos(math.radians(self.direction))

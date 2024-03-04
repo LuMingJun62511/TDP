@@ -2,7 +2,7 @@ import random
 import exception
 import utils
 from .decision import Decision
-
+import math
 class GrabDecision(Decision):
     def __init__(self, runner, player_number, player_color,direction):
         super().__init__(runner, player_number, player_color)
@@ -36,5 +36,12 @@ class GrabDecision(Decision):
             self.runner.ball.direction = closest_player.direction
             print("当前持球人是",self.runner.ball.owner.color,self.runner.ball.owner.number)
 
+        if closest_player:
+                self.runner.ball.owner = closest_player
+                # Here you should also set the ball's position relative to the player
+                # This might need information about from which direction the ball was grabbed, which could be tracked.
+                ball_direction = math.radians(closest_player.direction)
+                self.runner.ball.x = closest_player.x + (closest_player.radius + self.runner.ball.radius) * math.cos(ball_direction)
+                self.runner.ball.y = closest_player.y + (closest_player.radius + self.runner.ball.radius) * math.sin(ball_direction)
 
 
