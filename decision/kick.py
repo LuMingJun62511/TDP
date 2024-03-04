@@ -17,7 +17,6 @@ class KickDecision(Decision):
         if not 0 <= self.power <= utils.MAX_KICK_POWER:
             raise exception.DecisionException('Wrong kick power')
         if self.runner.ball.owner is None:
-            print(self.player_color,self.player_number)
             raise exception.DecisionException('The player is not the owner of the ball') 
         if self.runner.ball.owner.number != self.player_number:
             raise exception.DecisionException('The player is not the owner of the ball') 

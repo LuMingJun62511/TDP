@@ -62,7 +62,6 @@ class RedFlexible(player.Player):
         return decisions
 
     def in_attacking_area(self,ball):
-        print(ball['x'],ball['y'])
         if self.color == 'blue':
             x = ball['x']
             x1 = -450

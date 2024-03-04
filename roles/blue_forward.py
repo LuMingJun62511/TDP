@@ -159,7 +159,7 @@ class BlueForward(player.Player):
         return True
     
     def distance_to_ball_close_enough(self,ball):
-        return get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']}) < 10
+        return get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']}) < 24
     
     def move_towards_goal(self):
         goal_position = {'x': -448, 'y': 0} #这里得设定的比球门大一点，不然会报错

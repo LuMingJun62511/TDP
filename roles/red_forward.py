@@ -93,7 +93,6 @@ class RedForward(player.Player):
         return decisions
 
     def in_attacking_area(self,ball):
-        print(ball['x'],ball['y'])
         if self.color == 'blue':
             x = ball['x']
             x1 = -450
@@ -138,7 +137,6 @@ class RedForward(player.Player):
         else:
             goal_position = {'x': -450, 'y': 0}
         direction = get_direction({'x': self.x, 'y': self.y}, goal_position)
-        print(direction)
         if self.in_shoot_area():
             return {
                 'type': 'kick',
@@ -290,7 +288,7 @@ class RedForward(player.Player):
             distance_to_goal = get_distance({'x': self.x, 'y': self.y},{'x':goal_x,'y':goal_y})
             if distance_to_goal <= distance_to_receiver:
                 return None   #如果可以进球，那么优先进球而不是传球
-            print(f"Forward {self.color}{self.number}有适合传球的队员，传球")
+            print(f"Forward {self.color}{self.number} ")
             return {
                 'type': 'kick',
                 'player_number': self.number,
@@ -307,7 +305,7 @@ class RedForward(player.Player):
         else:
             goal_position = {'x': -200, 'y': 0}
         direction_to_goal = get_direction({'x': self.x, 'y': self.y}, goal_position)
-        print(f"{self.color}Forward {self.number}尝试接近射门区域")
+        print(f"{self.color}Forward {self.number} moving towards the goal")
         return {
             'type': 'move', 
             'player_number': self.number,
@@ -392,7 +390,7 @@ class RedForward(player.Player):
             x1 = -75
             x2 = 450
         else:
-            print("错误的前锋属性")
+            print("Error in own_half")
         return x1 <= x <= x2
     
 

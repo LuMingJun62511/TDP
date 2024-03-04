@@ -61,7 +61,6 @@ class RedDefender(Player):
         # Adjustments to ensure the defender stays within a defensive zone
         adjusted_x = max(min(midpoint_x, -300), -350)  # Example adjustment
         adjusted_y = max(min(midpoint_y, 300), -100)
-        print({'x': adjusted_x, 'y': adjusted_y})
         return {'x': adjusted_x, 'y': adjusted_y}
 
     def calculate_offensive_strategic_position(self, ball, players):
@@ -233,7 +232,7 @@ class RedDefender(Player):
         """Move towards the ball to intercept it."""
         direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         distance_to_ball = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        if distance_to_ball > 10:
+        if distance_to_ball > 24:
             if ball['owner_color'] == self.color:
                 speed = 5
                 destination = self.calculate_strategic_position(ball,players)

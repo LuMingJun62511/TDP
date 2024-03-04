@@ -163,7 +163,7 @@ class BlueDefender(Player):
         """Move towards the ball to intercept it."""
         direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         distance_to_ball = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        if distance_to_ball > 10:
+        if distance_to_ball > 24:
             if ball['owner_color'] == self.color:
                 speed = 5
                 destination = self.calculate_strategic_position(ball,players)

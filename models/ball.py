@@ -5,6 +5,8 @@ import pygame as pg
 import utils
 
 
+
+
 class Ball:
     def __init__(self, x=None, y=None, radius=None, img=None, owner=None, speed=None, direction=None):
         default_ball_image = pg.image.load(utils.BALL_IMG_LINK)
@@ -24,7 +26,7 @@ class Ball:
             self.img,
             (int(pygame_x) - self.radius, int(pygame_y) - self.radius)
         )
-    def move(self):
+    def move(self, player):
         if self.owner is not None:
             # Logic when the ball is with a player
             ball_placement_angle = 180 if self.owner.color == 'blue' else 0  # Blue faces right, red faces left.
@@ -34,8 +36,27 @@ class Ball:
         elif self.direction is not None:
             if self.speed == 0 or self.direction is None:
                 return
-            self.x += self.speed * math.cos(math.radians(self.direction))
-            self.y += self.speed * math.sin(math.radians(self.direction))
+            # Predict the ball's next position
+            next_x = self.x + self.speed * math.cos(math.radians(self.direction))
+            next_y = self.y + self.speed * math.sin(math.radians(self.direction))
+
+            # Check for potential collision with each player
+            for player in player:
+                if player != self.owner:  # Ignore the owner of the ball
+                    distance = math.hypot(next_x - player.x, next_y - player.y)
+                    if distance <= (self.radius + player.radius):
+                        # Adjust the ball's position to just outside the player's radius
+                        overlap_distance = (self.radius + player.radius) - distance
+                        adjust_x = overlap_distance * math.cos(math.radians(self.direction))
+                        adjust_y = overlap_distance * math.sin(math.radians(self.direction))
+                        next_x -= adjust_x
+                        next_y -= adjust_y
+                        # Stop the ball's movement as it has reached the player
+                        self.speed = 0
+                        break
+
+            # Update the ball's position to the new calculated position
+            self.x, self.y = next_x, next_y
             self.speed -= utils.FRICTION
             if self.speed < 0:
                 self.speed = 0
