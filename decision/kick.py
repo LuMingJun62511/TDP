@@ -1,3 +1,4 @@
+import random
 import exception
 import utils
 from .decision import Decision
@@ -24,3 +25,5 @@ class KickDecision(Decision):
         self.runner.ball.owner = None
         self.runner.ball.direction = self.direction
         self.runner.ball.speed = self.power
+        if random.random() < 1: #虽然这样不太合理，但它简答
+            self.player.ban_cycles = 4
