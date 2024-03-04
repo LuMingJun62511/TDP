@@ -129,54 +129,6 @@ class Runner:
             if player.ban_cycles > 0:
                 player.ban_cycles -= 1
 
-    # def kick_players(self, players_in_area, allowed_number, ban_cycles):
-    #     while len(players_in_area) > allowed_number:
-    #         random_player = random.choice(players_in_area)
-    #         if self.ball.owner == random_player:
-    #             self.ball.owner = None
-    #         random_player.ban_cycles = ban_cycles
-    #         random_player.x = 0
-    #         random_player.y = utils.SCREEN_WIDTH // 2 - utils.VERTICAL_MARGIN + random_player.radius
-    #         if random_player.color == 'red':
-    #             random_player.y = -random_player.y
-    #         players_in_area.remove(random_player)
-    #         # print("犯规")
-    # def check_if_the_bus_is_parked(self):
-    #     ''' RED '''
-    #     red_players_in_area = []
-    #     for player in self.red_players:
-    #         if -utils.FOOTBALL_PITCH_LENGTH//2<= player.x <= -utils.FOOTBALL_PITCH_LENGTH//2 + utils.PENALTY_AREA_LENGTH:
-    #             if -utils.PENALTY_AREA_WIDTH//2 <= player.y <= utils.PENALTY_AREA_WIDTH//2:
-    #                 if player.ban_cycles == 0:
-    #                     red_players_in_area.append(player)
-    #     self.kick_players(red_players_in_area, utils.ALLOWED_PLAYERS_IN_PENALTY_AREA_NUMBER, utils.PENALTY_ARIA_BAN_CYCLES)
-
-    #     ''' BLUE '''
-    #     blue_players_in_area = []
-    #     for player in self.blue_players:
-    #         if utils.FOOTBALL_PITCH_LENGTH//2 - utils.PENALTY_AREA_LENGTH <= player.x <= utils.FOOTBALL_PITCH_LENGTH//2:
-    #             if -utils.PENALTY_AREA_WIDTH//2 <= player.y <= utils.PENALTY_AREA_WIDTH//2:
-    #                 if player.ban_cycles == 0:
-    #                     blue_players_in_area.append(player)
-    #     self.kick_players(blue_players_in_area, utils.ALLOWED_PLAYERS_IN_PENALTY_AREA_NUMBER, utils.PENALTY_ARIA_BAN_CYCLES)
-
-    # def check_if_ball_is_crowded(self):
-    #     ''' RED '''
-    #     red_players_arround_ball = []
-    #     for player in self.red_players:
-    #         if utils.distance(self.ball, player) < utils.ALLOWED_PLAYERS_AROUND_BALL_RADIUS:
-    #             if not player.is_in_own_penalty_area():
-    #                 if player.ban_cycles == 0:
-    #                     red_players_arround_ball.append(player)
-    #     self.kick_players(red_players_arround_ball, utils.ALLOWED_PLAYERS_AROUND_BALL_NUMBER, utils.BALL_CROWDED_BAN_CYCLES)
-    #     ''' BLUE '''
-    #     blue_players_arround_ball = []
-    #     for player in self.blue_players:
-    #         if utils.distance(self.ball, player) < utils.ALLOWED_PLAYERS_AROUND_BALL_RADIUS:
-    #             if not player.is_in_own_penalty_area():
-    #                 if player.ban_cycles == 0:
-    #                     blue_players_arround_ball.append(player)
-    #     self.kick_players(blue_players_arround_ball, utils.ALLOWED_PLAYERS_AROUND_BALL_NUMBER, utils.BALL_CROWDED_BAN_CYCLES)
                 
     def check_if_overlapp(self,ban_cycles):
         new_distance = 2 * utils.PLAYER_RADIUS + 4
@@ -185,8 +137,8 @@ class Runner:
             for j, player_b in enumerate(players):
                 if i != j:  # 确保不与自身比较
                     # 计算两个玩家之间的距离
-                    dx = ((player_a.x - player_b.x)** 2)** 0.5
-                    dy = ((player_a.y - player_b.y)** 2)** 0.5
+                    dx = abs(player_a.x - player_b.x)
+                    dy = abs(player_a.y - player_b.y)
                     dx = dx if dx != 0 else 0.01
                     dy = dy if dy != 0 else 0.01
                     distance = (dx ** 2 + dy ** 2) ** 0.5

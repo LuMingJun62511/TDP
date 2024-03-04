@@ -31,8 +31,6 @@ class Ball:
             placement_direction = math.radians(self.owner.direction + ball_placement_angle)
             self.x = self.owner.x + (self.owner.radius + self.radius) * math.cos(placement_direction)
             self.y = self.owner.y + (self.owner.radius + self.radius) * math.sin(placement_direction)
-            #self.x = self.owner.x + (self.owner.radius + self.radius) * math.cos(math.radians(self.owner.direction))
-            #self.y = self.owner.y + (self.owner.radius + self.radius) * math.sin(math.radians(self.owner.direction))
         elif self.direction is not None:
             if self.speed == 0 or self.direction is None:
                 return

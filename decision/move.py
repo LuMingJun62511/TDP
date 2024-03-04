@@ -95,11 +95,3 @@ class MoveDecision(Decision):
         total_force_x = attract_force[0] + sum(force[0] for force in repulse_forces)
         total_force_y = attract_force[1] + sum(force[1] for force in repulse_forces)
         return (total_force_x, total_force_y)
-
-    def update_movement(self, total_force):
-        # 根据合成力更新球员位置
-        direction = math.atan2(total_force[1], total_force[0])
-        self.player.x += int(self.speed * math.cos(direction))
-        self.player.y += int(self.speed * math.sin(direction))
-        self.player.direction = direction
-        self.player.speed = self.speed
