@@ -178,7 +178,7 @@ class Runner:
         self.kick_players(blue_players_arround_ball, utils.ALLOWED_PLAYERS_AROUND_BALL_NUMBER, utils.BALL_CROWDED_BAN_CYCLES)
 
     def check_if_scored(self):
-        if self.ball.x + self.ball.radius  <= -utils.FOOTBALL_PITCH_LENGTH // 2 and \
+        if self.ball.x - self.ball.radius  <= -utils.FOOTBALL_PITCH_LENGTH // 2 and \
                 (-utils.GOAL_WIDTH // 2 <= self.ball.y <= utils.GOAL_WIDTH // 2):
             self.scoreboard.blue_score += 1
             self._init_players()
@@ -189,7 +189,7 @@ class Runner:
             self.red_players[utils.PLAYER_COUNT - 1].x, self.red_players[utils.PLAYER_COUNT - 1].y = self.ball.x, self.ball.y
             if self.config.additional_delay:
                 time.sleep(1)
-        if self.ball.x - self.ball.radius>= utils.FOOTBALL_PITCH_LENGTH // 2 and \
+        if self.ball.x + self.ball.radius>= utils.FOOTBALL_PITCH_LENGTH // 2 and \
                 (-utils.GOAL_WIDTH // 2 <= self.ball.y <= utils.GOAL_WIDTH // 2):
             self.scoreboard.red_score += 1
             self._init_players()

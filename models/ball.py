@@ -46,22 +46,17 @@ class Ball:
             # Check for goal conditions
             if self.x < -utils.FOOTBALL_PITCH_LENGTH // 2 and not (-utils.GOAL_WIDTH // 2 <= self.y <= utils.GOAL_WIDTH // 2):
                 self.x = -utils.FOOTBALL_PITCH_LENGTH // 2 + self.radius + 1
-                self.direction = (180 - self.direction) % 360
+                self.direction = 180 - self.direction
             elif self.x > utils.FOOTBALL_PITCH_LENGTH // 2 and not (-utils.GOAL_WIDTH // 2 <= self.y <= utils.GOAL_WIDTH // 2):
                 self.x = utils.FOOTBALL_PITCH_LENGTH // 2 - self.radius - 1
-                self.direction = (180 - self.direction) % 360
-
+                self.direction = 180 - self.direction
             # Boundary conditions for top and bottom
             if self.y < -utils.FOOTBALL_PITCH_WIDTH // 2:
                 self.y = -utils.FOOTBALL_PITCH_WIDTH // 2 + self.radius + 1
-                self.direction = (360 - self.direction) % 360
+                self.direction = -self.direction
             elif self.y > utils.FOOTBALL_PITCH_WIDTH // 2:
                 self.y = utils.FOOTBALL_PITCH_WIDTH // 2 - self.radius - 1
-                self.direction = (360 - self.direction) % 360
-        else:
-            print("默认")
-            self.x = self.owner.x + 12
-            self.y = self.owner.y + 12
+                self.direction = -self.direction
 
 
     @property

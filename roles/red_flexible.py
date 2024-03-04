@@ -6,7 +6,7 @@ from itertools import combinations
 from models import player
 import random
 import heapq
-class RedForward(player.Player):
+class RedFlexible(player.Player):
     
     def __init__(self, x,y,name, number, color,radius,img=None, ban_cycles=0,role=None,direction=0):
         super().__init__(x,y,name, number, color,radius,img, ban_cycles,role,direction)
@@ -75,18 +75,31 @@ class RedForward(player.Player):
                         decisions.append(self.shoot())
                     else:
                         decisions.append(self.move_towards_goal(ball))
-                elif self.is_closest_to_ball(players, ball):
-                    decisions.append(self.intercept_ball(ball,players,opponent_players))
+                #elif self.is_closest_to_ball(players, ball):
+                #    decisions.append(self.intercept_ball(ball,players,opponent_players))
                 else:
                     decisions.append(self.move_to_strategic_position(strategic_position))
-            elif self.is_closest_to_ball(players,ball):
+            elif self.is_most_closet(ball,players):
                 decisions.append(self.intercept_ball(ball,players,opponent_players))
             elif self.in_strategic_position(ball,players,opponent_players):
                 decisions.append(self.face_ball_direction(ball))
             else:
                 decisions.append(self.move_to_strategic_position(strategic_position)) 
+
+        elif self.is_most_closet(ball,players):
+            if ball['owner_color'] == self.color:
+                if self.owns_ball(ball):
+                    pass_decision = self.find_best_receiver(players, opponent_players)
+                    if pass_decision:
+                        decisions.append(pass_decision)
+                    else:
+                        decisions.append(self.move_towards_goal(ball))
+                else:
+                    decisions.append(self.move_to_strategic_position(strategic_position))
+            else:
+                decisions.append(self.intercept_ball(ball,players,opponent_players))
         elif self.in_strategic_position(ball,players,opponent_players):
-                decisions.append(self.face_ball_direction(ball))        
+            decisions.append(self.face_ball_direction(ball))        
         else:
             decisions.append(self.move_to_strategic_position(strategic_position))
             
@@ -138,7 +151,6 @@ class RedForward(player.Player):
         else:
             goal_position = {'x': -450, 'y': 0}
         direction = get_direction({'x': self.x, 'y': self.y}, goal_position)
-        print(direction)
         if self.in_shoot_area():
             return {
                 'type': 'kick',
@@ -202,14 +214,18 @@ class RedForward(player.Player):
     def is_closest_to_ball(self, players, ball):
         """Check if this player is the closest to the ball among all forwards."""
         own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        flexible = [player for player in players if player['number'] == 3]
-        forwards = [player for player in players if player['role'] == 'forward']
-        if ball['x'] < 0:
-            if get_distance({'x': flexible['x'], 'y': flexible['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
-                return False
+        forwards = [player for player in players if player['role'] == 'forwards']
         for player in forwards:
             if player['number'] != self.number:
                 if get_distance({'x': player['x'], 'y': player['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
+                    return False
+        return True
+
+    def is_most_closet(self,ball,players):
+        own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+        for player in players:
+            if player['number'] != self.number:
+                if get_distance({'x': player['x'], 'y': player['y']}, {'x': ball['x'], 'y': ball['y']}) <= own_distance:
                     return False
         return True
 
@@ -436,15 +452,25 @@ class RedForward(player.Player):
             # 定义矩形区域的边界
             x_min, y_min = 100, 0 if self.number == 3 else -200
             x_max, y_max = 300, 200 if self.number == 3 else 0
-
-            # 生成随机坐标点
-            random_x = random.uniform(x_min, x_max)
-            random_y = random.uniform(y_min, y_max)        
-            goal_node = (random_x, random_y)
+            current_x = self.x
+            current_y = self.y
+            if x_min <= self.x <= x_max:
+                random_y = random.uniform(y_min, y_max)  
+                goal_node = (current_x,random_y)
+            elif y_min < self.y < y_max:
+                random_x = random.uniform(x_min, x_max)
+                goal_node = (random_x,current_y)
+            elif x_min <= self.x <= x_max and y_min < self.y < y_max:
+                goal_node = (current_x,current_y)
+            else:
+                # 生成随机坐标点
+                random_x = random.uniform(x_min, x_max)
+                random_y = random.uniform(y_min, y_max)        
+                goal_node = (random_x, random_y)
         else:
             x = (ball['x'] + self.x) / 2
             y = (ball['y'] + self.y) / 2
-            goal_node = (abs(x) if ball['x'] < 0 else x,y)
+            goal_node = (x,y)
         
         start_node = (self.x, self.y)
         visited = set()

@@ -10,9 +10,7 @@ class RedDefender(Player):
 
     def decide_action(self, ball, players):
         decisions = []
-        # Define the strategic position based on the ball's location and possession status
-        #strategic_position = self.calculate_strategic_position(ball, players)
-        
+        # Define the strategic position based on the ball's location and possession status     
         if self.own_half(ball):
             if ball['owner_color'] == self.color:
                 if self.owns_ball(ball):
@@ -25,26 +23,36 @@ class RedDefender(Player):
                         decisions.append(self.move_towards_goal(ball))
                 else:
                     #decisions.append(self.move_to_strategic_position(self.calculate_strategic_position(ball,players)))
-                    decisions.append(self.move_to_middle(ball,players))
+                    #decisions.append(self.move_to_middle(ball,players))
+                    decisions.append(self.move_to_point(ball))
             elif self.is_closest_to_ball(players,ball): 
                 decisions.append(self.intercept_ball(ball,players))
-        #elif not self.in_strategic_position():
-            #decisions.append(self.move_to_strategic_position(strategic_position))
-        elif self.owns_ball(ball):
-            pass_decision = self.pass_to_teammates(players, ball)
-            if pass_decision:
-                #print("Defender is passing the ball")
-                decisions.append(pass_decision)
-            else:
-                #print("Defender is moving towards goal")
-                decisions.append(self.move_towards_goal(ball))
         #elif self.in_strategic_position():
-            #decisions.append(self.face_ball_direction(strategic_position))
+        #    decisions.append(self.face_ball_direction(ball))
         else:
-            #decisions.append(self.move_to_strategic_position(self.calculate_strategic_position(ball,players)))
-            decisions.append(self.move_to_middle(ball,players))
+            #decisions.append(self.move_to_middle(ball,players))
+            decisions.append(self.move_to_point(ball))
+
         return decisions
     
+    def in_defender_area(self):
+        x1 = -400
+        x2 = 0
+        return x1 <= self.x <= x2
+    
+    def move_to_area(self):
+        destination = {'x':-100,'y':self.y}
+        direction = get_direction({'x': self.x, 'y': self.y}, destination)
+        return {
+            'type': 'move',
+            'player_number': self.number,
+            'destination': destination,
+            'direction': direction,
+            'speed': 7,  # Adjust speed based on the urgency of repositioning
+            'has_ball':False
+        }
+
+
     def calculate_strategic_position(self, ball, players):
         # Adjusted to dynamically calculate strategic positions
         if self.own_half(ball):
@@ -98,7 +106,6 @@ class RedDefender(Player):
     # Example method to adjust for new strategic positioning
     def move_to_strategic_position(self, strategic_pos):
         direction_to_strategic_pos = get_direction({'x': self.x, 'y': self.y}, strategic_pos)
-        print('看看应该给的输入',strategic_pos)
         return {
             'type': 'move',
             'player_number': self.number,
@@ -112,7 +119,12 @@ class RedDefender(Player):
         for player in players:
             if player['role'] == 'defender' and player['number'] != self.number:
                 another_defender = player
-        destination = {'x':(ball['x'] + another_defender['x']) / 2,'y':(ball['y'] + another_defender['y']) / 2}
+        #destination = {'x':(ball['x'] + another_defender['x']) / 2,'y':(ball['y'] + another_defender['y']) / 2}
+        if (ball['x'] + another_defender['x']) / 2 > 0:
+            destination = {'x':0,'y':(ball['y'] + another_defender['y']) / 2}
+        else:
+            destination = {'x':(ball['x'] + another_defender['x']) / 2,'y':(ball['y'] + another_defender['y']) / 2}
+
         return {
             'type': 'move',
             'player_number': self.number,
@@ -121,6 +133,26 @@ class RedDefender(Player):
             'speed': 7,  # Adjust speed based on the urgency of repositioning
             'has_ball':False
         }
+
+    def move_to_point(self,ball):
+        goal_x = -450 if self.color == 'red' else 450
+        goal_y = 130
+        if self.number == 1:
+            side = {'x':goal_x,'y':goal_y}
+        else:
+            side = {'x':goal_x,'y':-goal_y}
+
+        destination = {'x':(ball['x'] + side['x']) / 2,'y':(ball['y'] + side['y']) / 2}
+
+        return {
+            'type': 'move',
+            'player_number': self.number,
+            'destination': destination,
+            'direction': get_direction({'x': self.x, 'y': self.y},destination),
+            'speed': 7,  # Adjust speed based on the urgency of repositioning
+            'has_ball':False
+        }
+
 
     def owns_ball(self, ball):
         return ball['owner_number'] == self.number and ball['owner_color'] == self.color
@@ -148,10 +180,7 @@ class RedDefender(Player):
             return None
 
     def move_towards_goal(self, ball):
-        if self.color == 'red':
-            goal_position = {'x': -250, 'y': 0}
-        else:
-            goal_position = {'x': 250, 'y': 0}
+        goal_position = {'x': 0, 'y': 0}
         direction_to_goal = get_direction({'x': self.x, 'y': self.y}, goal_position)
         return {
             'type': 'move', 
@@ -260,4 +289,4 @@ class RedDefender(Player):
             x2 = 450
         else:
             print("错误的后卫属性")
-        return x1 < x < x2
+        return x1 <= x <= x2

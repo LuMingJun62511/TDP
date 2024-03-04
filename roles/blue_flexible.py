@@ -2,7 +2,7 @@ from utils import get_direction, get_distance
 from models.player import Player
 
 
-class BlueDefender(Player):
+class BlueFlexible(Player):
     def __init__(self, x, y, name, number, color, radius, img=None, ban_cycles=0, role=None, direction=0):
         super().__init__(x, y, name, number, color, radius, img, ban_cycles, role, direction)
 
@@ -24,6 +24,16 @@ class BlueDefender(Player):
                     decisions.append(self.intercept_ball(ball, players))
                 else:
                     decisions.append(self.move_to_strategic_position(strategic_position))
+        elif self.is_most_closet(ball,players):
+            if ball['owner_color'] == self.color:
+                if self.owns_ball(ball):
+                    pass_decision = self.pass_to_teammates(players, ball)
+                    if pass_decision:
+                        decisions.append(pass_decision)
+                    else:
+                        decisions.append(self.move_towards_goal(ball))
+            else:
+                decisions.append(self.intercept_ball(ball,players))
         else:
             decisions.append(self.move_to_strategic_position(strategic_position))
             # # print('球不在我方半场，进入了分支')
@@ -151,6 +161,14 @@ class BlueDefender(Player):
             'speed': 7,  # Adjust speed based on the urgency of repositioning
             'has_ball':False
         }
+    
+    def is_most_closet(self,ball,players):
+        own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+        for player in players:
+            if player['number'] != self.number:
+                if get_distance({'x': player['x'], 'y': player['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
+                    return False
+        return True
 
     def is_closest_to_ball(self, players, ball):
         """Check if this forward is the closest to the ball among two forwards."""
