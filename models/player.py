@@ -52,15 +52,15 @@ class Player:
         alpha = math.atan2((destination.y - self.y), (destination.x - self.x))
         
         if distance < speed:
-            self.x = int(destination.x)
-            self.y = int(destination.y)
+            self.x = destination.x
+            self.y = destination.y
             self.direction = alpha
         
         else:
             alpha = math.atan2((destination.y - self.y), (destination.x - self.x))
             #alpha = direction
-            self.x += int(speed * math.cos(alpha))
-            self.y += int(speed * math.sin(alpha))
+            self.x += speed * math.cos(alpha)
+            self.y += speed * math.sin(alpha)
             self.direction = alpha
 
     def is_in_own_penalty_area(self):

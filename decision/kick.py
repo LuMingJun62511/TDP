@@ -25,5 +25,7 @@ class KickDecision(Decision):
         self.runner.ball.owner = None
         self.runner.ball.direction = self.direction
         self.runner.ball.speed = self.power
+        self.runner.ball.movable = True
+        print("Ball kicked by", self.player.color, self.player.number)
         if random.random() < 1: #虽然这样不太合理，但它简答
             self.player.ban_cycles = 4

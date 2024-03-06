@@ -12,6 +12,8 @@ from red import play as red_play
 from blue import play as blue_play
 import math
 
+
+
 def red_fire(*args, **kwargs):
     global red_responses
     red_responses = red_play(*args, **kwargs)
@@ -39,6 +41,8 @@ class Runner:
         end = False
         pause = False
         while not end:
+            # sleep 1 second
+            print("-----------------")
             # events: pause and quit
             for event in pg.event.get():
                 if event.type == pg.KEYDOWN:
@@ -82,10 +86,11 @@ class Runner:
             self.ball.move()
             self.check_if_scored()
             self.check_if_overlapp(5)
+            
             # self.check_if_the_bus_is_parked()
             # self.check_if_ball_is_crowded()
             self.adjust_overlapping_players()  # Adjust overlapping players to prevent freezing
-
+            self.adjust_ball_player_overlap()
             self._show_and_increase_cycle_number()
             if self.scoreboard.cycle_number > self.config.max_cycle:
                 if self.config.additional_delay:
@@ -100,6 +105,19 @@ class Runner:
         except exception.DecisionException as de:
             if utils.SHOULD_PRINT_DECISIONS_ERROR:
                 print(de)
+                
+    def adjust_ball_player_overlap(self):
+        for player in self.red_players + self.blue_players:
+            if utils.distance(player, self.ball) < player.radius + self.ball.radius:
+                # プレイヤーとボールが重なった場合、ボールをプレイヤーから遠ざける
+                angle = math.atan2(self.ball.y - player.y, self.ball.x - player.x)
+                overlap_distance = player.radius + self.ball.radius - utils.distance(player, self.ball)
+                self.ball.x += math.cos(angle) * overlap_distance
+                self.ball.y += math.sin(angle) * overlap_distance
+                # # ボールの速度と方向を更新（反発するように）
+                # if self.ball.owner is player:
+                #     self.ball.speed = min(max(self.ball.speed, 5), 10)  # 一定の速度を保証
+                #     self.ball.direction = math.degrees(angle)
 
     def perform_decisions(self, red_responses, blue_responses):
         red_decisions, blue_decisions = get_decisions(self, red_responses, blue_responses)
@@ -121,7 +139,7 @@ class Runner:
         #     self.handle_decision_perform_with_exception(test_decision)
 
         self.decrement_ban_cycles()
-
+    
 
     
     def decrement_ban_cycles(self):
@@ -222,9 +240,9 @@ class Runner:
             self._init_players()
             self.ball.x, self.ball.y = (0, 0)
             self.ball.direction = None
-            self.ball.owner = self.red_players[utils.PLAYER_COUNT - 1]
+            self.ball.owner = None
             self.ball.speed = 0
-            self.red_players[utils.PLAYER_COUNT - 1].x, self.red_players[utils.PLAYER_COUNT - 1].y = self.ball.x, self.ball.y
+            self.red_players[utils.PLAYER_COUNT - 1].x, self.red_players[utils.PLAYER_COUNT - 1].y = self.ball.x-24, self.ball.y
             if self.config.additional_delay:
                 time.sleep(1)
         if self.ball.x + self.ball.radius>= utils.FOOTBALL_PITCH_LENGTH // 2 and \
@@ -233,9 +251,9 @@ class Runner:
             self._init_players()
             self.ball.x, self.ball.y = (0, 0)
             self.ball.direction = None
-            self.ball.owner = self.blue_players[utils.PLAYER_COUNT - 1]
+            self.ball.owner = None
             self.ball.speed = 0
-            self.blue_players[utils.PLAYER_COUNT - 1].x, self.blue_players[utils.PLAYER_COUNT - 1].y = self.ball.x, self.ball.y
+            self.blue_players[utils.PLAYER_COUNT - 1].x, self.blue_players[utils.PLAYER_COUNT - 1].y = self.ball.x+24, self.ball.y
             if self.config.additional_delay:
                 time.sleep(1)
                 

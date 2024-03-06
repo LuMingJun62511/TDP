@@ -29,15 +29,28 @@ class MoveDecision(Decision):
         # self.player.direction = alpha
         # self.player.speed = movement
 
+        # if the owner of the ball is the player
+        if self.runner.ball.owner == self.player:
+            if self.has_ball:
+                # which color and player has the ball
+                print("player color:",self.player.color, "player number:",self.player.number, "has the ball")
+                self.runner.ball.movable = True
+                # the location of the player
+                self.runner.ball.move_with_ball(self.player)
+            else :
+                self.runner.ball.movable = False
+                
         if movement < self.speed: #一步到位
-            self.player.x = int(self.destination.x)
-            self.player.y = int(self.destination.y)
+            self.player.x = self.destination.x
+            self.player.y = self.destination.y
             self.player.direction = alpha
         else: #正常走一tick,pfa就是修改了speed和alpha,
-            self.player.x += int(movement * math.cos(alpha))
-            self.player.y += int(movement * math.sin(alpha))
+            self.player.x += movement * math.cos(alpha)
+            self.player.y += movement * math.sin(alpha)
             self.player.direction = alpha
             self.player.speed = movement
+            
+        
      
     def get_enemy_positions(self):
         # 根据当前球员的颜色确定敌方球队
