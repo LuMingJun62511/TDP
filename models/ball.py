@@ -4,9 +4,6 @@ import pygame as pg
 
 import utils
 
-
-
-
 class Ball:
     def __init__(self, x=None, y=None, radius=None, img=None, owner=None, speed=None, direction=None):
         default_ball_image = pg.image.load(utils.BALL_IMG_LINK)
@@ -19,6 +16,10 @@ class Ball:
         self.owner = owner
         self.speed = speed or 0
         self.direction = direction
+        self.grab_direction = None 
+        self.grab_x = None
+        self.grab_y = None #the point where the ball is grabbed
+        self.movable = True
 
     def draw(self, screen):
         pygame_x, pygame_y = utils.convert_coordinate_cartesian_to_pygame(self.x, self.y)
@@ -26,13 +27,25 @@ class Ball:
             self.img,
             (int(pygame_x) - self.radius, int(pygame_y) - self.radius)
         )
-    def move(self, player):
-        if self.owner is not None:
-            # Logic when the ball is with a player
-            ball_placement_angle = 180 if self.owner.color == 'blue' else 0  # Blue faces right, red faces left.
-            placement_direction = math.radians(self.owner.direction + ball_placement_angle)
-            self.x = self.owner.x + (self.owner.radius + self.radius) * math.cos(placement_direction)
-            self.y = self.owner.y + (self.owner.radius + self.radius) * math.sin(placement_direction)
+    def move(self):
+        if self.owner:
+            # print owner' color and owner'snumber
+            print("owner color:",self.owner.color)
+            print("owner number:",self.owner.number)
+            if self.movable:
+                print("ball is movable")
+                self.x = self.owner.x + math.cos(self.grab_direction) * (self.owner.radius + self.radius)
+                self.y = self.owner.y + math.sin(self.grab_direction) * (self.owner.radius + self.radius)
+                self.grab_x = self.x
+                self.grab_y = self.y
+                print("ball x:",self.x, "ball y:",self.y)
+                print("owner x:",self.owner.x, "owner y:",self.owner.y)
+            else:
+                print("ball is not movable")
+                self.x = self.grab_x
+                self.y = self.grab_y
+                print("ball x:",self.x, "ball y:",self.y)
+                print("owner x:",self.owner.x, "owner y:",self.owner.y)
         elif self.direction is not None:
             if self.speed == 0 or self.direction is None:
                 return
@@ -76,8 +89,44 @@ class Ball:
             elif self.y > utils.FOOTBALL_PITCH_WIDTH // 2:
                 self.y = utils.FOOTBALL_PITCH_WIDTH // 2 - self.radius - 1
                 self.direction = -self.direction
+    # whether the owner face the ball
+    def is_owner_facing(self):
+        # Calculate the angle from the player to the ball
+        relative_x = self.x - self.owner.x
+        relative_y = self.y - self.owner.y
+        angle_to_ball = math.atan2(relative_y, relative_x)
+        
+        # Normalize angles to be within 0 to 2*pi
+        angle_to_ball = math.degrees(angle_to_ball) % 360
+        owner_direction = self.owner.direction % 360
 
+        # Calculate the absolute difference in angles and adjust for angle wrap-around
+        angle_difference = min(abs(angle_to_ball - owner_direction), 360 - abs(angle_to_ball - owner_direction))
 
+        # Check if the player is facing the ball within a 90-degree arc
+        return angle_difference <= 90
+
+    def grab(self, player):
+        self.owner = player
+        # relative_x = self.x - player.x
+        # relative_y = self.y - player.y
+        # self.grab_direction = math.atan2(relative_y, relative_x)
+        # self.grab_x = player.x
+        # self.grab_y = player.y
+        self.grab_x = self.x
+        self.grab_y = self.y
+        self.movable = False
+    
+    def move_with_ball(self, player):
+        # remember the place "has ball" occured
+        self.owner = player
+        relative_x = self.x - player.x
+        relative_y = self.y - player.y
+        self.grab_direction = math.atan2(relative_y, relative_x)
+        self.grab_x = self.x
+        self.grab_y = self.y
+        self.movable = True
+    
     @property
     def info(self):
         return {

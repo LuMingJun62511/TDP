@@ -18,4 +18,5 @@ class Decision:
 
     def validate(self):
         if self.player.ban_cycles > 0:
-            raise exception.DecisionException("Player is banned for {} cycles".format(self.player.ban_cycles))
+            return
+            # raise exception.DecisionException("Player is banned for {} cycles".format(self.player.ban_cycles))

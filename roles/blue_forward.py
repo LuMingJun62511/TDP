@@ -1,6 +1,7 @@
 # forward.py
-from utils import get_direction, get_distance
+from utils import get_direction, get_distance, is_within_angle_to_ball, reposition_around_ball
 from models import player
+import math
 
 class BlueForward(player.Player):
     def __init__(self, x,y,name, number, color,radius,img=None, ban_cycles=0,role=None,direction=0):
@@ -8,17 +9,28 @@ class BlueForward(player.Player):
 
     def decide_action(self, ball, players,opponent_players):
         strategic_position = self.calculate_strategic_position(ball, players)
-    
         decisions = []
         if self.ball_in_attacking_area(ball):
-            if self.blue_team_owns_ball(ball):#
-                if self.owns_ball(ball):#这里我先简化一下，防止红方断不了球，它就只会去射门
-                    decisions.append(self.attempt_to_score(ball))
+            if self.blue_team_owns_ball(ball):
+                if self.owns_ball(ball):
+                    print("blue forward owns ball")
+                    direction = get_direction({'x': self.x, 'y': self.y}, {'x': -450, 'y': 0})
+                    if is_within_angle_to_ball(self, ball, direction):
+                        print("blue forward attempts to score")
+                        # if player faces the ball, attempt to score
+                        decisions.append(self.attempt_to_score(ball))
+                    else:
+                        print("blue forward doesn't face the ball and repositions around the ball")
+                        # if player doesn't face the ball, face the ball, looking at the goal
+                        # direction to goal
+                        decisions.append(reposition_around_ball(self, ball, direction))
+                    
                 else:#另一个就也跟着跑
                     decisions.append(self.move_to_strategic_position(strategic_position))
             else: #没球权
                 if self.is_closest_to_ball(players, ball):#往球跑，跑到了就抓球，
                     if self.distance_to_ball_close_enough(ball):
+                        print("blue forward grabs ball")
                         decisions.append(self.grab_ball(ball))
                     else: #往球跑，没跑到就继续跑
                         decisions.append(self.move_towards_ball(ball)) 
@@ -68,13 +80,16 @@ class BlueForward(player.Player):
         goal_position = {'x': -450, 'y': 0}
         direction = get_direction({'x': self.x, 'y': self.y}, goal_position)
         if self.in_shoot_area():
+            print("blue forward shoots")
             return {
                 'type': 'kick',
                 'player_number': self.number,
                 'direction': direction,
-                'power': 50,  # Power might be adjusted based on distance to goal
+                'power':50,  # Power might be adjusted based on distance to goal
+                'has_ball':False
             }
         else:
+            print("blue forward moves towards goal")
             return self.move_towards_goal()
     
     def in_shoot_area(self):
@@ -159,9 +174,10 @@ class BlueForward(player.Player):
         return True
     
     def distance_to_ball_close_enough(self,ball):
-        return get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']}) < 24
+        return get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']}) <= 24
     
     def move_towards_goal(self):
+        print("blue forward moves towards goal")
         goal_position = {'x': -448, 'y': 0} #这里得设定的比球门大一点，不然会报错
         direction_to_goal = get_direction({'x': self.x, 'y': self.y}, goal_position)
         return {

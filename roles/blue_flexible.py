@@ -1,4 +1,4 @@
-from utils import get_direction, get_distance
+from utils import get_direction, get_distance, is_within_angle_to_ball, reposition_around_ball
 from models.player import Player
 
 
@@ -12,11 +12,21 @@ class BlueFlexible(Player):
         if self.own_half(ball):  # For blue team, the own half is the positive x 
             if ball['owner_color'] == self.color:
                 if self.owns_ball(ball): 
+                    print('blue flexible own ball')
                     pass_decision = self.pass_to_teammates(players, ball)
                     if pass_decision:
-                        decisions.append(pass_decision)
+                        if is_within_angle_to_ball(self, ball, pass_decision['direction']):
+                            print("blue flexible facing ball and pass to teammates")
+                            decisions.append(pass_decision)
+                        else:
+                            decisions.append(reposition_around_ball(self, ball, pass_decision['direction']))
                     else:
-                        decisions.append(self.move_towards_goal(ball))
+                        direction = get_direction({'x': self.x, 'y': self.y}, {'x': -450, 'y': 0})
+                        if is_within_angle_to_ball(self, ball, direction):
+                            print("blue flexible facing ball and move towards goal")
+                            decisions.append(self.move_towards_goal(ball))
+                        else:
+                            decisions.append(reposition_around_ball(self, ball, direction))
                 else: #这个move_to_strategic_position
                     decisions.append(self.move_to_strategic_position(strategic_position))
             else:
@@ -25,13 +35,25 @@ class BlueFlexible(Player):
                 else:
                     decisions.append(self.move_to_strategic_position(strategic_position))
         elif self.is_most_closet(ball,players):
+            print('blue flexible is most closet')
             if ball['owner_color'] == self.color:
                 if self.owns_ball(ball):
                     pass_decision = self.pass_to_teammates(players, ball)
                     if pass_decision:
-                        decisions.append(pass_decision)
+                        if is_within_angle_to_ball(self, ball, pass_decision['direction']):
+                            print("blue flexible facing ball")
+                            decisions.append(pass_decision)
+                        else:
+                            print("blue flexible reposition around ball")
+                            decisions.append(reposition_around_ball(self, ball, pass_decision['direction']))
                     else:
-                        decisions.append(self.move_towards_goal(ball))
+                        direction = get_direction({'x': self.x, 'y': self.y}, {'x': -450, 'y': 0})
+                        if is_within_angle_to_ball(self, ball, direction):
+                            print("blue flexible facing ball")
+                            decisions.append(self.move_towards_goal(ball))
+                        else:
+                            print("blue flexible reposition around ball")
+                            decisions.append(reposition_around_ball(self, ball, direction))
             else:
                 decisions.append(self.intercept_ball(ball,players))
         else:
@@ -119,12 +141,13 @@ class BlueFlexible(Player):
                 'type': 'kick',
                 'player_number': self.number,
                 'direction': direction_to_teammate,
-                'power': 50  # Adjust power as necessary
+                'power': 50,  # Adjust power as necessary
             }
         else:
             return None
 
     def move_towards_goal(self, ball):
+        print('blue flexible move towards goal')
         if self.color == 'red':
             goal_position = {'x': 450, 'y': 0}
         else:

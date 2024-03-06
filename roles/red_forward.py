@@ -1,5 +1,5 @@
 # forward.py
-from utils import get_direction, get_distance,how_to_grab
+from utils import get_direction, get_distance,how_to_grab, is_within_angle_to_ball, reposition_around_ball
 from utils import FOOTBALL_PITCH_LENGTH,FOOTBALL_PITCH_WIDTH
 import numpy as np
 from itertools import combinations
@@ -63,23 +63,51 @@ class RedForward(player.Player):
         self.update_cost_map(ball,players,opponent_players)
         if self.in_attacking_area(ball):
             if ball['owner_color'] == self.color:
-                if self.owns_ball(ball):
+                if self.owns_ball(ball):           
+                    print("red_forward owns ball")
                     pass_decision = self.find_best_receiver(players,opponent_players)
                     if self.in_shoot_area():
-                        decisions.append(self.attempt_to_score(ball))
+                        print("red_forward in_shoot_area")
+                        direction = get_direction({'x': self.x, 'y': self.y}, {'x': 450 if self.color == 'red' else -450, 'y': 0})
+                        if is_within_angle_to_ball(self, ball,  direction):
+                            decisions.append(self.attempt_to_score(ball))
+                        else:
+                            decisions.append(reposition_around_ball(self, ball, direction))
                     elif pass_decision:
-                        decisions.append(pass_decision)
+                        print("red_forward pass_decision:",pass_decision)
+                        if is_within_angle_to_ball(self, ball, pass_decision['direction']):
+                            decisions.append(pass_decision)
+                        else:
+                            decisions.append(reposition_around_ball(self, ball, pass_decision['direction']))
                     elif self.opponent_in_randius(opponent_players):
-                        decisions.append(self.random_kick_out(opponent_players))
+                        print("red_forward opponent_in_randius")
+                        direction = how_to_grab({'x': self.x, 'y': self.y},opponent_players)
+                        if is_within_angle_to_ball(self, ball, direction):
+                            print("red_forward random_kick_out")
+                            decisions.append(self.random_kick_out(opponent_players))
+                        else: 
+                            decisions.append(reposition_around_ball(self, ball, how_to_grab({'x': self.x, 'y': self.y},opponent_players)))
                     elif self.can_be_grab(opponent_players):
-                        decisions.append(self.shoot())
+                        print("red_forward can shoot")
+                        direction = get_direction({'x': self.x, 'y': self.y}, {'x': 450 if self.color == 'red' else -450, 'y': 0})
+                        if is_within_angle_to_ball(self, ball, direction):
+                            decisions.append(self.shoot())
+                        else:
+                            decisions.append(reposition_around_ball(self, ball, direction))
                     else:
-                        decisions.append(self.move_towards_goal(ball))
+                        print("red_forward move_towards_goal")
+                        direction = get_direction({'x': self.x, 'y': self.y}, {'x': 450 if self.color == 'red' else -450, 'y': 0})
+                        if is_within_angle_to_ball(self, ball, direction):
+                            decisions.append(self.move_towards_goal(ball))
+                        else:
+                            decisions.append(reposition_around_ball(self, ball, direction))
                 elif self.is_closest_to_ball(players, ball):
+                    print("red_forward is_closest_to_ball and intercept_ball")
                     decisions.append(self.intercept_ball(ball,players,opponent_players))
                 else:
                     decisions.append(self.move_to_strategic_position(strategic_position))
             elif self.is_closest_to_ball(players,ball):
+                print("red_forward is_closest_to_ball and intercept_ball")
                 decisions.append(self.intercept_ball(ball,players,opponent_players))
             elif self.in_strategic_position(ball,players,opponent_players):
                 decisions.append(self.face_ball_direction(ball))
@@ -124,7 +152,7 @@ class RedForward(player.Player):
         return {
             'type': 'move',
             'player_number': self.number,
-            'destination': ball,
+            'destination': dict,
             'direction': direction,
             'speed': 10,  # Speed might be adjusted based on the situation
             'has_ball':False
@@ -230,7 +258,7 @@ class RedForward(player.Player):
         return False
     
     def random_kick_out(self,opponent_players):
-        print(f"{self.color}Forward {self.number}检测到拦截风险大，随机踢出")
+        # print(f"{self.color}Forward {self.number}检测到拦截风险大，随机踢出")
         angle = how_to_grab({'x': self.x, 'y': self.y},opponent_players)
         return{      
             'type': 'kick',
@@ -358,7 +386,7 @@ class RedForward(player.Player):
         """Move towards the ball to intercept it."""
         direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         distance_to_ball = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        if distance_to_ball > 18:
+        if distance_to_ball > 24:
 
             return {
                 'type': 'move',

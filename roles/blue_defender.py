@@ -1,4 +1,4 @@
-from utils import get_direction, get_distance
+from utils import get_direction, get_distance, is_within_angle_to_ball, reposition_around_ball
 from models.player import Player
 
 
@@ -12,15 +12,27 @@ class BlueDefender(Player):
         if self.own_half(ball):  # For blue team, the own half is the positive x 
             if ball['owner_color'] == self.color:
                 if self.owns_ball(ball): 
+                    print('blue_defender owns ball')
                     pass_decision = self.pass_to_teammates(players, ball)
                     if pass_decision:
-                        decisions.append(pass_decision)
+                        print("pass_decision:",pass_decision)
+                        if is_within_angle_to_ball(self, ball, pass_decision['direction']):
+                            print('is_within_angle_to_ball')
+                            decisions.append(pass_decision)
+                        else:
+                            print('reposition_around_ball')
+                            decisions.append(reposition_around_ball(self, ball, pass_decision['direction']))
                     else:
-                        decisions.append(self.move_towards_goal(ball))
+                        direction = get_direction({'x': self.x, 'y': self.y}, {'x': -450, 'y': 0})
+                        if is_within_angle_to_ball(self, ball, direction):
+                            decisions.append(self.move_towards_goal(ball))
+                        else:
+                            decisions.append(reposition_around_ball(self, ball, direction))
                 else: #这个move_to_strategic_position
                     decisions.append(self.move_to_strategic_position(strategic_position))
             else:
                 if self.is_closest_to_ball(players, ball): 
+                    print('blue_defender is closest to ball and intercepts')
                     decisions.append(self.intercept_ball(ball, players))
                 else:
                     decisions.append(self.move_to_strategic_position(strategic_position))
@@ -33,6 +45,8 @@ class BlueDefender(Player):
             #     decisions.append(self.face_ball_direction(ball)) #行吧，这里有问题，这里会一直背对着球，这显然不合适
 
         return decisions
+    
+    
 
     def calculate_strategic_position(self, ball, players):
         # goal_x = 450
@@ -155,9 +169,13 @@ class BlueDefender(Player):
     def is_closest_to_ball(self, players, ball):
         """Check if this forward is the closest to the ball among two forwards."""
         own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        other_denfender = [player for player in players if player['role'] == 'defender' and player['number'] != self.number][0]
-        other_distance = get_distance({'x': other_denfender['x'], 'y': other_denfender['y']}, {'x': ball['x'], 'y': ball['y']})
-        return own_distance < other_distance
+        other_denfender = [player for player in players if player['role'] == 'defender' and player['number'] != self.number]
+        if other_denfender:
+            other_denfender = other_denfender[0]
+            other_distance = get_distance({'x': other_denfender['x'], 'y': other_denfender['y']}, {'x': ball['x'], 'y': ball['y']})
+            return own_distance < other_distance
+        else:
+            return True
 
     def intercept_ball(self, ball,players):
         """Move towards the ball to intercept it."""

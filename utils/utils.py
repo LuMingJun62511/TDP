@@ -3,6 +3,60 @@ import math
 from .size import *
 import random
 
+def angle_difference(angle1, angle2):
+    """
+    Calculate the minimum difference between two angles.
+
+    :param angle1: The first angle in degrees.
+    :param angle2: The second angle in degrees.
+    :return: The minimum angle difference in degrees.
+    """
+    # Normalize angles to be within 0 to 360 degrees
+    angle1 = angle1 % 360
+    angle2 = angle2 % 360
+
+    # Calculate differences in two directions and return the smaller one
+    diff = abs(angle1 - angle2) % 360
+    return min(diff, 360 - diff)
+
+def is_within_angle_to_ball(self, ball, direction):
+    ball_direction = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+    # Compare the player-to-ball direction with the provided direction
+    return angle_difference(direction, ball_direction) < 60
+
+def reposition_around_ball(self, ball, direction):
+    player_position = (self.x, self.y)
+    print('player current position:',player_position)
+    # Calculate the angle from the ball to the player
+    current_angle = get_direction({'x': ball['x'], 'y': ball['y']}, {'x': self.x, 'y': self.y})
+    print('current angle from ball to player:',current_angle)
+    # Calculate self to ball angle
+    self_to_ball_angle = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+    # Calculate self to goal angle
+    self_to_goal_angle = direction
+    if self_to_ball_angle - self_to_goal_angle > 0:
+        angle_increment = -45
+    else:
+        angle_increment = 45
+    new_angle = (current_angle + angle_increment) % 360
+    print('new_angle:',new_angle)
+    # Calculate the new position based on the new angle, with the player moving around the ball
+    distance_to_ball = get_distance({'x': ball['x'], 'y': ball['y']}, {'x': self.x, 'y': self.y})
+    new_x = ball['x'] + distance_to_ball * math.cos(math.radians(new_angle))
+    new_y = ball['y'] + distance_to_ball * math.sin(math.radians(new_angle))
+    print('new_x:',new_x)
+    print('new_y:',new_y)
+    # Update the player's position to the new coordinates
+    return {
+        'type': 'move',
+        'player_number': self.number,
+        'destination': {'x': new_x, 'y': new_y},
+        # Keep the player facing in the original direction even after moving
+        'direction': get_direction({'x': self.x, 'y': self.y}, {'x': new_x, 'y': new_y}),
+        'speed': 5,
+        'has_ball': False
+    }
+
 def convert_coordinate_cartesian_to_pygame(cartesian_x, cartesian_y):
     pygame_x = SCREEN_LENGTH // 2 + cartesian_x
     pygame_y = SCREEN_WIDTH // 2 - cartesian_y
@@ -18,7 +72,7 @@ def write_text_on_pygame_screen(screen, font_size, color, text, cartesian_x, car
 
 #以下的代码考虑到复用性，所以暂时写在 utils，后续可以更改
 def distance(cartesian_p1, cartesian_p2):
-    return ((cartesian_p1.x - cartesian_p2.x) ** 2 + (cartesian_p1.y - cartesian_p2.y) ** 2) ** 0.5
+    return int(((cartesian_p1.x - cartesian_p2.x) ** 2 + (cartesian_p1.y - cartesian_p2.y) ** 2) ** 0.5)
 
 def get_direction(p1, p2):
     x = p2['x']- p1['x']
@@ -41,7 +95,7 @@ def cal_angle(player1, player2):
 
 def just_grab(player1,players):
     for player in players:
-        if get_distance(player1,player) < 20:
+        if get_distance(player1,player) <= 24:
             return False
     return True
 

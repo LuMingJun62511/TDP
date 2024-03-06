@@ -1,5 +1,5 @@
 # forward.py
-from utils import get_direction, get_distance,how_to_grab
+from utils import get_direction, get_distance,how_to_grab, is_within_angle_to_ball, reposition_around_ball
 from utils import FOOTBALL_PITCH_LENGTH,FOOTBALL_PITCH_WIDTH
 import numpy as np
 from itertools import combinations
@@ -20,22 +20,46 @@ class RedFlexible(player.Player):
         if self.in_attacking_area(ball):
             if ball['owner_color'] == self.color:
                 if self.owns_ball(ball):
+                    print("Red flexible owns ball")
                     pass_decision = self.find_best_receiver(players,opponent_players)
                     if self.in_shoot_area():
-                        decisions.append(self.attempt_to_score(ball))
+                        print("Red flexible in_shoot_area")
+                        direction = get_direction({'x': self.x, 'y': self.y}, {'x': 450 if self.color == 'red' else -450, 'y': 0})
+                        if is_within_angle_to_ball(self, ball,  direction):
+                            decisions.append(self.attempt_to_score(ball))
+                        else:
+                            decisions.append(reposition_around_ball(self, ball, direction))
                     elif pass_decision:
-                        decisions.append(pass_decision)
+                        print("Red flexible pass_decision:",pass_decision)
+                        if is_within_angle_to_ball(self, ball, pass_decision['direction']):
+                            decisions.append(pass_decision)
+                        else:
+                            decisions.append(reposition_around_ball(self, ball, pass_decision['direction']))
                     elif self.opponent_in_randius(opponent_players):
-                        decisions.append(self.random_kick_out(opponent_players))
+                        print("Red flexible opponent_in_randius")
+                        direction = how_to_grab({'x': self.x, 'y': self.y},opponent_players)
+                        if is_within_angle_to_ball(self, ball, direction):
+                            decisions.append(self.random_kick_out(opponent_players))
+                        else: 
+                            decisions.append(reposition_around_ball(self, ball, how_to_grab({'x': self.x, 'y': self.y},opponent_players)))
                     elif self.can_be_grab(opponent_players):
-                        decisions.append(self.shoot())
+                        print("Red flexible can_be_grab")
+                        direction = get_direction({'x': self.x, 'y': self.y}, {'x': 450 if self.color == 'red' else -450, 'y': 0})
+                        if is_within_angle_to_ball(self, ball, direction):
+                            decisions.append(self.shoot())
+                        else:
+                            decisions.append(reposition_around_ball(self, ball, direction))
                     else:
-                        decisions.append(self.move_towards_goal(ball))
-                #elif self.is_closest_to_ball(players, ball):
-                #    decisions.append(self.intercept_ball(ball,players,opponent_players))
+                        print("Red flexible move_towards_goal")
+                        direction = get_direction({'x': self.x, 'y': self.y}, {'x': 450 if self.color == 'red' else -450, 'y': 0})
+                        if is_within_angle_to_ball(self, ball, direction):
+                            decisions.append(self.move_towards_ball(ball))
+                        else:
+                            decisions.append(reposition_around_ball(self, ball, direction))
                 else:
                     decisions.append(self.move_to_strategic_position(strategic_position))
             elif self.is_most_closet(ball,players):
+                print("Red flexible is most closet and intercept_ball")
                 decisions.append(self.intercept_ball(ball,players,opponent_players))
             elif self.in_strategic_position(ball,players,opponent_players):
                 decisions.append(self.face_ball_direction(ball))
@@ -47,12 +71,20 @@ class RedFlexible(player.Player):
                 if self.owns_ball(ball):
                     pass_decision = self.find_best_receiver(players, opponent_players)
                     if pass_decision:
-                        decisions.append(pass_decision)
+                        if is_within_angle_to_ball(self, ball, pass_decision['direction']):
+                            decisions.append(pass_decision)
+                        else:
+                            decisions.append(reposition_around_ball(self, ball, pass_decision['direction']))
                     else:
-                        decisions.append(self.move_towards_goal(ball))
+                        direction = get_direction({'x': self.x, 'y': self.y}, {'x': 450 if self.color == 'red' else -450, 'y': 0})
+                        if is_within_angle_to_ball(self, ball, direction):
+                            decisions.append(self.move_towards_goal(ball))
+                        else:
+                            decisions.append(reposition_around_ball(self, ball, direction))
                 else:
                     decisions.append(self.move_to_strategic_position(strategic_position))
             else:
+                print("Red flexible intercept_ball")
                 decisions.append(self.intercept_ball(ball,players,opponent_players))
         elif self.in_strategic_position(ball,players,opponent_players):
             decisions.append(self.face_ball_direction(ball))        
@@ -187,7 +219,7 @@ class RedFlexible(player.Player):
         return False
     
     def random_kick_out(self,opponent_players):
-        print(f"{self.color}Forward {self.number}检测到拦截风险大，随机踢出")
+        # print(f"{self.color}Forward {self.number}检测到拦截风险大，随机踢出")
         angle = how_to_grab({'x': self.x, 'y': self.y},opponent_players)
         return{      
             'type': 'kick',
@@ -223,7 +255,7 @@ class RedFlexible(player.Player):
             distance_to_goal = get_distance({'x': self.x, 'y': self.y},{'x':goal_x,'y':goal_y})
             if distance_to_goal <= distance_to_receiver:
                 return None   #如果可以进球，那么优先进球而不是传球
-            print(f"Forward {self.color}{self.number}有适合传球的队员，传球")
+            # print(f"Forward {self.color}{self.number}有适合传球的队员，传球")
             return {
                 'type': 'kick',
                 'player_number': self.number,
@@ -288,7 +320,7 @@ class RedFlexible(player.Player):
         """Move towards the ball to intercept it."""
         direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         distance_to_ball = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        if distance_to_ball > 18:
+        if distance_to_ball > 24:
 
             return {
                 'type': 'move',

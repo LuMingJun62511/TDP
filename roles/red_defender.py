@@ -1,4 +1,4 @@
-from utils import get_direction, get_distance
+from utils import get_direction, get_distance, is_within_angle_to_ball, reposition_around_ball
 from models.player import Player
 import math
 class RedDefender(Player):
@@ -11,19 +11,33 @@ class RedDefender(Player):
         if self.own_half(ball):
             if ball['owner_color'] == self.color:
                 if self.owns_ball(ball):
+                    print('red_defender owns ball')
                     pass_decision = self.pass_to_teammates(players, opponents)
                     if pass_decision:
-                        #print("Defender is passing the ball")
-                        decisions.append(pass_decision)
+                        print("red_defender is passing the ball")
+                        if is_within_angle_to_ball(self, ball, pass_decision['direction']):
+                            print("Red Defender is passing the ball to teammate")
+                            decisions.append(pass_decision)
+                        else:
+                            print("Red Defender is repositioning around ball")
+                            decisions.append(reposition_around_ball(self, ball, pass_decision['direction']))
                     else:
-                        #print("Defender is moving towards goal")
-                        decisions.append(self.move_towards_goal(ball))
+                        direction = get_direction({'x': self.x, 'y': self.y}, {'x': 450, 'y': 0})
+                        if is_within_angle_to_ball(self, ball, direction):
+                            print("Red Defender is moving towards goal")
+                            decisions.append(self.move_towards_goal(ball))
+                        else:
+                            print("Red Defender is repositioning around ball")
+                            decisions.append(reposition_around_ball(self, ball, direction))
                 else:
                     #decisions.append(self.move_to_strategic_position(self.calculate_strategic_position(ball,players)))
                     #decisions.append(self.move_to_middle(ball,players))
                     decisions.append(self.move_to_point(ball))
             elif self.is_closest_to_ball(players,ball): 
+                print('red_defender is closest to ball and intercepts')
                 decisions.append(self.intercept_ball(ball,players))
+            else: 
+                decisions.append(self.move_to_point(ball))
         #elif self.in_strategic_position():
         #    decisions.append(self.face_ball_direction(ball))
         else:
@@ -232,6 +246,7 @@ class RedDefender(Player):
         """Move towards the ball to intercept it."""
         direction_to_ball = get_direction({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
         distance_to_ball = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+        print('distance_to_ball:',distance_to_ball)
         if distance_to_ball > 24:
             if ball['owner_color'] == self.color:
                 speed = 5
@@ -248,6 +263,7 @@ class RedDefender(Player):
                 'has_ball':False
             }
         else:
+            print("red_defender is grabbing ball")
             return self.grab_ball(ball)
     
     def grab_ball(self,ball):
