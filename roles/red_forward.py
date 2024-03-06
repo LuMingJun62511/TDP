@@ -152,7 +152,7 @@ class RedForward(player.Player):
         return {
             'type': 'move',
             'player_number': self.number,
-            'destination': dict,
+            'destination': ball,
             'direction': direction,
             'speed': 10,  # Speed might be adjusted based on the situation
             'has_ball':False
