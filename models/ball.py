@@ -27,7 +27,7 @@ class Ball:
             self.img,
             (int(pygame_x) - self.radius, int(pygame_y) - self.radius)
         )
-    def move(self):
+    def move(self, player):
         if self.owner:
             # print owner' color and owner'snumber
             print("owner color:",self.owner.color)
