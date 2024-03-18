@@ -1,5 +1,5 @@
 # forward.py
-from utils import get_direction, get_distance,how_to_grab, is_within_angle_to_ball, reposition_around_ball
+from utils import get_direction, get_distance,how_to_grab, is_within_angle_to_ball, reposition_around_ball, is_closest_to_ball
 from utils import FOOTBALL_PITCH_LENGTH,FOOTBALL_PITCH_WIDTH
 import numpy as np
 from itertools import combinations
@@ -101,12 +101,12 @@ class RedForward(player.Player):
                             decisions.append(self.move_towards_goal(ball))
                         else:
                             decisions.append(reposition_around_ball(self, ball, direction))
-                elif self.is_closest_to_ball(players, ball):
+                elif is_closest_to_ball(self, ball, players):
                     print("red_forward is_closest_to_ball and intercept_ball")
                     decisions.append(self.intercept_ball(ball,players,opponent_players))
                 else:
                     decisions.append(self.move_to_strategic_position(strategic_position))
-            elif self.is_closest_to_ball(players,ball):
+            elif is_closest_to_ball(self, ball, players):
                 print("red_forward is_closest_to_ball and intercept_ball")
                 decisions.append(self.intercept_ball(ball,players,opponent_players))
             elif self.in_strategic_position(ball,players,opponent_players):
@@ -184,7 +184,7 @@ class RedForward(player.Player):
     def calculate_strategic_position(self, ball, players,opponent_players):
         if not self.own_half(ball):
             # Scenario 1: Ball on our attacking half
-            if ball['owner_color'] != self.color and not self.is_closest_to_ball(players, ball):
+            if ball['owner_color'] != self.color and not is_closest_to_ball(self, ball, players):
                 # Move to a position that covers the farthest goal from the ball
                 return self.calculate_offensive_strategic_position(ball, players,opponent_players)
             elif ball['owner_color'] == self.color and ball['owner_number'] != self.number:
@@ -225,19 +225,19 @@ class RedForward(player.Player):
         strategic_y_min, strategic_y_max = strategic_y - 10, strategic_y + 10  
         return strategic_x_min <= self.x <= strategic_x_max and strategic_y_min <= self.y <= strategic_y_max
 
-    def is_closest_to_ball(self, players, ball):
-        """Check if this player is the closest to the ball among all forwards."""
-        own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        flexible = [player for player in players if player['number'] == 3]
-        forwards = [player for player in players if player['role'] == 'forward']
-        if ball['x'] < 0:
-            if get_distance({'x': flexible['x'], 'y': flexible['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
-                return False
-        for player in forwards:
-            if player['number'] != self.number:
-                if get_distance({'x': player['x'], 'y': player['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
-                    return False
-        return True
+    # def is_closest_to_ball(self, players, ball):
+    #     """Check if this player is the closest to the ball among all forwards."""
+    #     own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+    #     flexible = [player for player in players if player['number'] == 3]
+    #     forwards = [player for player in players if player['role'] == 'forward']
+    #     if ball['x'] < 0:
+    #         if get_distance({'x': flexible['x'], 'y': flexible['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
+    #             return False
+    #     for player in forwards:
+    #         if player['number'] != self.number:
+    #             if get_distance({'x': player['x'], 'y': player['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
+    #                 return False
+    #     return True
 
     def owns_ball(self, ball):
         return ball['owner_number'] == self.number and ball['owner_color'] == self.color
@@ -371,12 +371,9 @@ class RedForward(player.Player):
     #     return get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
 
 
-    def is_closest_to_ball(self, players, ball):
-        """Check if this defender is the closest to the ball among all defenders."""
+    def is_most_closet(self,ball,players):
         own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        #defenders = [players[1],players[2]]
-        forwards = [player for player in players if player['role'] == 'forward']
-        for player in forwards:
+        for player in players:
             if player['number'] != self.number:
                 if get_distance({'x': player['x'], 'y': player['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
                     return False

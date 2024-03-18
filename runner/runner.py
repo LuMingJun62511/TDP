@@ -88,6 +88,7 @@ class Runner:
             self.check_if_scored()
             self.check_if_overlapp(5)
             
+            
             # self.check_if_the_bus_is_parked()
             # self.check_if_ball_is_crowded()
             self.adjust_overlapping_players()  # Adjust overlapping players to prevent freezing

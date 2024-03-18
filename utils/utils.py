@@ -129,3 +129,11 @@ def how_to_grab(player1,players):
         return random_direction
     else:
         return get_direction(player1,goal)
+
+def is_closest_to_ball(self,ball,players):
+        own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+        for player in players:
+            if player['number'] != self.number:
+                if get_distance({'x': player['x'], 'y': player['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
+                    return False
+        return True

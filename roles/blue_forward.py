@@ -1,5 +1,5 @@
 # forward.py
-from utils import get_direction, get_distance, is_within_angle_to_ball, reposition_around_ball
+from utils import get_direction, get_distance, is_within_angle_to_ball, reposition_around_ball, is_closest_to_ball
 from models import player
 import math
 
@@ -28,7 +28,7 @@ class BlueForward(player.Player):
                 else:#另一个就也跟着跑
                     decisions.append(self.move_to_strategic_position(strategic_position))
             else: #没球权
-                if self.is_closest_to_ball(players, ball):#往球跑，跑到了就抓球，
+                if is_closest_to_ball(self, ball, players):#往球跑，跑到了就抓球，
                     if self.distance_to_ball_close_enough(ball):
                         print("blue forward grabs ball")
                         decisions.append(self.grab_ball(ball))
@@ -100,7 +100,7 @@ class BlueForward(player.Player):
     def calculate_strategic_position(self, ball, players):#3种情况
         if self.ball_in_attacking_area(ball):
             # Scenario 1: Ball in our attacking area
-            if ball['owner_color'] != self.color and not self.is_closest_to_ball(players, ball):#(2)满足了
+            if ball['owner_color'] != self.color and not is_closest_to_ball(self, ball, players):#(2)满足了
                 # Move to a position that covers the farthest goal from the ball
                 return self.calculate_offensive_strategic_position(ball, players)
             elif ball['owner_color'] == self.color and ball['owner_number'] != self.number: #(3)
@@ -160,18 +160,13 @@ class BlueForward(player.Player):
         return strategic_x_min <= self.x <= strategic_x_max and strategic_y_min <= self.y <= strategic_y_max
 
 
-    def is_closest_to_ball(self, players, ball):
-        """Check if this forward is the closest to the ball among two forwards."""
-        own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        #other_forward = [player for player in players if player['role'] == 'forward' and player['number'] != self.number][0]
-        #other_distance = get_distance({'x': other_forward['x'], 'y': other_forward['y']}, {'x': ball['x'], 'y': ball['y']})
-        #is_closest_to_ball可能都有错,注意
-        forwards = [player for player in players if player['role'] == 'forwards'] 
-        for player in forwards:
-            if player['number'] != self.number:
-                if get_distance({'x': player['x'], 'y': player['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
-                    return False
-        return True
+    # def is_closest_to_ball(self,ball,players):
+    #     own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+    #     for player in players:
+    #         if player['number'] != self.number:
+    #             if get_distance({'x': player['x'], 'y': player['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
+    #                 return False
+    #     return True
     
     def distance_to_ball_close_enough(self,ball):
         return get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']}) <= 24

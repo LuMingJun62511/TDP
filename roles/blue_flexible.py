@@ -1,4 +1,4 @@
-from utils import get_direction, get_distance, is_within_angle_to_ball, reposition_around_ball
+from utils import get_direction, get_distance, is_within_angle_to_ball, reposition_around_ball, is_closest_to_ball
 from models.player import Player
 
 
@@ -30,11 +30,11 @@ class BlueFlexible(Player):
                 else: #这个move_to_strategic_position
                     decisions.append(self.move_to_strategic_position(strategic_position))
             else:
-                if self.is_closest_to_ball(players, ball): 
+                if is_closest_to_ball(self, ball, players): 
                     decisions.append(self.intercept_ball(ball, players))
                 else:
                     decisions.append(self.move_to_strategic_position(strategic_position))
-        elif self.is_most_closet(ball,players):
+        elif is_closest_to_ball(self,ball,players):
             print('blue flexible is most closet')
             if ball['owner_color'] == self.color:
                 if self.owns_ball(ball):
@@ -185,20 +185,20 @@ class BlueFlexible(Player):
             'has_ball':False
         }
     
-    def is_most_closet(self,ball,players):
-        own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        for player in players:
-            if player['number'] != self.number:
-                if get_distance({'x': player['x'], 'y': player['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
-                    return False
-        return True
+    # def is_most_closet(self,ball,players):
+    #     own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+    #     for player in players:
+    #         if player['number'] != self.number:
+    #             if get_distance({'x': player['x'], 'y': player['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
+    #                 return False
+    #     return True
 
-    def is_closest_to_ball(self, players, ball):
-        """Check if this forward is the closest to the ball among two forwards."""
-        own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        other_denfender = [player for player in players if player['role'] == 'defender' and player['number'] != self.number][0]
-        other_distance = get_distance({'x': other_denfender['x'], 'y': other_denfender['y']}, {'x': ball['x'], 'y': ball['y']})
-        return own_distance < other_distance
+    # def is_closest_to_ball(self, players, ball):
+    #     """Check if this forward is the closest to the ball among two forwards."""
+    #     own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+    #     other_denfender = [player for player in players if player['role'] == 'defender' and player['number'] != self.number][0]
+    #     other_distance = get_distance({'x': other_denfender['x'], 'y': other_denfender['y']}, {'x': ball['x'], 'y': ball['y']})
+    #     return own_distance < other_distance
 
     def intercept_ball(self, ball,players):
         """Move towards the ball to intercept it."""

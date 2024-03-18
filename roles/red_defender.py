@@ -1,4 +1,4 @@
-from utils import get_direction, get_distance, is_within_angle_to_ball, reposition_around_ball
+from utils import get_direction, get_distance, is_within_angle_to_ball, reposition_around_ball, is_closest_to_ball
 from models.player import Player
 import math
 class RedDefender(Player):
@@ -33,7 +33,7 @@ class RedDefender(Player):
                     #decisions.append(self.move_to_strategic_position(self.calculate_strategic_position(ball,players)))
                     #decisions.append(self.move_to_middle(ball,players))
                     decisions.append(self.move_to_point(ball))
-            elif self.is_closest_to_ball(players,ball): 
+            elif is_closest_to_ball(self, ball, players): 
                 print('red_defender is closest to ball and intercepts')
                 decisions.append(self.intercept_ball(ball,players))
             else: 
@@ -231,16 +231,16 @@ class RedDefender(Player):
         return get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
 
 
-    def is_closest_to_ball(self, players, ball):
-        """Check if this defender is the closest to the ball among all defenders."""
-        own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        #defenders = [players[1],players[2]]
-        defenders = [player for player in players if player['role'] == 'defender']
-        for player in defenders:
-            if player['number'] != self.number:
-                if get_distance({'x': player['x'], 'y': player['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
-                    return False
-        return True
+    # def is_closest_to_ball(self, players, ball):
+    #     """Check if this defender is the closest to the ball among all defenders."""
+    #     own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+    #     #defenders = [players[1],players[2]]
+    #     #forwards = [player for player in players if player['role'] == 'forward']
+    #     for player in players:
+    #         if player['number'] != self.number:
+    #             if get_distance({'x': player['x'], 'y': player['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
+    #                 return False
+    #     return True
 
     def intercept_ball(self, ball,players):
         """Move towards the ball to intercept it."""

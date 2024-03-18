@@ -1,5 +1,5 @@
 # forward.py
-from utils import get_direction, get_distance,how_to_grab, is_within_angle_to_ball, reposition_around_ball
+from utils import get_direction, get_distance,how_to_grab, is_within_angle_to_ball, reposition_around_ball, is_closest_to_ball
 from utils import FOOTBALL_PITCH_LENGTH,FOOTBALL_PITCH_WIDTH
 import numpy as np
 from itertools import combinations
@@ -53,12 +53,12 @@ class RedFlexible(player.Player):
                         print("Red flexible move_towards_goal")
                         direction = get_direction({'x': self.x, 'y': self.y}, {'x': 450 if self.color == 'red' else -450, 'y': 0})
                         if is_within_angle_to_ball(self, ball, direction):
-                            decisions.append(self.move_towards_ball(ball))
+                            decisions.append(self.move_towards_goal(ball))
                         else:
                             decisions.append(reposition_around_ball(self, ball, direction))
                 else:
                     decisions.append(self.move_to_strategic_position(strategic_position))
-            elif self.is_most_closet(ball,players):
+            elif is_closest_to_ball(self, ball,players):
                 print("Red flexible is most closet and intercept_ball")
                 decisions.append(self.intercept_ball(ball,players,opponent_players))
             elif self.in_strategic_position(ball,players,opponent_players):
@@ -66,7 +66,7 @@ class RedFlexible(player.Player):
             else:
                 decisions.append(self.move_to_strategic_position(strategic_position)) 
 
-        elif self.is_most_closet(ball,players):
+        elif is_closest_to_ball(self, ball,players):
             if ball['owner_color'] == self.color:
                 if self.owns_ball(ball):
                     pass_decision = self.find_best_receiver(players, opponent_players)
@@ -157,7 +157,7 @@ class RedFlexible(player.Player):
     def calculate_strategic_position(self, ball, players,opponent_players):
         if not self.own_half(ball):
             # Scenario 1: Ball on our attacking half
-            if ball['owner_color'] != self.color and not self.is_closest_to_ball(players, ball):
+            if ball['owner_color'] != self.color and not is_closest_to_ball(self, ball,players):
                 # Move to a position that covers the farthest goal from the ball
                 return self.calculate_offensive_strategic_position(ball, players,opponent_players)
             elif ball['owner_color'] == self.color and ball['owner_number'] != self.number:
@@ -305,16 +305,16 @@ class RedFlexible(player.Player):
             'has_ball':False
         }
 
-    def is_closest_to_ball(self, players, ball):
-        """Check if this defender is the closest to the ball among all defenders."""
-        own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
-        #defenders = [players[1],players[2]]
-        forwards = [player for player in players if player['role'] == 'forward']
-        for player in forwards:
-            if player['number'] != self.number:
-                if get_distance({'x': player['x'], 'y': player['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
-                    return False
-        return True
+    # def is_closest_to_ball(self, players, ball):
+    #     """Check if this defender is the closest to the ball among all defenders."""
+    #     own_distance = get_distance({'x': self.x, 'y': self.y}, {'x': ball['x'], 'y': ball['y']})
+    #     #defenders = [players[1],players[2]]
+    #     #forwards = [player for player in players if player['role'] == 'forward']
+    #     for player in players:
+    #         if player['number'] != self.number:
+    #             if get_distance({'x': player['x'], 'y': player['y']}, {'x': ball['x'], 'y': ball['y']}) < own_distance:
+    #                 return False
+    #     return True
     
     def intercept_ball(self, ball,players,opponent_players):
         """Move towards the ball to intercept it."""
@@ -331,6 +331,7 @@ class RedFlexible(player.Player):
                 'has_ball':False
             }
         else:
+            print("Red flexible grab ball")
             return self.grab_ball(ball)
     
     def grab_ball(self,ball):
